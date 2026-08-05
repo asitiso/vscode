@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './App.css';
-import { GameProvider } from './store/GameContext';
+import { GameProvider, useGame } from './store/GameContext';
 import { BottomNav } from './components/BottomNav';
 import { HomeScreen } from './screens/HomeScreen';
 import { RecordScreen } from './screens/RecordScreen';
@@ -13,12 +13,21 @@ import { CardSetCompletionModal } from './screens/CardSetCompletionModal';
 export type ScreenId = 'home' | 'record' | 'pack-opening' | 'collection' | 'rewards' | 'settings';
 
 function AppShell() {
+  const { canSelectDailyMission } = useGame();
   const [screen, setScreen] = useState<ScreenId>('home');
   const [activePackId, setActivePackId] = useState<string | null>(null);
 
   function navigate(next: ScreenId, params?: { packId?: string }) {
     if (next === 'pack-opening' && params?.packId) setActivePackId(params.packId);
     setScreen(next);
+  }
+
+  function navigateFromBottomNav(next: ScreenId) {
+    if (next === 'record' && canSelectDailyMission) {
+      setScreen('home');
+      return;
+    }
+    navigate(next);
   }
 
   const showBottomNav = screen !== 'pack-opening';
@@ -36,7 +45,7 @@ function AppShell() {
         {screen === 'rewards' && <RewardsScreen />}
         {screen === 'settings' && <SettingsScreen />}
       </div>
-      {showBottomNav && <BottomNav active={activeTab} onSelect={navigate} />}
+      {showBottomNav && <BottomNav active={activeTab} onSelect={navigateFromBottomNav} />}
       <CardSetCompletionModal />
     </div>
   );
