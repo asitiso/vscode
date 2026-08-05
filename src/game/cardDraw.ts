@@ -3,16 +3,14 @@ import { EXERCISES_BY_ID } from '../data/exercises';
 import {
   LEGENDARY_PITY_THRESHOLD,
   RARITY_DROP_RATE,
+  SET_COMPLETION_DROP_RATE,
   type CardDefinition,
   type CardRarity,
   type ExerciseCategory,
   type WorkoutSetEntry,
 } from '../types';
+import { CARD_SETS_BY_ID } from './cardSets';
 
-/**
- * 오늘 기록한 운동 종목들로부터 관련 카테고리 집합을 구한다.
- * 기본 운동 정의에 없는 사용자 운동은 기타 카테고리로 처리한다.
- */
 export function categoriesFromEntries(entries: WorkoutSetEntry[]): ExerciseCategory[] {
   const set = new Set<ExerciseCategory>();
   for (const entry of entries) {
@@ -22,7 +20,19 @@ export function categoriesFromEntries(entries: WorkoutSetEntry[]): ExerciseCateg
   return [...set];
 }
 
-function rollRarity(pityBoost: boolean): CardRarity {
+export interface DrawOptions {
+  dailySetId?: string;
+  completionSetId?: string;
+}
+
+function rollRarity(pityBoost: boolean, completionPack: boolean): CardRarity {
+  if (completionPack) {
+    const roll = Math.random();
+    if (roll < SET_COMPLETION_DROP_RATE.legendary) return 'legendary';
+    if (roll < SET_COMPLETION_DROP_RATE.legendary + SET_COMPLETION_DROP_RATE['super-rare']) return 'super-rare';
+    return 'rare';
+  }
+
   const rates: Record<CardRarity, number> = pityBoost
     ? {
         legendary: 0.2,
@@ -31,10 +41,8 @@ function rollRarity(pityBoost: boolean): CardRarity {
         common: RARITY_DROP_RATE.common * 0.9,
       }
     : RARITY_DROP_RATE;
-
-  const total = Object.values(rates).reduce((a, b) => a + b, 0);
+  const total = Object.values(rates).reduce((sum, value) => sum + value, 0);
   let roll = Math.random() * total;
-
   for (const rarity of ['legendary', 'super-rare', 'rare', 'common'] as CardRarity[]) {
     roll -= rates[rarity];
     if (roll <= 0) return rarity;
@@ -42,22 +50,24 @@ function rollRarity(pityBoost: boolean): CardRarity {
   return 'common';
 }
 
-function pickCardFromRarity(rarity: CardRarity, relatedCategories: ExerciseCategory[]): CardDefinition {
+function pickCardFromRarity(
+  rarity: CardRarity,
+  relatedCategories: ExerciseCategory[],
+  options: DrawOptions,
+): CardDefinition {
   const pool = CARDS_BY_RARITY[rarity];
-  if (pool.length === 0) {
-    const all = Object.values(CARDS_BY_RARITY).flat();
-    return all[Math.floor(Math.random() * all.length)];
-  }
-
-  const related = pool.filter((c) => {
-    const exercise = EXERCISES_BY_ID[c.exerciseId];
-    return exercise && relatedCategories.includes(exercise.category);
-  });
-
+  const fallbackPool = pool.length > 0 ? pool : Object.values(CARDS_BY_RARITY).flat();
+  const dailySet = options.dailySetId ? CARD_SETS_BY_ID[options.dailySetId] : undefined;
+  const completionSet = options.completionSetId ? CARD_SETS_BY_ID[options.completionSetId] : undefined;
   const weighted: CardDefinition[] = [];
-  for (const card of pool) {
-    const weight = related.includes(card) ? 3 : 1;
-    for (let i = 0; i < weight; i++) weighted.push(card);
+
+  for (const card of fallbackPool) {
+    const exercise = EXERCISES_BY_ID[card.exerciseId];
+    const related = Boolean(exercise && relatedCategories.includes(exercise.category));
+    const daily = Boolean(dailySet?.cardIds.includes(card.id));
+    const completion = Boolean(completionSet?.cardIds.includes(card.id));
+    const weight = completion ? 6 : daily ? 5 : related ? 3 : 1;
+    for (let i = 0; i < weight; i += 1) weighted.push(card);
   }
 
   return weighted[Math.floor(Math.random() * weighted.length)];
@@ -71,9 +81,12 @@ export interface DrawResult {
 export function drawCard(
   relatedCategories: ExerciseCategory[],
   legendaryPityCounter: number,
+  options: DrawOptions = {},
 ): DrawResult {
   const pityTriggered = legendaryPityCounter >= LEGENDARY_PITY_THRESHOLD;
-  const rarity = rollRarity(pityTriggered);
-  const card = pickCardFromRarity(rarity, relatedCategories);
-  return { card, pityTriggered };
+  const rarity = rollRarity(pityTriggered, Boolean(options.completionSetId));
+  return {
+    card: pickCardFromRarity(rarity, relatedCategories, options),
+    pityTriggered,
+  };
 }
