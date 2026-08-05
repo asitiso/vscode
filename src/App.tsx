@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
+import './MobileViewport.css';
 import { GameProvider, useGame } from './store/GameContext';
 import { BottomNav } from './components/BottomNav';
 import { HomeScreen } from './screens/HomeScreen';
@@ -9,6 +10,7 @@ import { CollectionScreen } from './screens/CollectionScreen';
 import { RewardsScreen } from './screens/RewardsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { CardSetCompletionModal } from './screens/CardSetCompletionModal';
+import { installViewportHeightSync } from './utils/viewport';
 
 export type ScreenId = 'home' | 'record' | 'pack-opening' | 'collection' | 'rewards' | 'settings';
 
@@ -16,6 +18,8 @@ function AppShell() {
   const { canSelectDailyMission } = useGame();
   const [screen, setScreen] = useState<ScreenId>('home');
   const [activePackId, setActivePackId] = useState<string | null>(null);
+
+  useEffect(() => installViewportHeightSync(), []);
 
   function navigate(next: ScreenId, params?: { packId?: string }) {
     if (next === 'pack-opening' && params?.packId) setActivePackId(params.packId);
