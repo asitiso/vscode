@@ -1,6 +1,16 @@
 :root {
+  --app-layout-height: 100dvh;
   --app-viewport-height: 100dvh;
+  --keyboard-height: 0px;
+  --keyboard-open: 0;
   --app-bottom-nav-height: clamp(72px, 18vw, 92px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 html,
@@ -11,6 +21,17 @@ body,
   margin: 0;
   overflow: hidden;
   overscroll-behavior: none;
+}
+
+body {
+  overflow-wrap: anywhere;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
 }
 
 .app-shell {
@@ -36,8 +57,22 @@ body,
   transform: translateZ(0);
 }
 
+.app-shell[data-keyboard-open='true'] .bottom-nav {
+  display: none;
+}
+
 .home-screen__top-panel {
   top: max(10px, env(safe-area-inset-top));
+}
+
+@media (max-width: 350px) {
+  :root {
+    --app-bottom-nav-height: 68px;
+  }
+
+  .bottom-nav__label {
+    font-size: 0.58rem;
+  }
 }
 
 /* 브라우저 주소창과 하단 도구막대가 모두 보이는 짧은 모바일 화면 */
@@ -118,5 +153,14 @@ body,
   .home-screen__pack {
     top: 48%;
     height: 15%;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .app-shell {
+    width: min(100%, 760px);
+    max-width: 760px;
+    border-radius: 0;
+    margin: 0 auto;
   }
 }
