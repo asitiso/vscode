@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 import './PackOpeningScreen.css';
 import './RewardEventsV2.css';
+import './RewardEventsV3.css';
 import { useGame } from '../store/GameContext';
 import { PACKS_BY_ID } from '../data/packs';
 import { CARDS, CARDS_BY_ID } from '../data/cards';
@@ -13,7 +14,17 @@ interface PackOpeningScreenProps {
   onDone: () => void;
 }
 
-type OpeningPhase = 'ready' | 'charging' | 'burst' | 'reveal';
+type OpeningPhase = 'ready' | 'charging' | 'burst' | 'cinematic' | 'reveal';
+type RewardEventKind = 'star' | 'trophy' | 'weekly' | 'collection';
+
+interface RewardEventResult {
+  key: string;
+  kind: RewardEventKind;
+  icon: string;
+  title: string;
+  description: string;
+  detail?: string;
+}
 
 const RARITY_LABEL: Record<string, string> = {
   common: '일반',
@@ -22,12 +33,22 @@ const RARITY_LABEL: Record<string, string> = {
   legendary: '레전드',
 };
 
-const PARTICLES = Array.from({ length: 18 }, (_, index) => index);
+const SPECIAL_PACK_LABEL: Record<string, string> = {
+  'weekly-goal': 'WEEKLY CLEAR',
+  'streak-reward': 'STREAK BONUS',
+  'special-challenge': 'LIMITED EVENT',
+};
+
+const PARTICLES = Array.from({ length: 24 }, (_, index) => index);
 
 export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
   const { state, openPack, weeklyProgress } = useGame();
   const [phase, setPhase] = useState<OpeningPhase>('ready');
+  const [dragY, setDragY] = useState(0);
+  const [rewardIndex, setRewardIndex] = useState(0);
   const openedRef = useRef(false);
+  const revealScheduledRef = useRef(false);
+  const pointerStartYRef = useRef<number | null>(null);
   const timersRef = useRef<number[]>([]);
 
   const pack = state.grantedPacks.find((p) => p.id === packId);
@@ -54,10 +75,89 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
   const previousCollectionCount = Math.max(0, collectionCount - (isNewCard ? 1 : 0));
   const collectionPercent = Math.round((collectionCount / CARDS.length) * 100);
   const previousCollectionPercent = Math.round((previousCollectionCount / CARDS.length) * 100);
+  const specialPackLabel = packDef ? SPECIAL_PACK_LABEL[packDef.type] : undefined;
+  const packTheme = packDef?.type ?? 'basic';
+
+  const rewardEvents = useMemo<RewardEventResult[]>(() => {
+    const events: RewardEventResult[] = [];
+
+    if (starGrew) {
+      events.push({
+        key: 'star',
+        kind: 'star',
+        icon: '🌟',
+        title: `${previousStarLevel}성 → ${owned?.starLevel}성 성장!`,
+        description: '중복 카드가 하나로 합쳐져 새로운 별이 켜졌어요.',
+        detail: `${'★'.repeat(owned?.starLevel ?? 1)} POWER UP`,
+      });
+    }
+
+    if (isPersonalBest) {
+      events.push({
+        key: 'trophy',
+        kind: 'trophy',
+        icon: '🏆',
+        title: '오늘의 개인 기록 달성!',
+        description: '최고의 운동을 기념하는 특별 트로피가 빛납니다.',
+        detail: 'PERSONAL BEST',
+      });
+    }
+
+    if (weeklyGoalHit) {
+      events.push({
+        key: 'weekly',
+        kind: 'weekly',
+        icon: '🎁',
+        title: '주간 목표 보상 상자 개방!',
+        description: `이번 주 ${weeklyGoalTarget}회 운동 목표를 완성했어요.`,
+        detail: 'WEEKLY CLEAR',
+      });
+    }
+
+    if (isNewCard) {
+      events.push({
+        key: 'collection',
+        kind: 'collection',
+        icon: '📚',
+        title: `도감 완성도 ${previousCollectionPercent}% → ${collectionPercent}%`,
+        description: `${collectionCount}/${CARDS.length}종 발견 · 새로운 빈칸이 채워졌어요!`,
+        detail: 'COLLECTION UP',
+      });
+    }
+
+    return events;
+  }, [collectionCount, collectionPercent, isNewCard, isPersonalBest, owned?.starLevel, previousCollectionPercent, previousStarLevel, starGrew, weeklyGoalHit, weeklyGoalTarget]);
 
   useEffect(() => {
     return () => timersRef.current.forEach((timer) => window.clearTimeout(timer));
   }, []);
+
+  useEffect(() => {
+    if (phase !== 'burst' || !resultCard || revealScheduledRef.current) return;
+    revealScheduledRef.current = true;
+
+    const isLegendary = resultCard.rarity === 'legendary';
+    timersRef.current.push(
+      window.setTimeout(() => {
+        if (isLegendary) {
+          setPhase('cinematic');
+          vibrate([90, 50, 120, 60, 180]);
+        } else {
+          setPhase('reveal');
+          vibrate([30, 30, 30]);
+        }
+      }, 620),
+    );
+
+    if (isLegendary) {
+      timersRef.current.push(
+        window.setTimeout(() => {
+          setPhase('reveal');
+          vibrate([80, 40, 160]);
+        }, 2450),
+      );
+    }
+  }, [phase, resultCard]);
 
   function vibrate(pattern: number | number[]) {
     if ('vibrate' in navigator) navigator.vibrate(pattern);
@@ -69,10 +169,11 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
     openPack(packId);
   }
 
-  function handleOpen() {
+  function beginOpening() {
     if (phase !== 'ready') return;
 
     grantRewardOnce();
+    setDragY(0);
     setPhase('charging');
     vibrate(35);
 
@@ -80,25 +181,61 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
       window.setTimeout(() => {
         setPhase('burst');
         vibrate([45, 35, 80]);
-      }, 650),
-      window.setTimeout(() => {
-        setPhase('reveal');
-        vibrate([30, 30, 30]);
-      }, 1350),
+      }, 700),
     );
+  }
+
+  function handlePointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (phase !== 'ready') return;
+    pointerStartYRef.current = event.clientY;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handlePointerMove(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (pointerStartYRef.current === null || phase !== 'ready') return;
+    const nextDrag = Math.min(0, event.clientY - pointerStartYRef.current);
+    setDragY(Math.max(-90, nextDrag));
+  }
+
+  function handlePointerUp(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (pointerStartYRef.current === null || phase !== 'ready') return;
+    const distance = event.clientY - pointerStartYRef.current;
+    pointerStartYRef.current = null;
+    event.currentTarget.releasePointerCapture(event.pointerId);
+
+    if (distance <= -48) {
+      beginOpening();
+    } else {
+      setDragY(0);
+    }
   }
 
   function handleSkip() {
     grantRewardOnce();
     timersRef.current.forEach((timer) => window.clearTimeout(timer));
     timersRef.current = [];
+    revealScheduledRef.current = true;
+    setDragY(0);
     setPhase('reveal');
   }
 
+  function handleRewardNext() {
+    if (rewardIndex < rewardEvents.length - 1) {
+      setRewardIndex((current) => current + 1);
+      vibrate(20);
+      return;
+    }
+    onDone();
+  }
+
   const rarityClass = resultCard?.rarity ?? 'common';
+  const activeReward = rewardEvents[rewardIndex];
+  const hasRewardSequence = rewardEvents.length > 0;
 
   return (
-    <div className={`pack-screen pack-screen--${phase} pack-screen--rarity-${rarityClass}`}>
+    <div
+      className={`pack-screen pack-screen--${phase} pack-screen--rarity-${rarityClass} reward-v3 reward-v3--pack-${packTheme}`}
+    >
       <div className="pack-screen__bg-photo">
         <PlaceholderArt assetName="pack-opening-background" emoji="🏋️" />
       </div>
@@ -112,27 +249,59 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
         ))}
       </div>
 
-      {phase !== 'reveal' || !resultCard ? (
-        <div className="pack-screen__opening-stage">
-          <p className="pack-screen__eyebrow">
-            {phase === 'ready' ? '운동 보상 도착!' : phase === 'charging' ? '보상 에너지 충전 중' : '카드가 깨어납니다!'}
-          </p>
-
-          <button type="button" className="pack-screen__pack" onClick={handleOpen} disabled={phase !== 'ready'}>
-            <span className="pack-screen__pack-aura" aria-hidden="true" />
-            <PlaceholderArt assetName={packDef?.packAsset ?? 'pack-basic'} emoji="🎁" label={packDef?.name} />
-          </button>
-
-          <div className="pack-screen__charge-track" aria-hidden="true">
-            <span className="pack-screen__charge-fill" />
+      {phase === 'cinematic' && (
+        <div className="reward-v3__legendary-cinematic" role="status" aria-live="assertive">
+          <span className="reward-v3__legendary-crown">♛</span>
+          <p>전설의 기운이 깨어납니다</p>
+          <strong>LEGENDARY</strong>
+          <div className="reward-v3__legendary-countdown" aria-hidden="true">
+            <span>3</span><span>2</span><span>1</span>
           </div>
-
-          <p className="pack-screen__hint">
-            {phase === 'ready' ? '팩을 터치해서 직접 열어보세요' : phase === 'charging' ? '조금만 더…!' : '두근두근!'}
-          </p>
         </div>
+      )}
+
+      {phase !== 'reveal' || !resultCard ? (
+        phase !== 'cinematic' && (
+          <div className="pack-screen__opening-stage">
+            {specialPackLabel && <span className="reward-v3__season-label">{specialPackLabel}</span>}
+            <p className="pack-screen__eyebrow">
+              {phase === 'ready' ? '운동 보상 도착!' : phase === 'charging' ? '보상 에너지 충전 중' : '카드가 깨어납니다!'}
+            </p>
+
+            <button
+              type="button"
+              className="pack-screen__pack reward-v3__swipe-pack"
+              onClick={beginOpening}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={() => {
+                pointerStartYRef.current = null;
+                setDragY(0);
+              }}
+              disabled={phase !== 'ready'}
+              style={{ '--drag-y': `${dragY}px` } as CSSProperties}
+            >
+              <span className="pack-screen__pack-aura" aria-hidden="true" />
+              <PlaceholderArt assetName={packDef?.packAsset ?? 'pack-basic'} emoji="🎁" label={packDef?.name} />
+            </button>
+
+            <div className="reward-v3__swipe-guide" aria-hidden="true">
+              <span>↑</span>
+              <i />
+            </div>
+
+            <div className="pack-screen__charge-track" aria-hidden="true">
+              <span className="pack-screen__charge-fill" />
+            </div>
+
+            <p className="pack-screen__hint">
+              {phase === 'ready' ? '위를 향해 밀거나 터치해서 개봉하세요' : phase === 'charging' ? '조금만 더…!' : '두근두근!'}
+            </p>
+          </div>
+        )
       ) : (
-        <div className={`pack-screen__card pack-screen__card--${resultCard.rarity}`}>
+        <div className={`pack-screen__card pack-screen__card--${resultCard.rarity} reward-v3__result-stage`}>
           <div className="pack-screen__reward-banner">
             <span>{isNewCard ? 'NEW' : 'POWER UP'}</span>
             <strong>{isNewCard ? '새로운 운동 친구 발견!' : '중복 카드가 성장 에너지로 변했어요!'}</strong>
@@ -164,60 +333,27 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
             )}
           </div>
 
-          <div className="reward-v2__events" aria-label="추가 보상 결과">
-            {starGrew && (
-              <article className="reward-v2__event reward-v2__event--star">
-                <span className="reward-v2__event-icon">🌟</span>
-                <div>
-                  <strong>{previousStarLevel}성 → {owned?.starLevel}성 성장!</strong>
-                  <p>중복 카드가 합쳐져 새로운 별이 켜졌어요.</p>
+          {hasRewardSequence && activeReward && (
+            <section className={`reward-v3__sequence-card reward-v3__sequence-card--${activeReward.kind}`} key={activeReward.key}>
+              <div className="reward-v3__sequence-icon">{activeReward.icon}</div>
+              {activeReward.detail && <span className="reward-v3__sequence-label">{activeReward.detail}</span>}
+              <strong>{activeReward.title}</strong>
+              <p>{activeReward.description}</p>
+              {activeReward.kind === 'collection' && (
+                <div className="reward-v3__collection-mini-track" aria-hidden="true">
+                  <span style={{ width: `${collectionPercent}%` }} />
                 </div>
-              </article>
-            )}
+              )}
+              <div className="reward-v3__sequence-dots" aria-label={`${rewardIndex + 1}/${rewardEvents.length}`}>
+                {rewardEvents.map((event, index) => (
+                  <i key={event.key} className={index === rewardIndex ? 'is-active' : ''} />
+                ))}
+              </div>
+            </section>
+          )}
 
-            {isPersonalBest && (
-              <article className="reward-v2__event reward-v2__event--trophy">
-                <span className="reward-v2__event-icon">🏆</span>
-                <div>
-                  <strong>오늘의 개인 기록 달성!</strong>
-                  <p>최고의 운동을 기념하는 트로피 이벤트예요.</p>
-                </div>
-              </article>
-            )}
-
-            {weeklyGoalHit && (
-              <article className="reward-v2__event reward-v2__event--weekly">
-                <span className="reward-v2__event-icon reward-v2__chest">🎁</span>
-                <div>
-                  <strong>주간 목표 보상 상자 개방!</strong>
-                  <p>이번 주 {weeklyGoalTarget}회 운동 목표를 완성했어요.</p>
-                </div>
-              </article>
-            )}
-
-            {isNewCard && (
-              <article className="reward-v2__event reward-v2__event--collection">
-                <div className="reward-v2__collection-head">
-                  <span>📚 도감 완성도</span>
-                  <strong>{previousCollectionPercent}% → {collectionPercent}%</strong>
-                </div>
-                <div className="reward-v2__collection-track" aria-hidden="true">
-                  <span
-                    style={
-                      {
-                        '--collection-before': `${previousCollectionPercent}%`,
-                        '--collection-after': `${collectionPercent}%`,
-                      } as CSSProperties
-                    }
-                  />
-                </div>
-                <p>{collectionCount}/{CARDS.length}종 발견 · 새로운 빈칸이 채워졌어요!</p>
-              </article>
-            )}
-          </div>
-
-          <button type="button" className="pack-screen__save-btn" onClick={onDone}>
-            도감에 저장하고 확인하기
+          <button type="button" className="pack-screen__save-btn reward-v3__next-btn" onClick={hasRewardSequence ? handleRewardNext : onDone}>
+            {hasRewardSequence && rewardIndex < rewardEvents.length - 1 ? `다음 보상 보기 (${rewardIndex + 1}/${rewardEvents.length})` : '도감에 저장하고 확인하기'}
           </button>
         </div>
       )}
