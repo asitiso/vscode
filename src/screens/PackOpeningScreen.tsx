@@ -4,12 +4,19 @@ import './PackOpeningScreen.css';
 import './RewardEventsV2.css';
 import './RewardEventsV3.css';
 import './RewardEventsV4.css';
+import './RewardEventsV5.css';
 import { useGame } from '../store/GameContext';
 import { PACKS_BY_ID } from '../data/packs';
 import { CARDS, CARDS_BY_ID } from '../data/cards';
 import { PlaceholderArt } from '../components/PlaceholderArt';
 import { calcStarLevel, pickDisplayIllustration } from '../types';
 import { playRewardSound } from '../game/rewardAudio';
+import {
+  getCardGrowthProgress,
+  getRewardCopy,
+  selectRewardVariant,
+  type RewardVariantId,
+} from '../game/rewardVariation';
 
 interface PackOpeningScreenProps {
   packId: string;
@@ -36,6 +43,11 @@ const SPECIAL_PACK_LABEL: Record<string, string> = {
 };
 const PARTICLES = Array.from({ length: 24 }, (_, index) => index);
 const CONFETTI = Array.from({ length: 12 }, (_, index) => index);
+const VARIANT_STORAGE_KEY = 'workout-card-reward-last-variant';
+
+function getCopySeed(value: string): number {
+  return [...value].reduce((total, character) => total + character.charCodeAt(0), 0);
+}
 
 export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
   const { state, openPack, weeklyProgress } = useGame();
@@ -43,6 +55,12 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
   const [dragY, setDragY] = useState(0);
   const [rewardIndex, setRewardIndex] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem('reward-sound') !== 'off');
+  const [variant] = useState(() => {
+    const previous = localStorage.getItem(VARIANT_STORAGE_KEY) as RewardVariantId | null;
+    const selected = selectRewardVariant(previous);
+    localStorage.setItem(VARIANT_STORAGE_KEY, selected.id);
+    return selected;
+  });
   const openedRef = useRef(false);
   const revealScheduledRef = useRef(false);
   const pointerStartYRef = useRef<number | null>(null);
@@ -58,6 +76,8 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
   const previousCount = owned ? Math.max(0, owned.count - 1) : 0;
   const previousStarLevel = previousCount > 0 ? calcStarLevel(previousCount) : 0;
   const starGrew = Boolean(owned && previousCount > 0 && owned.starLevel > previousStarLevel);
+  const growth = owned ? getCardGrowthProgress(owned.count) : null;
+  const previousGrowth = previousCount > 0 ? getCardGrowthProgress(previousCount) : null;
   const isPersonalBest = relatedLog?.feeling === 'personal-best';
   const latestWorkout = state.workoutLogs[state.workoutLogs.length - 1];
   const weeklyGoalTarget = state.user.weeklyGoal.targetSessionsPerWeek;
@@ -68,6 +88,17 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
   const previousCollectionPercent = Math.round((previousCollectionCount / CARDS.length) * 100);
   const specialPackLabel = packDef ? SPECIAL_PACK_LABEL[packDef.type] : undefined;
   const packTheme = packDef?.type ?? 'basic';
+  const copySeed = getCopySeed(packId);
+  const phaseCopy = phase === 'ready' || phase === 'charging' || phase === 'burst'
+    ? getRewardCopy(variant, phase, copySeed)
+    : '';
+  const rareOmen = resultCard && resultCard.rarity !== 'common'
+    ? resultCard.rarity === 'legendary'
+      ? '공기가 멈췄어요… 아주 특별한 기운입니다'
+      : resultCard.rarity === 'super-rare'
+        ? '보라빛 파동이 강하게 반응합니다'
+        : '평소와 다른 푸른빛이 느껴집니다'
+    : null;
 
   const rewardEvents = useMemo<RewardEventResult[]>(() => {
     const events: RewardEventResult[] = [];
@@ -91,16 +122,16 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
         vibrate([90, 50, 120, 60, 180]);
       } else {
         setPhase('reveal');
-        playRewardSound('reveal', soundEnabled);
+        playRewardSound('reveal', soundEnabled, variant.soundPitch);
         vibrate([30, 30, 30]);
       }
     }, 620));
     if (legendary) timersRef.current.push(window.setTimeout(() => {
       setPhase('reveal');
-      playRewardSound('reveal', soundEnabled);
+      playRewardSound('reveal', soundEnabled, variant.soundPitch);
       vibrate([80, 40, 160]);
     }, 2450));
-  }, [phase, resultCard, soundEnabled]);
+  }, [phase, resultCard, soundEnabled, variant.soundPitch]);
 
   function vibrate(pattern: number | number[]) { if ('vibrate' in navigator) navigator.vibrate(pattern); }
   function grantRewardOnce() { if (!openedRef.current) { openedRef.current = true; openPack(packId); } }
@@ -110,11 +141,11 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
     grantRewardOnce();
     setDragY(0);
     setPhase('charging');
-    playRewardSound('charge', soundEnabled);
+    playRewardSound('charge', soundEnabled, variant.soundPitch);
     vibrate(35);
     timersRef.current.push(window.setTimeout(() => {
       setPhase('burst');
-      playRewardSound('burst', soundEnabled);
+      playRewardSound('burst', soundEnabled, variant.soundPitch);
       vibrate([45, 35, 80]);
     }, 700));
   }
@@ -123,7 +154,7 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
     if (phase !== 'ready') return;
     pointerStartYRef.current = event.clientY;
     event.currentTarget.setPointerCapture(event.pointerId);
-    playRewardSound('tap', soundEnabled);
+    playRewardSound('tap', soundEnabled, variant.soundPitch);
   }
   function handlePointerMove(event: ReactPointerEvent<HTMLButtonElement>) {
     if (pointerStartYRef.current === null || phase !== 'ready') return;
@@ -143,12 +174,12 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
     revealScheduledRef.current = true;
     setDragY(0);
     setPhase('reveal');
-    playRewardSound('reveal', soundEnabled);
+    playRewardSound('reveal', soundEnabled, variant.soundPitch);
   }
   function handleRewardNext() {
     if (rewardIndex < rewardEvents.length - 1) {
       setRewardIndex((current) => current + 1);
-      playRewardSound('reward', soundEnabled);
+      playRewardSound('reward', soundEnabled, variant.soundPitch);
       vibrate(20);
       return;
     }
@@ -159,21 +190,26 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
   function replayResult() {
     setRewardIndex(0);
     setPhase('reveal');
-    playRewardSound('reveal', soundEnabled);
+    playRewardSound('reveal', soundEnabled, variant.soundPitch);
   }
   function toggleSound() {
     const next = !soundEnabled;
     setSoundEnabled(next);
     localStorage.setItem('reward-sound', next ? 'on' : 'off');
-    playRewardSound('tap', next);
+    playRewardSound('tap', next, variant.soundPitch);
   }
 
   const rarityClass = resultCard?.rarity ?? 'common';
   const activeReward = rewardEvents[rewardIndex];
   const hasRewardSequence = rewardEvents.length > 0;
+  const growthLabel = growth?.isMax
+    ? '최대 성장 완료'
+    : growth
+      ? `${growth.nextStar}성까지 ${growth.remaining}장 남음`
+      : '';
 
   return (
-    <div className={`pack-screen pack-screen--${phase} pack-screen--rarity-${rarityClass} reward-v3 reward-v3--pack-${packTheme}`}>
+    <div className={`pack-screen pack-screen--${phase} pack-screen--rarity-${rarityClass} reward-v3 reward-v3--pack-${packTheme} reward-v5 ${variant.className}`}>
       <div className="pack-screen__bg-photo"><PlaceholderArt assetName="pack-opening-background" emoji="🏋️" /></div>
       <div className="pack-screen__dark-bg" />
       <div className="pack-screen__energy-ring" aria-hidden="true" />
@@ -183,34 +219,39 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
 
       {phase === 'cinematic' && <div className="reward-v3__legendary-cinematic" role="status" aria-live="assertive"><span className="reward-v3__legendary-crown">♛</span><p>전설의 기운이 깨어납니다</p><strong>LEGENDARY</strong><div className="reward-v3__legendary-countdown" aria-hidden="true"><span>3</span><span>2</span><span>1</span></div></div>}
 
-      {phase === 'finale' && resultCard && owned && (
+      {phase === 'finale' && resultCard && owned && growth && (
         <div className="reward-v4__finale">
           <div className="reward-v4__confetti" aria-hidden="true">{CONFETTI.map((item) => <span key={item} style={{ '--i': item } as CSSProperties} />)}</div>
           <section className="reward-v4__finale-card">
+            <span className="reward-v5__variant-badge">{variant.label}</span>
             <h2 className="reward-v4__finale-title">보상 획득 완료!</h2>
             <p className="reward-v4__finale-subtitle">오늘의 운동이 새로운 수집 기록이 되었습니다.</p>
             <div className="reward-v4__finale-card-preview"><PlaceholderArt assetName={pickDisplayIllustration(resultCard, owned.starLevel)} emoji="🃏" /></div>
             <h3 className="reward-v4__finale-name">{resultCard.name}</h3>
             <div className="reward-v4__finale-summary"><div><strong>{RARITY_LABEL[resultCard.rarity]}</strong><span>카드 등급</span></div><div><strong>{owned.starLevel}성</strong><span>성장 단계</span></div><div><strong>{rewardEvents.length}</strong><span>추가 성과</span></div></div>
+            <div className="reward-v5__final-growth"><strong>{growthLabel}</strong><span>{growth.isMax ? '특별 일러스트와 최고 단계가 열렸어요.' : `현재 ${owned.count}/${growth.nextThreshold}장`}</span></div>
             <div className="reward-v4__finale-actions"><button type="button" className="reward-v4__replay-btn" onClick={replayResult}>결과 다시보기</button><button type="button" className="reward-v4__done-btn" onClick={onDone}>도감으로 이동</button></div>
           </section>
         </div>
       )}
 
-      {phase !== 'reveal' && phase !== 'finale' || !resultCard ? (
+      {(phase !== 'reveal' && phase !== 'finale') || !resultCard ? (
         phase !== 'cinematic' && <div className="pack-screen__opening-stage">
           {specialPackLabel && <span className="reward-v3__season-label">{specialPackLabel}</span>}
-          <p className="pack-screen__eyebrow">{phase === 'ready' ? '운동 보상 도착!' : phase === 'charging' ? '보상 에너지 충전 중' : '카드가 깨어납니다!'}</p>
+          <span className="reward-v5__variant-badge">{variant.label}</span>
+          <p className="pack-screen__eyebrow">{phaseCopy}</p>
+          {rareOmen && phase !== 'ready' && <p className={`reward-v5__omen reward-v5__omen--${rarityClass}`}>{rareOmen}</p>}
           <button type="button" className="pack-screen__pack reward-v3__swipe-pack" onClick={beginOpening} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={() => { pointerStartYRef.current = null; setDragY(0); }} disabled={phase !== 'ready'} style={{ '--drag-y': `${dragY}px` } as CSSProperties}><span className="pack-screen__pack-aura" aria-hidden="true" /><PlaceholderArt assetName={packDef?.packAsset ?? 'pack-basic'} emoji="🎁" label={packDef?.name} /></button>
           <div className="reward-v3__swipe-guide" aria-hidden="true"><span>↑</span><i /></div>
           <div className="pack-screen__charge-track" aria-hidden="true"><span className="pack-screen__charge-fill" /></div>
-          <p className="pack-screen__hint">{phase === 'ready' ? '위를 향해 밀거나 터치해서 개봉하세요' : phase === 'charging' ? '조금만 더…!' : '두근두근!'}</p>
+          <p className="pack-screen__hint">{phase === 'ready' ? '위를 향해 밀거나 터치해서 개봉하세요' : phase === 'charging' ? '빛의 반응을 지켜보세요' : '곧 공개됩니다!'}</p>
         </div>
       ) : phase === 'reveal' && resultCard && (
         <div className={`pack-screen__card pack-screen__card--${resultCard.rarity} reward-v3__result-stage`}>
           <div className="pack-screen__reward-banner"><span>{isNewCard ? 'NEW' : 'POWER UP'}</span><strong>{isNewCard ? '새로운 운동 친구 발견!' : '중복 카드가 성장 에너지로 변했어요!'}</strong></div>
           <div className="pack-screen__card-frame"><span className="pack-screen__card-rays" aria-hidden="true" /><PlaceholderArt assetName={owned ? pickDisplayIllustration(resultCard, owned.starLevel) : resultCard.illustrationAsset} emoji="🃏" />{starGrew && <div className="reward-v2__star-up"><span>STAR UP!</span><strong>{'★'.repeat(owned?.starLevel ?? 1)}</strong></div>}</div>
           <div className="pack-screen__result"><p className="pack-screen__rarity">{RARITY_LABEL[resultCard.rarity]}</p><h2>{resultCard.name}</h2>{owned && <p className="pack-screen__stars">{'★'.repeat(owned.starLevel)} · 총 {owned.count}장</p>}</div>
+          {growth && <section className={`reward-v5__growth ${growth.isMax ? 'is-max' : ''}`}><div className="reward-v5__growth-head"><strong>{growthLabel}</strong><span>{growth.isMax ? 'MAX' : `${growth.currentCount}/${growth.nextThreshold}`}</span></div><div className="reward-v5__growth-track" aria-hidden="true"><span style={{ '--growth-before': `${previousGrowth?.progressPercent ?? 0}%`, '--growth-after': `${growth.progressPercent}%` } as CSSProperties} /></div><p>{growth.isMax ? '최고 단계 달성! 특별 일러스트를 확인해 보세요.' : '중복 카드는 다음 별을 밝히는 성장 에너지가 됩니다.'}</p></section>}
           {hasRewardSequence && activeReward && <section className={`reward-v3__sequence-card reward-v3__sequence-card--${activeReward.kind}`} key={activeReward.key}><div className="reward-v3__sequence-icon">{activeReward.icon}</div>{activeReward.detail && <span className="reward-v3__sequence-label">{activeReward.detail}</span>}<strong>{activeReward.title}</strong><p>{activeReward.description}</p>{activeReward.kind === 'collection' && <div className="reward-v3__collection-mini-track"><span style={{ width: `${collectionPercent}%` }} /></div>}<div className="reward-v3__sequence-dots">{rewardEvents.map((event, index) => <i key={event.key} className={index === rewardIndex ? 'is-active' : ''} />)}</div></section>}
           <button type="button" className="pack-screen__save-btn reward-v3__next-btn" onClick={hasRewardSequence ? handleRewardNext : () => { setPhase('finale'); playRewardSound('complete', soundEnabled); }}>{hasRewardSequence && rewardIndex < rewardEvents.length - 1 ? `다음 보상 보기 (${rewardIndex + 1}/${rewardEvents.length})` : '최종 보상 확인'}</button>
         </div>

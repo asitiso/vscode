@@ -41,27 +41,29 @@ function tone(
   oscillator.stop(start + duration + 0.02);
 }
 
-export function playRewardSound(sound: RewardSound, enabled = true): void {
+export function playRewardSound(sound: RewardSound, enabled = true, pitch = 1): void {
   if (!enabled) return;
   const context = getAudioContext();
   if (!context) return;
   const now = context.currentTime + 0.01;
+  const adjustedPitch = Math.max(0.82, Math.min(1.2, pitch));
+  const hz = (frequency: number) => frequency * adjustedPitch;
 
   switch (sound) {
     case 'tap':
-      tone(context, 420, now, 0.08, 0.05, 'sine', 560);
+      tone(context, hz(420), now, 0.08, 0.05, 'sine', hz(560));
       break;
     case 'charge':
-      tone(context, 180, now, 0.42, 0.045, 'sawtooth', 760);
-      tone(context, 260, now + 0.12, 0.34, 0.035, 'triangle', 980);
+      tone(context, hz(180), now, 0.42, 0.045, 'sawtooth', hz(760));
+      tone(context, hz(260), now + 0.12, 0.34, 0.035, 'triangle', hz(980));
       break;
     case 'burst':
-      tone(context, 110, now, 0.28, 0.08, 'sawtooth', 45);
-      tone(context, 680, now + 0.04, 0.22, 0.055, 'square', 1300);
+      tone(context, hz(110), now, 0.28, 0.08, 'sawtooth', hz(45));
+      tone(context, hz(680), now + 0.04, 0.22, 0.055, 'square', hz(1300));
       break;
     case 'reveal':
       [523, 659, 784].forEach((frequency, index) =>
-        tone(context, frequency, now + index * 0.075, 0.32, 0.045, 'sine'),
+        tone(context, hz(frequency), now + index * 0.075, 0.32, 0.045, 'sine'),
       );
       break;
     case 'legendary':
@@ -70,8 +72,8 @@ export function playRewardSound(sound: RewardSound, enabled = true): void {
       );
       break;
     case 'reward':
-      tone(context, 740, now, 0.15, 0.045, 'sine', 980);
-      tone(context, 980, now + 0.08, 0.2, 0.04, 'sine', 1240);
+      tone(context, hz(740), now, 0.15, 0.045, 'sine', hz(980));
+      tone(context, hz(980), now + 0.08, 0.2, 0.04, 'sine', hz(1240));
       break;
     case 'complete':
       [523, 659, 784, 1047].forEach((frequency, index) =>
