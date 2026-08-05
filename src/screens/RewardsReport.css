@@ -1,0 +1,65 @@
+.rewards-screen {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(clamp(88px, 22vw, 108px) + env(safe-area-inset-bottom));
+  scrollbar-gutter: stable;
+}
+
+.rewards-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.rewards-tabs button {
+  min-width: 0;
+  padding: 0 5px;
+  font-size: clamp(0.7rem, 2.8vw, 0.86rem);
+  white-space: nowrap;
+}
+
+.rewards-report {
+  display: block;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 350px) {
+  .rewards-screen {
+    padding-inline: 12px;
+  }
+
+  .rewards-tabs {
+    padding: 4px;
+    gap: 3px;
+  }
+
+  .rewards-tabs button {
+    min-height: 40px;
+    padding-inline: 2px;
+    font-size: 0.68rem;
+  }
+}
+
+@media (max-height: 650px) {
+  .rewards-screen__header {
+    margin-bottom: 10px;
+  }
+
+  .rewards-screen__title {
+    font-size: 1.55rem;
+  }
+
+  .rewards-screen__desc {
+    font-size: 0.74rem;
+  }
+
+  .rewards-tabs {
+    margin-bottom: 11px;
+  }
+}
