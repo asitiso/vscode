@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './HomeScreen.css';
+import './HomeLevelXp.css';
 import { useGame } from '../store/GameContext';
 import { PlaceholderArt } from '../components/PlaceholderArt';
 import { PACKS_BY_ID } from '../data/packs';
@@ -43,12 +44,10 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
 
   return (
     <div className="home-screen">
-      {/* z-index 0: 배경 */}
       <div className="home-screen__layer home-screen__bg">
         <PlaceholderArt assetName="home-background" emoji="🌤️" />
       </div>
 
-      {/* z-index 40: 상단 정보 패널 */}
       <div className="home-screen__layer home-screen__top-panel">
         <div className="hud-level-control" ref={levelControlRef}>
           <button
@@ -117,7 +116,6 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         </div>
       </div>
 
-      {/* z-index 40: 이번 주 운동 정보 패널 (상단) */}
       <div className="home-screen__layer home-screen__info-panel">
         <div className="info-row">
           <span>이번 주 운동</span>
@@ -137,7 +135,6 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         )}
       </div>
 
-      {/* z-index 50: 오늘 운동 기록하기 버튼 (상단) */}
       <button
         type="button"
         className="home-screen__layer home-screen__cta"
@@ -147,13 +144,11 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         {todayLogged ? '오늘 운동 추가 기록하기' : '오늘 운동 기록하기'}
       </button>
 
-      {/* z-index 20: 메인 캐릭터 (하단) */}
       <div className="home-screen__layer home-screen__character">
         <span className="character-platform" />
         <PlaceholderArt assetName={state.user.selectedCharacterId} emoji="🏃" label="오늘의 캐릭터" />
       </div>
 
-      {/* z-index 30: 오늘의 카드팩 (하단) */}
       {nextPack && (
         <button
           type="button"
