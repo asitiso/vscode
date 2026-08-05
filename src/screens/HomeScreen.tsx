@@ -1,9 +1,7 @@
 import './HomeScreen.css';
 import { useGame } from '../store/GameContext';
 import { PlaceholderArt } from '../components/PlaceholderArt';
-import { CARDS_BY_ID } from '../data/cards';
 import { PACKS_BY_ID } from '../data/packs';
-import { pickDisplayIllustration } from '../types';
 import type { ScreenId } from '../App';
 
 interface HomeScreenProps {
@@ -12,10 +10,6 @@ interface HomeScreenProps {
 
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const { state, todayLogged, unopenedPacks, weeklyProgress } = useGame();
-
-  const recentCards = Object.values(state.ownedCards)
-    .sort((a, b) => b.lastObtainedAt.localeCompare(a.lastObtainedAt))
-    .slice(0, 3);
 
   const nextPack = unopenedPacks[0];
   const goalTarget = state.user.weeklyGoal.targetSessionsPerWeek;
@@ -63,20 +57,6 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           </div>
         ) : (
           <div className="info-row info-row--success">이번 주 목표 달성! 🎉</div>
-        )}
-
-        {recentCards.length > 0 && (
-          <div className="recent-cards">
-            {recentCards.map((owned) => {
-              const card = CARDS_BY_ID[owned.cardId];
-              return (
-                <div key={owned.cardId} className={`recent-card recent-card--${card.rarity}`}>
-                  <PlaceholderArt assetName={pickDisplayIllustration(card, owned.starLevel)} emoji="🃏" />
-                  <span className="recent-card__stars">{'★'.repeat(owned.starLevel)}</span>
-                </div>
-              );
-            })}
-          </div>
         )}
       </div>
 
