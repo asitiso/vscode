@@ -1,7 +1,10 @@
+import { useEffect, useRef, useState } from 'react';
 import './HomeScreen.css';
+import './HomeLevelXp.css';
 import { useGame } from '../store/GameContext';
 import { PlaceholderArt } from '../components/PlaceholderArt';
 import { PACKS_BY_ID } from '../data/packs';
+import { calculateExperienceProgress } from '../game/experience';
 import type { ScreenId } from '../App';
 
 interface HomeScreenProps {
@@ -10,27 +13,100 @@ interface HomeScreenProps {
 
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const { state, todayLogged, unopenedPacks, weeklyProgress } = useGame();
+  const [showXp, setShowXp] = useState(false);
+  const levelControlRef = useRef<HTMLDivElement>(null);
 
   const nextPack = unopenedPacks[0];
   const goalTarget = state.user.weeklyGoal.targetSessionsPerWeek;
   const goalProgressPct = Math.min(100, Math.round((weeklyProgress.sessionsThisWeek / goalTarget) * 100));
+  const experience = calculateExperienceProgress(state);
+
+  useEffect(() => {
+    if (!showXp) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!levelControlRef.current?.contains(event.target as Node)) {
+        setShowXp(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setShowXp(false);
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showXp]);
 
   return (
     <div className="home-screen">
-      {/* z-index 0: 배경 */}
       <div className="home-screen__layer home-screen__bg">
         <PlaceholderArt assetName="home-background" emoji="🌤️" />
       </div>
 
-      {/* z-index 40: 상단 정보 패널 */}
       <div className="home-screen__layer home-screen__top-panel">
-        <div className="hud-badge hud-badge--level">
-          <span className="hud-badge__icon">⭐</span>
-          <div className="hud-badge__text">
-            <span className="hud-badge__title">Lv.{state.user.level}</span>
-            <span className="hud-badge__subtitle">{state.user.name}</span>
-          </div>
+        <div className="hud-level-control" ref={levelControlRef}>
+          <button
+            type="button"
+            className="hud-badge hud-badge--level hud-badge--button"
+            aria-expanded={showXp}
+            aria-controls="home-level-xp-popover"
+            onClick={() => setShowXp((current) => !current)}
+          >
+            <span className="hud-badge__icon">⭐</span>
+            <span className="hud-badge__text">
+              <span className="hud-badge__title">Lv.{state.user.level}</span>
+              <span className="hud-badge__subtitle">{state.user.name}</span>
+            </span>
+          </button>
+
+          {showXp && (
+            <section
+              id="home-level-xp-popover"
+              className="level-xp-popover"
+              role="dialog"
+              aria-labelledby="home-level-xp-title"
+            >
+              <div className="level-xp-popover__heading">
+                <span className="level-xp-popover__star">⭐</span>
+                <div>
+                  <strong id="home-level-xp-title">Lv.{state.user.level}</strong>
+                  <span>다음 레벨 진행도</span>
+                </div>
+                <b>{experience.progressPercent}%</b>
+              </div>
+
+              <div className="level-xp-popover__numbers">
+                <span>현재 경험치</span>
+                <strong>
+                  {experience.currentLevelXp.toLocaleString()} / {experience.requiredXp.toLocaleString()} XP
+                </strong>
+              </div>
+
+              <div
+                className="level-xp-progress"
+                role="progressbar"
+                aria-label="다음 레벨 경험치 진행률"
+                aria-valuemin={0}
+                aria-valuemax={experience.requiredXp}
+                aria-valuenow={experience.currentLevelXp}
+              >
+                <span style={{ width: `${experience.progressPercent}%` }} />
+              </div>
+
+              <p className="level-xp-popover__remaining">
+                {experience.remainingXp > 0
+                  ? `다음 레벨까지 ${experience.remainingXp.toLocaleString()} XP 남았어요`
+                  : '다음 레벨 조건을 달성했어요!'}
+              </p>
+            </section>
+          )}
         </div>
+
         <div className="hud-badge hud-badge--streak">
           <span className="hud-badge__icon">🔥</span>
           <div className="hud-badge__text">
@@ -40,7 +116,6 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         </div>
       </div>
 
-      {/* z-index 40: 이번 주 운동 정보 패널 (상단) */}
       <div className="home-screen__layer home-screen__info-panel">
         <div className="info-row">
           <span>이번 주 운동</span>
@@ -60,7 +135,6 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         )}
       </div>
 
-      {/* z-index 50: 오늘 운동 기록하기 버튼 (상단) */}
       <button
         type="button"
         className="home-screen__layer home-screen__cta"
@@ -70,13 +144,11 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         {todayLogged ? '오늘 운동 추가 기록하기' : '오늘 운동 기록하기'}
       </button>
 
-      {/* z-index 20: 메인 캐릭터 (하단) */}
       <div className="home-screen__layer home-screen__character">
         <span className="character-platform" />
         <PlaceholderArt assetName={state.user.selectedCharacterId} emoji="🏃" label="오늘의 캐릭터" />
       </div>
 
-      {/* z-index 30: 오늘의 카드팩 (하단) */}
       {nextPack && (
         <button
           type="button"

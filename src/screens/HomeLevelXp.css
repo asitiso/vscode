@@ -1,0 +1,172 @@
+.home-screen__top-panel {
+  z-index: 60;
+}
+
+.hud-level-control {
+  position: relative;
+  flex: 0 1 auto;
+}
+
+.hud-badge--button {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.hud-badge--button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.hud-badge--button:focus-visible {
+  outline: 3px solid rgba(255, 138, 61, 0.42);
+  outline-offset: 3px;
+}
+
+.level-xp-popover {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 0;
+  z-index: 75;
+  width: min(76vw, 286px);
+  box-sizing: border-box;
+  padding: 14px;
+  border: 2px solid rgba(255, 184, 72, 0.48);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.98);
+  color: var(--ink);
+  box-shadow: 0 14px 34px rgba(24, 43, 55, 0.24);
+  animation: level-xp-popover-in 0.18s ease-out;
+}
+
+.level-xp-popover::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 27px;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid rgba(255, 184, 72, 0.48);
+  border-left: 2px solid rgba(255, 184, 72, 0.48);
+  background: #fff;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.level-xp-popover__heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 9px;
+}
+
+.level-xp-popover__star {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--yellow), var(--orange));
+  font-size: 1.05rem;
+  box-shadow: inset 0 -2px 4px rgba(150, 76, 8, 0.16);
+}
+
+.level-xp-popover__heading div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.level-xp-popover__heading strong {
+  font-family: var(--font-display);
+  font-size: 0.96rem;
+}
+
+.level-xp-popover__heading span:not(.level-xp-popover__star) {
+  margin-top: 1px;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+}
+
+.level-xp-popover__heading b {
+  color: var(--orange-deep);
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+}
+
+.level-xp-popover__numbers {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.level-xp-popover__numbers strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.level-xp-progress {
+  position: relative;
+  height: 11px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf0f2;
+  box-shadow: inset 0 1px 3px rgba(34, 48, 58, 0.12);
+}
+
+.level-xp-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--yellow), var(--orange));
+  box-shadow: 0 0 10px rgba(255, 155, 58, 0.38);
+  transition: width 0.35s ease;
+  pointer-events: none;
+}
+
+.level-xp-popover__remaining {
+  margin: 9px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+@keyframes level-xp-popover-in {
+  from { opacity: 0; transform: translateY(-5px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 374px) {
+  .level-xp-popover {
+    width: min(82vw, 270px);
+    padding: 12px;
+  }
+
+  .level-xp-popover__numbers {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-xp-popover,
+  .level-xp-progress > span,
+  .hud-badge--button {
+    animation: none;
+    transition: none;
+  }
+}
