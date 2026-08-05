@@ -1,5 +1,6 @@
+@import './screens/CardSetProgress.css';
+
 :root {
-  /* CLAUDE.md 8절 색상 지침 기반 게임 팔레트 */
   --mint: #d8f6ee;
   --sky: #cfeeff;
   --bg-gradient: linear-gradient(160deg, var(--mint) 0%, var(--sky) 100%);
@@ -10,7 +11,6 @@
   --ink: #2b3a45;
   --ink-soft: #6b7c87;
   --paper: #ffffff;
-
   --rarity-common: #9aa7ad;
   --rarity-common-bg: #eef1f2;
   --rarity-rare: #4d8dff;
@@ -19,10 +19,8 @@
   --rarity-super-rare-bg: #f3e9ff;
   --rarity-legendary: #f2b93a;
   --rarity-legendary-bg: #fff6df;
-
   --font-display: 'Jua', 'Baloo 2', system-ui, sans-serif;
   --font-body: 'Pretendard', system-ui, 'Segoe UI', Roboto, sans-serif;
-
   color-scheme: light;
   color: var(--ink);
   font-family: var(--font-body);
@@ -32,37 +30,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
-
-body {
-  margin: 0;
-  background: #b9c8d1;
-}
-
-#root {
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-h1,
-h2,
-h3 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  color: var(--ink);
-  letter-spacing: 0.01em;
-}
-
-button {
-  font-family: var(--font-body);
-}
-
-input,
-textarea {
-  font-family: var(--font-body);
-}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; background: #b9c8d1; }
+#root { min-height: 100dvh; display: flex; align-items: center; justify-content: center; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; color: var(--ink); letter-spacing: .01em; }
+button, input, textarea { font-family: var(--font-body); }
