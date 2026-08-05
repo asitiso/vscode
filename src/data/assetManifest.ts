@@ -44,6 +44,17 @@ export const ASSET_MANIFEST: Record<string, string> = {
   'main-character-4': '/assets/characters/main-character-4.png',
   'main-character-5': '/assets/characters/main-character-5.png',
 
+  // 카드팩 및 보상 상자 (public/assets/packs/)
+  // 현재 모든 팩은 동일한 대표 보상 상자를 사용한다.
+  'pack-basic': '/assets/packs/reward-chest.svg',
+  'pack-lower-body': '/assets/packs/reward-chest.svg',
+  'pack-upper-body': '/assets/packs/reward-chest.svg',
+  'pack-cardio': '/assets/packs/reward-chest.svg',
+  'pack-full-body': '/assets/packs/reward-chest.svg',
+  'pack-weekly-goal': '/assets/packs/reward-chest.svg',
+  'pack-streak-reward': '/assets/packs/reward-chest.svg',
+  'pack-special-challenge': '/assets/packs/reward-chest.svg',
+
   // 화면별 배경 (public/assets/backgrounds/)
   'home-background': '/assets/backgrounds/home-background.png',
   'pack-opening-background': '/assets/backgrounds/pack-opening-background.png',

@@ -3,6 +3,7 @@ import './HomeScreen.css';
 import './HomeLevelXp.css';
 import { useGame } from '../store/GameContext';
 import { PlaceholderArt } from '../components/PlaceholderArt';
+import { HomeCharacterInteraction } from './HomeCharacterInteraction';
 import { PACKS_BY_ID } from '../data/packs';
 import { calculateExperienceProgress } from '../game/experience';
 import type { ScreenId } from '../App';
@@ -20,6 +21,13 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const goalTarget = state.user.weeklyGoal.targetSessionsPerWeek;
   const goalProgressPct = Math.min(100, Math.round((weeklyProgress.sessionsThisWeek / goalTarget) * 100));
   const experience = calculateExperienceProgress(state);
+  const characterDialogueContext = {
+    hasUnopenedPack: unopenedPacks.length > 0,
+    remainingWeeklySessions: weeklyProgress.remainingThisWeek,
+    weeklyGoalComplete: weeklyProgress.remainingThisWeek === 0,
+    todayLogged,
+    streak: weeklyProgress.streak,
+  };
 
   useEffect(() => {
     if (!showXp) return;
@@ -146,7 +154,10 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
 
       <div className="home-screen__layer home-screen__character">
         <span className="character-platform" />
-        <PlaceholderArt assetName={state.user.selectedCharacterId} emoji="🏃" label="오늘의 캐릭터" />
+        <HomeCharacterInteraction
+          assetName={state.user.selectedCharacterId}
+          dialogueContext={characterDialogueContext}
+        />
       </div>
 
       {nextPack && (
