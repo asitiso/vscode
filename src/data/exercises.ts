@@ -1,9 +1,7 @@
 import type { Exercise } from '../types';
 
-// 1차 제작 대상 10종 (CLAUDE.md 16절)
-// characterAsset은 assets/equipment/ 아래 PNG 파일명(확장자 제외)이며
-// 아직 이미지가 없으면 UI에서 플레이스홀더로 대체 표시한다.
-
+// 기본 운동기구 20종. characterAsset은 public/assets/equipment 아래
+// PNG와 assetManifest의 키를 통해 연결된다.
 export const EXERCISES: Exercise[] = [
   {
     id: 'treadmill',
@@ -84,6 +82,86 @@ export const EXERCISES: Exercise[] = [
     logType: 'duration',
     characterAsset: 'stretching-mat-character',
     linkedCardIds: ['card-stretching-mat'],
+  },
+  {
+    id: 'rowing-machine',
+    name: '로잉머신',
+    category: 'cardio',
+    logType: 'duration',
+    characterAsset: 'rowing-machine-character',
+    linkedCardIds: ['card-rowing-machine'],
+  },
+  {
+    id: 'leg-extension',
+    name: '레그익스텐션',
+    category: 'legs',
+    logType: 'weight-reps-sets',
+    characterAsset: 'leg-extension-character',
+    linkedCardIds: ['card-leg-extension'],
+  },
+  {
+    id: 'leg-curl',
+    name: '레그컬',
+    category: 'legs',
+    logType: 'weight-reps-sets',
+    characterAsset: 'leg-curl-character',
+    linkedCardIds: ['card-leg-curl'],
+  },
+  {
+    id: 'smith-machine',
+    name: '스미스머신',
+    category: 'etc',
+    logType: 'weight-reps-sets',
+    characterAsset: 'smith-machine-character',
+    linkedCardIds: ['card-smith-machine'],
+  },
+  {
+    id: 'pec-deck-fly',
+    name: '펙덱플라이',
+    category: 'chest',
+    logType: 'weight-reps-sets',
+    characterAsset: 'pec-deck-fly-character',
+    linkedCardIds: ['card-pec-deck-fly'],
+  },
+  {
+    id: 'seated-row',
+    name: '시티드로우',
+    category: 'back',
+    logType: 'weight-reps-sets',
+    characterAsset: 'seated-row-character',
+    linkedCardIds: ['card-seated-row'],
+  },
+  {
+    id: 'cable-machine',
+    name: '케이블머신',
+    category: 'etc',
+    logType: 'weight-reps-sets',
+    characterAsset: 'cable-machine-character',
+    linkedCardIds: ['card-cable-machine'],
+  },
+  {
+    id: 'barbell',
+    name: '바벨',
+    category: 'etc',
+    logType: 'weight-reps-sets',
+    characterAsset: 'barbell-character',
+    linkedCardIds: ['card-barbell'],
+  },
+  {
+    id: 'kettlebell',
+    name: '케틀벨',
+    category: 'etc',
+    logType: 'weight-reps-sets',
+    characterAsset: 'kettlebell-character',
+    linkedCardIds: ['card-kettlebell'],
+  },
+  {
+    id: 'ab-crunch-machine',
+    name: '복근운동 기구',
+    category: 'abs',
+    logType: 'weight-reps-sets',
+    characterAsset: 'ab-crunch-machine-character',
+    linkedCardIds: ['card-ab-crunch-machine'],
   },
 ];
 
