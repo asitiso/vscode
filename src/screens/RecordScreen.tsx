@@ -81,116 +81,161 @@ export function RecordScreen({ onDone, onNavigate }: RecordScreenProps) {
 
   return (
     <div className="record-screen">
-      <div className="record-screen__header">
+      <header className="record-screen__header">
+        <span className="record-screen__eyebrow">TODAY WORKOUT</span>
         <h1 className="record-screen__title">오늘 운동 기록</h1>
-      </div>
+        <p className="record-screen__desc">운동을 선택하고 오늘의 기록을 남겨보세요.</p>
+      </header>
 
-      {recentExerciseIds.length > 0 && (
-        <section className="record-section">
-          <h2>최근 운동</h2>
+      <section className="record-card record-card--exercise">
+        <div className="record-card__heading">
+          <div>
+            <span className="record-card__kicker">운동 선택</span>
+            <h2>오늘의 운동</h2>
+          </div>
+          <span className="record-card__count">{selectedList.length}개 선택</span>
+        </div>
+
+        {recentExerciseIds.length > 0 && (
+          <div className="record-group">
+            <h3>최근 운동</h3>
+            <div className="chip-row">
+              {recentExerciseIds.map((id) => {
+                const exercise = EXERCISES.find((e) => e.id === id)!;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`chip ${entries[id] ? 'chip--active' : ''}`}
+                    onClick={() => toggleExercise(id)}
+                    aria-pressed={Boolean(entries[id])}
+                  >
+                    {exercise.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="record-group">
+          <h3>운동 카테고리</h3>
           <div className="chip-row">
-            {recentExerciseIds.map((id) => {
-              const exercise = EXERCISES.find((e) => e.id === id)!;
+            {CATEGORIES.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={`chip chip--category ${category === c ? 'chip--active' : ''}`}
+                onClick={() => setCategory(c)}
+                aria-pressed={category === c}
+              >
+                {EXERCISE_CATEGORY_LABELS[c]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="record-group record-group--last">
+          <h3>운동 선택</h3>
+          <div className="chip-row">
+            {exercisesInCategory.map((exercise) => (
+              <button
+                key={exercise.id}
+                type="button"
+                className={`chip ${entries[exercise.id] ? 'chip--active' : ''}`}
+                onClick={() => toggleExercise(exercise.id)}
+                aria-pressed={Boolean(entries[exercise.id])}
+              >
+                {exercise.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {selectedList.length > 0 && (
+        <section className="record-card">
+          <div className="record-card__heading">
+            <div>
+              <span className="record-card__kicker">운동 수치</span>
+              <h2>운동 기록</h2>
+            </div>
+            <span className="record-card__count">{selectedList.length}종목</span>
+          </div>
+
+          <div className="set-card-list">
+            {selectedList.map((entry) => {
+              const exercise = EXERCISES.find((e) => e.id === entry.exerciseId)!;
               return (
-                <button
-                  key={id}
-                  type="button"
-                  className={`chip ${entries[id] ? 'chip--active' : ''}`}
-                  onClick={() => toggleExercise(id)}
-                >
-                  {exercise.name}
-                </button>
+                <div key={entry.exerciseId} className="set-card">
+                  <div className="set-card__name">{exercise.name}</div>
+                  {exercise.logType === 'weight-reps-sets' ? (
+                    <div className="set-card__fields">
+                      <label>
+                        무게(kg)
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          value={entry.weightKg ?? 0}
+                          onChange={(e) => updateEntry(entry.exerciseId, { weightKg: Number(e.target.value) })}
+                        />
+                      </label>
+                      <label>
+                        횟수
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min="0"
+                          value={entry.reps ?? 0}
+                          onChange={(e) => updateEntry(entry.exerciseId, { reps: Number(e.target.value) })}
+                        />
+                      </label>
+                      <label>
+                        세트
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min="0"
+                          value={entry.sets ?? 0}
+                          onChange={(e) => updateEntry(entry.exerciseId, { sets: Number(e.target.value) })}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="set-card__fields set-card__fields--single">
+                      <label>
+                        시간(분)
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min="0"
+                          value={entry.durationMinutes ?? 0}
+                          onChange={(e) =>
+                            updateEntry(entry.exerciseId, { durationMinutes: Number(e.target.value) })
+                          }
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
         </section>
       )}
 
-      <section className="record-section">
-        <h2>운동 카테고리</h2>
-        <div className="chip-row">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              type="button"
-              className={`chip ${category === c ? 'chip--active' : ''}`}
-              onClick={() => setCategory(c)}
-            >
-              {EXERCISE_CATEGORY_LABELS[c]}
-            </button>
-          ))}
+      <section className="record-card">
+        <div className="record-card__heading">
+          <div>
+            <span className="record-card__kicker">컨디션 체크</span>
+            <h2>오늘의 느낌</h2>
+          </div>
+          <span className={`record-card__status ${feeling ? 'record-card__status--complete' : ''}`}>
+            {feeling ? '선택 완료' : '필수'}
+          </span>
         </div>
-        <div className="chip-row">
-          {exercisesInCategory.map((exercise) => (
-            <button
-              key={exercise.id}
-              type="button"
-              className={`chip ${entries[exercise.id] ? 'chip--active' : ''}`}
-              onClick={() => toggleExercise(exercise.id)}
-            >
-              {exercise.name}
-            </button>
-          ))}
-        </div>
-      </section>
 
-      {selectedList.length > 0 && (
-        <section className="record-section">
-          <h2>세트 기록</h2>
-          {selectedList.map((entry) => {
-            const exercise = EXERCISES.find((e) => e.id === entry.exerciseId)!;
-            return (
-              <div key={entry.exerciseId} className="set-card">
-                <div className="set-card__name">{exercise.name}</div>
-                {exercise.logType === 'weight-reps-sets' ? (
-                  <div className="set-card__fields">
-                    <label>
-                      무게(kg)
-                      <input
-                        type="number"
-                        value={entry.weightKg ?? 0}
-                        onChange={(e) => updateEntry(entry.exerciseId, { weightKg: Number(e.target.value) })}
-                      />
-                    </label>
-                    <label>
-                      횟수
-                      <input
-                        type="number"
-                        value={entry.reps ?? 0}
-                        onChange={(e) => updateEntry(entry.exerciseId, { reps: Number(e.target.value) })}
-                      />
-                    </label>
-                    <label>
-                      세트
-                      <input
-                        type="number"
-                        value={entry.sets ?? 0}
-                        onChange={(e) => updateEntry(entry.exerciseId, { sets: Number(e.target.value) })}
-                      />
-                    </label>
-                  </div>
-                ) : (
-                  <div className="set-card__fields">
-                    <label>
-                      시간(분)
-                      <input
-                        type="number"
-                        value={entry.durationMinutes ?? 0}
-                        onChange={(e) =>
-                          updateEntry(entry.exerciseId, { durationMinutes: Number(e.target.value) })
-                        }
-                      />
-                    </label>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </section>
-      )}
-
-      <section className="record-section">
-        <h2>오늘의 느낌</h2>
         <div className="feeling-grid">
           {FEELINGS.map((f) => (
             <button
@@ -198,26 +243,33 @@ export function RecordScreen({ onDone, onNavigate }: RecordScreenProps) {
               type="button"
               className={`feeling-btn ${feeling === f.id ? 'feeling-btn--active' : ''}`}
               onClick={() => setFeeling(f.id)}
+              aria-pressed={feeling === f.id}
             >
-              <span>{f.emoji}</span>
-              {f.label}
+              <span className="feeling-btn__emoji">{f.emoji}</span>
+              <span>{f.label}</span>
             </button>
           ))}
         </div>
       </section>
 
-      <section className="record-section">
-        <h2>메모 (선택)</h2>
+      <section className="record-card record-card--memo">
+        <div className="record-card__heading">
+          <div>
+            <span className="record-card__kicker">선택 입력</span>
+            <h2>오늘의 메모</h2>
+          </div>
+          <span className="record-card__optional">선택</span>
+        </div>
         <textarea
           className="memo-input"
           placeholder="오늘 운동에서 기억하고 싶은 점을 짧게 적어보세요."
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
-          rows={2}
+          rows={3}
         />
       </section>
 
-      <div className="record-screen__actions">
+      <div className="record-screen__actions" aria-label="운동 기록 작업">
         <button type="button" className="secondary-btn" onClick={() => onNavigate('home')}>
           취소
         </button>
