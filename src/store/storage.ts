@@ -2,16 +2,21 @@ import type { AppState } from '../types';
 
 const STORAGE_KEY = 'workout-card-game:v1';
 
+export function migrateState(parsed: AppState): AppState {
+  if (!parsed.user.selectedCharacterId) {
+    parsed.user.selectedCharacterId = 'main-character';
+  }
+  if (!Array.isArray(parsed.customExercises)) {
+    parsed.customExercises = [];
+  }
+  return parsed;
+}
+
 export function loadState(): AppState | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as AppState;
-    // 이전 버전 저장 데이터 마이그레이션: 새로 추가된 필드 기본값 채우기
-    if (!parsed.user.selectedCharacterId) {
-      parsed.user.selectedCharacterId = 'main-character';
-    }
-    return parsed;
+    return migrateState(JSON.parse(raw) as AppState);
   } catch (err) {
     console.warn('저장된 데이터를 불러오지 못했습니다.', err);
     return null;
@@ -41,5 +46,6 @@ export function createInitialState(): AppState {
     workoutLogs: [],
     ownedCards: {},
     grantedPacks: [],
+    customExercises: [],
   };
 }
