@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import './PackOpeningScreen.css';
 import { useGame } from '../store/GameContext';
 import { PACKS_BY_ID } from '../data/packs';
@@ -88,7 +89,7 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
 
       <div className="pack-screen__particles" aria-hidden="true">
         {PARTICLES.map((particle) => (
-          <span key={particle} style={{ '--particle-index': particle } as React.CSSProperties} />
+          <span key={particle} style={{ '--particle-index': particle } as CSSProperties} />
         ))}
       </div>
 
