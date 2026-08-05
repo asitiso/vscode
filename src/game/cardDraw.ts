@@ -1,6 +1,7 @@
 import { CARDS_BY_RARITY } from '../data/cards';
 import { EXERCISES_BY_ID } from '../data/exercises';
 import {
+  DAILY_MISSION_DROP_RATE,
   LEGENDARY_PITY_THRESHOLD,
   RARITY_DROP_RATE,
   SET_COMPLETION_DROP_RATE,
@@ -23,15 +24,24 @@ export function categoriesFromEntries(entries: WorkoutSetEntry[]): ExerciseCateg
 export interface DrawOptions {
   dailySetId?: string;
   completionSetId?: string;
+  missionPack?: boolean;
 }
 
-function rollRarity(pityBoost: boolean, completionPack: boolean): CardRarity {
-  if (completionPack) {
-    const roll = Math.random();
-    if (roll < SET_COMPLETION_DROP_RATE.legendary) return 'legendary';
-    if (roll < SET_COMPLETION_DROP_RATE.legendary + SET_COMPLETION_DROP_RATE['super-rare']) return 'super-rare';
-    return 'rare';
+function rollFromRates(rates: Record<CardRarity, number>): CardRarity {
+  const total = Object.values(rates).reduce((sum, value) => sum + value, 0);
+  let roll = Math.random() * total;
+  for (const rarity of ['legendary', 'super-rare', 'rare', 'common'] as CardRarity[]) {
+    roll -= rates[rarity];
+    if (roll <= 0) return rarity;
   }
+  return 'common';
+}
+
+function rollRarity(pityBoost: boolean, completionPack: boolean, missionPack: boolean): CardRarity {
+  if (completionPack) {
+    return rollFromRates({ common: 0, ...SET_COMPLETION_DROP_RATE });
+  }
+  if (missionPack) return rollFromRates(DAILY_MISSION_DROP_RATE);
 
   const rates: Record<CardRarity, number> = pityBoost
     ? {
@@ -41,13 +51,7 @@ function rollRarity(pityBoost: boolean, completionPack: boolean): CardRarity {
         common: RARITY_DROP_RATE.common * 0.9,
       }
     : RARITY_DROP_RATE;
-  const total = Object.values(rates).reduce((sum, value) => sum + value, 0);
-  let roll = Math.random() * total;
-  for (const rarity of ['legendary', 'super-rare', 'rare', 'common'] as CardRarity[]) {
-    roll -= rates[rarity];
-    if (roll <= 0) return rarity;
-  }
-  return 'common';
+  return rollFromRates(rates);
 }
 
 function pickCardFromRarity(
@@ -84,7 +88,11 @@ export function drawCard(
   options: DrawOptions = {},
 ): DrawResult {
   const pityTriggered = legendaryPityCounter >= LEGENDARY_PITY_THRESHOLD;
-  const rarity = rollRarity(pityTriggered, Boolean(options.completionSetId));
+  const rarity = rollRarity(
+    pityTriggered,
+    Boolean(options.completionSetId),
+    Boolean(options.missionPack),
+  );
   return {
     card: pickCardFromRarity(rarity, relatedCategories, options),
     pityTriggered,
