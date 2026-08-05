@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from 'react';
 import type {
   AppState,
+  CustomExercise,
+  ExerciseLogType,
   FeelingTag,
   GrantedPack,
   OwnedCard,
@@ -13,11 +15,14 @@ import { categoriesFromEntries, drawCard } from '../game/cardDraw';
 import { selectPackForCategories } from '../game/packSelector';
 import { computeWeeklyProgress } from '../game/weeklyGoal';
 
-// ── 액션 정의 ────────────────────────────────────────────────
+export type CustomExerciseInput = { name: string; logType: ExerciseLogType };
 
 type Action =
   | { type: 'COMPLETE_WORKOUT'; entries: WorkoutSetEntry[]; feeling: FeelingTag; memo?: string }
   | { type: 'OPEN_PACK'; packId: string }
+  | { type: 'CREATE_CUSTOM_EXERCISE'; exercise: CustomExercise }
+  | { type: 'UPDATE_CUSTOM_EXERCISE'; id: string; input: CustomExerciseInput; updatedAt: string }
+  | { type: 'DELETE_CUSTOM_EXERCISE'; id: string }
   | { type: 'SET_USER_NAME'; name: string }
   | { type: 'SET_WEEKLY_GOAL'; target: number }
   | { type: 'SET_SELECTED_CHARACTER'; characterId: string };
@@ -61,7 +66,6 @@ function reducer(state: AppState, action: Action): AppState {
       const pack = state.grantedPacks.find((p) => p.id === action.packId);
       if (!pack || pack.openedAt) return state;
 
-      // 이 팩이 지급된 운동 기록의 카테고리를 찾아 카드 가중치에 사용한다.
       const relatedLog = state.workoutLogs.find((l) => l.grantedPackIds.includes(pack.id));
       const categories = relatedLog ? categoriesFromEntries(relatedLog.entries) : [];
 
@@ -93,6 +97,25 @@ function reducer(state: AppState, action: Action): AppState {
       };
     }
 
+    case 'CREATE_CUSTOM_EXERCISE':
+      return { ...state, customExercises: [...state.customExercises, action.exercise] };
+
+    case 'UPDATE_CUSTOM_EXERCISE':
+      return {
+        ...state,
+        customExercises: state.customExercises.map((exercise) =>
+          exercise.id === action.id
+            ? { ...exercise, name: action.input.name, logType: action.input.logType, updatedAt: action.updatedAt }
+            : exercise,
+        ),
+      };
+
+    case 'DELETE_CUSTOM_EXERCISE':
+      return {
+        ...state,
+        customExercises: state.customExercises.filter((exercise) => exercise.id !== action.id),
+      };
+
     case 'SET_USER_NAME':
       return { ...state, user: { ...state.user, name: action.name } };
 
@@ -110,12 +133,13 @@ function reducer(state: AppState, action: Action): AppState {
   }
 }
 
-// ── Context ──────────────────────────────────────────────────
-
 interface GameContextValue {
   state: AppState;
   completeWorkout: (entries: WorkoutSetEntry[], feeling: FeelingTag, memo?: string) => void;
   openPack: (packId: string) => void;
+  createCustomExercise: (input: CustomExerciseInput) => CustomExercise;
+  updateCustomExercise: (id: string, input: CustomExerciseInput) => void;
+  deleteCustomExercise: (id: string) => void;
   setUserName: (name: string) => void;
   setWeeklyGoal: (target: number) => void;
   setSelectedCharacter: (characterId: string) => void;
@@ -146,6 +170,22 @@ export function GameProvider({ children }: { children: ReactNode }) {
     completeWorkout: (entries, feeling, memo) =>
       dispatch({ type: 'COMPLETE_WORKOUT', entries, feeling, memo }),
     openPack: (packId) => dispatch({ type: 'OPEN_PACK', packId }),
+    createCustomExercise: (input) => {
+      const now = new Date().toISOString();
+      const exercise: CustomExercise = {
+        id: uid('custom-exercise'),
+        name: input.name,
+        category: 'etc',
+        logType: input.logType,
+        createdAt: now,
+        updatedAt: now,
+      };
+      dispatch({ type: 'CREATE_CUSTOM_EXERCISE', exercise });
+      return exercise;
+    },
+    updateCustomExercise: (id, input) =>
+      dispatch({ type: 'UPDATE_CUSTOM_EXERCISE', id, input, updatedAt: new Date().toISOString() }),
+    deleteCustomExercise: (id) => dispatch({ type: 'DELETE_CUSTOM_EXERCISE', id }),
     setUserName: (name) => dispatch({ type: 'SET_USER_NAME', name }),
     setWeeklyGoal: (target) => dispatch({ type: 'SET_WEEKLY_GOAL', target }),
     setSelectedCharacter: (characterId) => dispatch({ type: 'SET_SELECTED_CHARACTER', characterId }),
