@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type { DailyWorkoutReport } from '../game/workoutReport';
 import type { FeelingTag } from '../types';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 import './WorkoutDayDetailSheet.css';
 
 const FEELING_LABELS: Record<FeelingTag, string> = {
@@ -27,6 +28,8 @@ export function WorkoutDayDetailSheet({ report, onClose, onSelectExercise }: {
   onClose: () => void;
   onSelectExercise?: (exerciseId: string) => void;
 }) {
+  useBodyScrollLock(Boolean(report));
+
   useEffect(() => {
     if (!report) return;
     function handleKeyDown(event: KeyboardEvent) { if (event.key === 'Escape') onClose(); }
@@ -44,31 +47,33 @@ export function WorkoutDayDetailSheet({ report, onClose, onSelectExercise }: {
           <div><span>DAILY LOG</span><h2 id="workout-day-title">{formatDate(report.date)}</h2></div>
           <button type="button" aria-label="닫기" onClick={onClose}>×</button>
         </header>
-        <div className="workout-day-sheet__summary">
-          <div><strong>{report.totals.exerciseCount}</strong><span>운동 종목</span></div>
-          <div><strong>{report.totals.durationMinutes}</strong><span>총 시간(분)</span></div>
-          <div><strong>{report.totals.sets}</strong><span>총 세트</span></div>
-          <div><strong>{report.totals.reps}</strong><span>총 반복</span></div>
+        <div className="workout-day-sheet__content">
+          <div className="workout-day-sheet__summary">
+            <div><strong>{report.totals.exerciseCount}</strong><span>운동 종목</span></div>
+            <div><strong>{report.totals.durationMinutes}</strong><span>총 시간(분)</span></div>
+            <div><strong>{report.totals.sets}</strong><span>총 세트</span></div>
+            <div><strong>{report.totals.reps}</strong><span>총 반복</span></div>
+          </div>
+          {report.exercises.length > 0 ? (
+            <div className="workout-day-sheet__exercises">
+              {report.exercises.map((exercise) => (
+                <article key={exercise.exerciseId}>
+                  <button type="button" onClick={() => { onClose(); onSelectExercise?.(exercise.exerciseId); }} disabled={!onSelectExercise}>
+                    <div><strong>{exercise.name}</strong><span>{formatExerciseMetrics(exercise.durationMinutes, exercise.sets, exercise.reps)}</span></div>
+                    {onSelectExercise && <span aria-hidden="true">분석 ›</span>}
+                  </button>
+                </article>
+              ))}
+            </div>
+          ) : <p className="workout-day-sheet__empty">이 날짜에는 운동 기록이 없어요.</p>}
+          {report.logs.length > 0 && (
+            <div className="workout-day-sheet__notes">
+              {report.logs.map((log, index) => (
+                <div key={log.id}><strong>{report.logs.length > 1 ? `${index + 1}번째 기록` : '운동 느낌'}</strong><span>{FEELING_LABELS[log.feeling]}</span>{log.memo && <p>{log.memo}</p>}</div>
+              ))}
+            </div>
+          )}
         </div>
-        {report.exercises.length > 0 ? (
-          <div className="workout-day-sheet__exercises">
-            {report.exercises.map((exercise) => (
-              <article key={exercise.exerciseId}>
-                <button type="button" onClick={() => { onClose(); onSelectExercise?.(exercise.exerciseId); }} disabled={!onSelectExercise}>
-                  <div><strong>{exercise.name}</strong><span>{formatExerciseMetrics(exercise.durationMinutes, exercise.sets, exercise.reps)}</span></div>
-                  {onSelectExercise && <span aria-hidden="true">분석 ›</span>}
-                </button>
-              </article>
-            ))}
-          </div>
-        ) : <p className="workout-day-sheet__empty">이 날짜에는 운동 기록이 없어요.</p>}
-        {report.logs.length > 0 && (
-          <div className="workout-day-sheet__notes">
-            {report.logs.map((log, index) => (
-              <div key={log.id}><strong>{report.logs.length > 1 ? `${index + 1}번째 기록` : '운동 느낌'}</strong><span>{FEELING_LABELS[log.feeling]}</span>{log.memo && <p>{log.memo}</p>}</div>
-            ))}
-          </div>
-        )}
       </section>
     </div>
   );
