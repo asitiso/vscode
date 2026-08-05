@@ -3,12 +3,15 @@ import type { AppState } from '../types';
 const STORAGE_KEY = 'workout-card-game:v1';
 
 export function migrateState(parsed: AppState): AppState {
-  if (!parsed.user.selectedCharacterId) {
-    parsed.user.selectedCharacterId = 'main-character';
-  }
-  if (!Array.isArray(parsed.customExercises)) {
-    parsed.customExercises = [];
-  }
+  if (!parsed.user.selectedCharacterId) parsed.user.selectedCharacterId = 'main-character';
+  if (!Array.isArray(parsed.customExercises)) parsed.customExercises = [];
+  if (!Array.isArray(parsed.completedSetIds)) parsed.completedSetIds = [];
+  if (!Array.isArray(parsed.rewardedSetIds)) parsed.rewardedSetIds = [];
+  if (!Array.isArray(parsed.grantedPacks)) parsed.grantedPacks = [];
+  parsed.grantedPacks = parsed.grantedPacks.map((pack) => ({
+    ...pack,
+    source: pack.source ?? 'workout',
+  }));
   return parsed;
 }
 
@@ -47,5 +50,7 @@ export function createInitialState(): AppState {
     ownedCards: {},
     grantedPacks: [],
     customExercises: [],
+    completedSetIds: [],
+    rewardedSetIds: [],
   };
 }
