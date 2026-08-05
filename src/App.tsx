@@ -4,7 +4,7 @@ import { GameProvider } from './store/GameContext';
 import { BottomNav } from './components/BottomNav';
 import { HomeScreen } from './screens/HomeScreen';
 import { RecordScreen } from './screens/RecordScreen';
-import { PackOpeningScreen } from './screens/PackOpeningScreen';
+import { ComboPackOpeningScreen } from './screens/ComboPackOpeningScreen';
 import { CollectionScreen } from './screens/CollectionScreen';
 import { RewardsScreen } from './screens/RewardsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
@@ -23,7 +23,6 @@ function AppShell() {
   }
 
   const showBottomNav = screen !== 'pack-opening';
-  // 하단 네비게이션의 5개 탭에 해당하는 화면만 활성 탭으로 표시한다.
   const activeTab: ScreenId = screen === 'pack-opening' ? 'home' : screen;
 
   return (
@@ -32,7 +31,7 @@ function AppShell() {
         {screen === 'home' && <HomeScreen onNavigate={navigate} />}
         {screen === 'record' && <RecordScreen onDone={() => navigate('home')} onNavigate={navigate} />}
         {screen === 'pack-opening' && activePackId && (
-          <PackOpeningScreen packId={activePackId} onDone={() => navigate('home')} />
+          <ComboPackOpeningScreen packId={activePackId} onDone={() => navigate('home')} />
         )}
         {screen === 'collection' && <CollectionScreen />}
         {screen === 'rewards' && <RewardsScreen />}
