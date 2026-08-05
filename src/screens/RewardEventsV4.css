@@ -44,9 +44,16 @@
   content: '';
   position: absolute;
   inset: -45%;
+  z-index: 0;
+  pointer-events: none;
   background: repeating-conic-gradient(rgba(255,255,255,.18) 0 7deg, transparent 7deg 18deg);
   animation: reward-v4-spin 12s linear infinite;
   mask-image: radial-gradient(circle, #000 0 35%, transparent 68%);
+}
+
+.reward-v4__finale-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .reward-v4__finale > * { position: relative; }
@@ -60,8 +67,8 @@
 .reward-v4__finale-summary div { padding: 10px 5px; border-radius: 14px; background: rgba(255,255,255,.1); }
 .reward-v4__finale-summary strong { display: block; font-size: 1rem; color: #ffe37a; }
 .reward-v4__finale-summary span { font-size: .65rem; color: rgba(255,255,255,.7); }
-.reward-v4__finale-actions { display: grid; grid-template-columns: 1fr 1.25fr; gap: 8px; }
-.reward-v4__finale-actions button { min-height: 46px; border: none; border-radius: 999px; font-family: var(--font-display); cursor: pointer; }
+.reward-v4__finale-actions { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1.25fr; gap: 8px; }
+.reward-v4__finale-actions button { position: relative; z-index: 3; min-height: 46px; border: none; border-radius: 999px; font-family: var(--font-display); cursor: pointer; touch-action: manipulation; }
 .reward-v4__replay-btn { background: rgba(255,255,255,.14); color: #fff; }
 .reward-v4__done-btn { background: linear-gradient(180deg, var(--yellow), var(--orange)); color: #fff; box-shadow: 0 5px 18px rgba(255,138,61,.45); }
 
