@@ -101,16 +101,6 @@
   z-index: -1;
 }
 
-.home-screen__character .placeholder-art__img {
-  animation: character-bob 3.2s ease-in-out infinite;
-  filter: drop-shadow(0 10px 10px rgba(20, 40, 50, 0.15));
-}
-
-@keyframes character-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4%); }
-}
-
 /* ── 카드팩 (하단) ────────────────────────────────────────── */
 
 .home-screen__pack {
