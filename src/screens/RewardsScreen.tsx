@@ -4,10 +4,12 @@ import { useGame } from '../store/GameContext';
 import { PlaceholderArt } from '../components/PlaceholderArt';
 import { CARDS_BY_ID } from '../data/cards';
 import { EXERCISES_BY_ID } from '../data/exercises';
+import { getLocalDateKey } from '../game/cardSets';
 import { STAR_THRESHOLDS, pickDisplayIllustration } from '../types';
 import type { FeelingTag } from '../types';
+import { WorkoutReportPanel } from './WorkoutReportPanel';
 
-type RewardsTab = 'today' | 'streak';
+type RewardsTab = 'today' | 'report' | 'streak';
 
 const FEELING_LABELS: Record<FeelingTag, string> = {
   easy: '가볍게 완료했어요',
@@ -36,7 +38,7 @@ function getNextGrowthLabel(count: number, starLevel: number): string {
 export function RewardsScreen() {
   const { state, weeklyProgress } = useGame();
   const [activeTab, setActiveTab] = useState<RewardsTab>('today');
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getLocalDateKey();
 
   const todayLogs = useMemo(
     () => state.workoutLogs.filter((log) => log.date === today),
@@ -57,7 +59,9 @@ export function RewardsScreen() {
     return counts;
   }, {});
   const topExerciseId = Object.entries(mostActiveExercise).sort((a, b) => b[1] - a[1])[0]?.[0];
-  const topExerciseName = topExerciseId ? EXERCISES_BY_ID[topExerciseId]?.name : null;
+  const topExerciseName = topExerciseId
+    ? todayEntries.find((entry) => entry.exerciseId === topExerciseId)?.exerciseName ?? EXERCISES_BY_ID[topExerciseId]?.name
+    : null;
 
   const todayCards = state.grantedPacks
     .filter((pack) => pack.openedAt?.slice(0, 10) === today && pack.resultCardId)
@@ -79,9 +83,9 @@ export function RewardsScreen() {
   return (
     <div className="rewards-screen">
       <header className="rewards-screen__header">
-        <p className="rewards-screen__eyebrow">TODAY REWARD</p>
+        <p className="rewards-screen__eyebrow">ACTIVITY & REWARD</p>
         <h1 className="rewards-screen__title">보상</h1>
-        <p className="rewards-screen__desc">오늘의 운동과 획득한 카드를 한눈에 확인해요.</p>
+        <p className="rewards-screen__desc">오늘의 운동, 과거 기록과 연속 보상을 확인해요.</p>
       </header>
 
       <div className="rewards-tabs" role="tablist" aria-label="보상 화면 탭">
@@ -97,6 +101,15 @@ export function RewardsScreen() {
         <button
           type="button"
           role="tab"
+          aria-selected={activeTab === 'report'}
+          className={activeTab === 'report' ? 'is-active' : ''}
+          onClick={() => setActiveTab('report')}
+        >
+          운동 리포트
+        </button>
+        <button
+          type="button"
+          role="tab"
           aria-selected={activeTab === 'streak'}
           className={activeTab === 'streak' ? 'is-active' : ''}
           onClick={() => setActiveTab('streak')}
@@ -105,7 +118,7 @@ export function RewardsScreen() {
         </button>
       </div>
 
-      {activeTab === 'today' ? (
+      {activeTab === 'today' && (
         <div className="rewards-today" role="tabpanel">
           <section className="today-summary-card">
             <div className="today-summary-card__heading">
@@ -174,7 +187,15 @@ export function RewardsScreen() {
             )}
           </section>
         </div>
-      ) : (
+      )}
+
+      {activeTab === 'report' && (
+        <div className="rewards-report" role="tabpanel">
+          <WorkoutReportPanel workoutLogs={state.workoutLogs} />
+        </div>
+      )}
+
+      {activeTab === 'streak' && (
         <div className="rewards-list" role="tabpanel">
           <div className="streak-summary">
             <span>현재 연속 기록</span>
