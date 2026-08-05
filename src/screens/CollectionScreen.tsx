@@ -3,6 +3,7 @@ import './CollectionScreen.css';
 import { CARDS } from '../data/cards';
 import { useGame } from '../store/GameContext';
 import { PlaceholderArt } from '../components/PlaceholderArt';
+import { CARD_SETS } from '../game/cardSets';
 import { pickDisplayIllustration, type CardRarity } from '../types';
 
 const RARITY_LABEL: Record<CardRarity, string> = {
@@ -11,16 +12,26 @@ const RARITY_LABEL: Record<CardRarity, string> = {
   'super-rare': '슈퍼 레어',
   legendary: '레전드',
 };
-
 const RARITY_FILTERS: (CardRarity | 'all')[] = ['all', 'common', 'rare', 'super-rare', 'legendary'];
 
+type SetFilter = 'all' | (typeof CARD_SETS)[number]['id'];
+
 export function CollectionScreen() {
-  const { state } = useGame();
+  const { state, cardSetProgress, dailyCardSet } = useGame();
   const [rarityFilter, setRarityFilter] = useState<CardRarity | 'all'>('all');
+  const [setFilter, setSetFilter] = useState<SetFilter>('all');
+  const selectedSet = setFilter === 'all' ? undefined : CARD_SETS.find((set) => set.id === setFilter);
+  const selectedProgress = selectedSet
+    ? cardSetProgress.find((progress) => progress.set.id === selectedSet.id)
+    : undefined;
 
   const filteredCards = useMemo(
-    () => CARDS.filter((c) => rarityFilter === 'all' || c.rarity === rarityFilter),
-    [rarityFilter],
+    () => CARDS.filter((card) => {
+      const rarityMatches = rarityFilter === 'all' || card.rarity === rarityFilter;
+      const setMatches = !selectedSet || selectedSet.cardIds.includes(card.id);
+      return rarityMatches && setMatches;
+    }),
+    [rarityFilter, selectedSet],
   );
 
   const ownedCount = Object.keys(state.ownedCards).length;
@@ -28,34 +39,47 @@ export function CollectionScreen() {
 
   return (
     <div className="collection-screen">
-      <div className="collection-screen__header">
-        <h1 className="collection-screen__title">카드 도감</h1>
-      </div>
+      <div className="collection-screen__header"><h1 className="collection-screen__title">카드 도감</h1></div>
 
       <div className="collection-stats">
-        <div className="collection-stats__item">
-          <span className="collection-stats__value">{ownedCount}</span>
-          <span className="collection-stats__label">획득</span>
-        </div>
-        <div className="collection-stats__item">
-          <span className="collection-stats__value">{CARDS.length}</span>
-          <span className="collection-stats__label">전체</span>
-        </div>
-        <div className="collection-stats__item">
-          <span className="collection-stats__value">{completion}%</span>
-          <span className="collection-stats__label">완성률</span>
-        </div>
+        <div className="collection-stats__item"><span className="collection-stats__value">{ownedCount}</span><span className="collection-stats__label">획득</span></div>
+        <div className="collection-stats__item"><span className="collection-stats__value">{CARDS.length}</span><span className="collection-stats__label">전체</span></div>
+        <div className="collection-stats__item"><span className="collection-stats__value">{completion}%</span><span className="collection-stats__label">완성률</span></div>
       </div>
 
-      <div className="chip-row">
-        {RARITY_FILTERS.map((r) => (
+      <div className="collection-set-filter" aria-label="카드 세트 필터">
+        <button type="button" className={`chip ${setFilter === 'all' ? 'chip--active' : ''}`} onClick={() => setSetFilter('all')}>전체</button>
+        {CARD_SETS.map((set) => (
           <button
-            key={r}
+            key={set.id}
             type="button"
-            className={`chip ${rarityFilter === r ? 'chip--active' : ''}`}
-            onClick={() => setRarityFilter(r)}
+            className={`chip ${setFilter === set.id ? 'chip--active' : ''}`}
+            onClick={() => setSetFilter(set.id)}
           >
-            {r === 'all' ? '전체' : RARITY_LABEL[r]}
+            {set.shortLabel}{dailyCardSet.id === set.id ? ' UP' : ''}
+          </button>
+        ))}
+      </div>
+
+      {selectedProgress && (
+        <section className="collection-set-summary">
+          <div className="collection-set-summary__top">
+            <strong>{selectedProgress.set.name}</strong>
+            <span className="collection-set-summary__badge">
+              {selectedProgress.complete ? '완성' : `${selectedProgress.ownedCount} / ${selectedProgress.totalCount}`}
+            </span>
+          </div>
+          <span className="collection-set-summary__title">칭호 · {selectedProgress.set.title}</span>
+          <div className="collection-set-summary__track" role="progressbar" aria-label={`${selectedProgress.set.name} 진행률`} aria-valuemin={0} aria-valuemax={4} aria-valuenow={selectedProgress.ownedCount}>
+            <span style={{ width: `${selectedProgress.ownedCount * 25}%` }} />
+          </div>
+        </section>
+      )}
+
+      <div className="chip-row">
+        {RARITY_FILTERS.map((rarity) => (
+          <button key={rarity} type="button" className={`chip ${rarityFilter === rarity ? 'chip--active' : ''}`} onClick={() => setRarityFilter(rarity)}>
+            {rarity === 'all' ? '전체 등급' : RARITY_LABEL[rarity]}
           </button>
         ))}
       </div>
@@ -64,15 +88,8 @@ export function CollectionScreen() {
         {filteredCards.map((card) => {
           const owned = state.ownedCards[card.id];
           return (
-            <div
-              key={card.id}
-              className={`card-grid__item card-grid__item--${card.rarity} ${!owned ? 'card-grid__item--locked' : ''} ${owned?.starLevel === 4 ? 'card-grid__item--evolved' : ''}`}
-            >
-              <PlaceholderArt
-                assetName={owned ? pickDisplayIllustration(card, owned.starLevel) : card.illustrationAsset}
-                emoji={owned ? '🃏' : '❔'}
-                label={owned ? card.name : undefined}
-              />
+            <div key={card.id} className={`card-grid__item card-grid__item--${card.rarity} ${!owned ? 'card-grid__item--locked' : ''} ${owned?.starLevel === 4 ? 'card-grid__item--evolved' : ''}`}>
+              <PlaceholderArt assetName={owned ? pickDisplayIllustration(card, owned.starLevel) : card.illustrationAsset} emoji={owned ? '🃏' : '❔'} label={owned ? card.name : undefined} />
               {owned && <span className="card-grid__stars">{'★'.repeat(owned.starLevel)}</span>}
             </div>
           );
