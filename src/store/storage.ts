@@ -7,6 +7,9 @@ export function migrateState(parsed: AppState): AppState {
   if (!Array.isArray(parsed.customExercises)) parsed.customExercises = [];
   if (!Array.isArray(parsed.completedSetIds)) parsed.completedSetIds = [];
   if (!Array.isArray(parsed.rewardedSetIds)) parsed.rewardedSetIds = [];
+  if (!parsed.dailyMissions || typeof parsed.dailyMissions !== 'object' || Array.isArray(parsed.dailyMissions)) {
+    parsed.dailyMissions = {};
+  }
   if (!Array.isArray(parsed.grantedPacks)) parsed.grantedPacks = [];
   parsed.grantedPacks = parsed.grantedPacks.map((pack) => ({
     ...pack,
@@ -52,5 +55,6 @@ export function createInitialState(): AppState {
     customExercises: [],
     completedSetIds: [],
     rewardedSetIds: [],
+    dailyMissions: {},
   };
 }
