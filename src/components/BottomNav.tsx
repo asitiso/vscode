@@ -25,7 +25,10 @@ export function BottomNav({ active, onSelect }: BottomNavProps) {
             key={tab.id}
             type="button"
             className={`bottom-nav__item ${isActive ? 'is-active' : ''}`}
-            onClick={() => onSelect(tab.id)}
+            aria-current={isActive ? 'page' : undefined}
+            onClick={() => {
+              if (!isActive) onSelect(tab.id);
+            }}
           >
             <span className="bottom-nav__icon-wrap">
               <PlaceholderArt assetName={tab.asset} emoji={tab.emoji} className="bottom-nav__icon" />
