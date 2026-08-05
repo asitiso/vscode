@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './App.css';
 import './MobileViewport.css';
+import './ScreenStability.css';
 import { GameProvider, useGame } from './store/GameContext';
 import { BottomNav } from './components/BottomNav';
 import { HomeScreen } from './screens/HomeScreen';
