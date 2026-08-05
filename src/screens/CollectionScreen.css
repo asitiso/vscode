@@ -1,0 +1,161 @@
+.collection-screen {
+  height: 100%;
+  overflow-y: auto;
+  padding: clamp(14px, 4vw, 20px);
+  padding-bottom: 100px;
+  box-sizing: border-box;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.82) 42%),
+    url('/assets/backgrounds/collection-background.jpg');
+  background-size: cover;
+  background-position: top center;
+}
+
+.collection-screen__header {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 999px;
+  padding: 6px 18px;
+  margin: 4px 0 14px;
+  box-shadow: 0 4px 10px rgba(30, 50, 60, 0.1);
+}
+
+.collection-screen__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 5vw, 1.35rem);
+  margin: 0;
+  color: var(--ink);
+}
+
+.collection-stats {
+  display: flex;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 16px rgba(30, 50, 60, 0.12);
+  border: 2px solid #eef3f2;
+}
+
+.collection-stats__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.collection-stats__item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+  background: #eef1f2;
+}
+
+.collection-stats__value {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--orange-deep);
+}
+
+.collection-stats__label {
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.chip {
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 2px solid #dcecea;
+  background: #ffffff;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.chip:active {
+  transform: scale(0.94);
+}
+
+.chip--active {
+  background: linear-gradient(180deg, var(--yellow), var(--orange));
+  border-color: var(--orange-deep);
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(255, 138, 61, 0.4);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.card-grid__item {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--rarity-common-bg);
+  border: 3px solid var(--rarity-common);
+  box-shadow: 0 4px 8px rgba(30, 50, 60, 0.12);
+}
+
+.card-grid__item::before {
+  /* 카드 상단 하이라이트 — 실제 카드 프레임 PNG가 준비되기 전 임시 광택 표현 */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.55) 0%, transparent 40%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.card-grid__item--rare {
+  border-color: var(--rarity-rare);
+  background: var(--rarity-rare-bg);
+  box-shadow: 0 4px 10px rgba(77, 141, 255, 0.3);
+}
+.card-grid__item--super-rare {
+  border-color: var(--rarity-super-rare);
+  background: var(--rarity-super-rare-bg);
+  box-shadow: 0 4px 12px rgba(163, 91, 255, 0.35);
+}
+.card-grid__item--legendary {
+  border-color: var(--rarity-legendary);
+  background: var(--rarity-legendary-bg);
+  box-shadow: 0 4px 14px rgba(242, 185, 58, 0.45);
+}
+
+.card-grid__item--locked {
+  opacity: 0.55;
+  filter: grayscale(1);
+  box-shadow: none;
+}
+
+.card-grid__item--evolved {
+  border-width: 4px;
+  border-image: linear-gradient(135deg, var(--rarity-legendary), #fff2c4, var(--rarity-legendary)) 1;
+  box-shadow: 0 0 16px 2px rgba(242, 185, 58, 0.55);
+}
+
+.card-grid__stars {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  z-index: 2;
+  font-size: 0.65rem;
+  color: var(--rarity-legendary);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
+}

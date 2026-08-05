@@ -1,0 +1,73 @@
+.rewards-screen {
+  height: 100%;
+  overflow-y: auto;
+  padding: clamp(14px, 4vw, 20px);
+  padding-bottom: 100px;
+  box-sizing: border-box;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.82) 42%),
+    url('/assets/backgrounds/rewards-background.jpg');
+  background-size: cover;
+  background-position: top center;
+}
+
+.rewards-screen__header {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 20px;
+  padding: 10px 18px;
+  margin: 4px 0 16px;
+  box-shadow: 0 4px 10px rgba(30, 50, 60, 0.1);
+}
+
+.rewards-screen__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 5vw, 1.35rem);
+  margin: 0 0 2px;
+  color: var(--ink);
+}
+
+.rewards-screen__desc {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.rewards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rewards-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--ink);
+  box-shadow: 0 4px 10px rgba(30, 50, 60, 0.1);
+  border: 2px solid #eef3f2;
+}
+
+.rewards-item--locked {
+  color: #b0bac2;
+  background: #f6f8f8;
+}
+
+.rewards-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--yellow), var(--orange));
+  font-size: 1.1rem;
+}
+
+.rewards-item--locked .rewards-item__icon {
+  background: #e2e7e8;
+}

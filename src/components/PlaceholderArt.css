@@ -1,0 +1,37 @@
+.placeholder-art {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(2px, 1vw, 6px);
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.04),
+    rgba(0, 0, 0, 0.04) 10px,
+    rgba(0, 0, 0, 0.02) 10px,
+    rgba(0, 0, 0, 0.02) 20px
+  );
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border-radius: clamp(8px, 3vw, 16px);
+  color: #7a8a99;
+}
+
+.placeholder-art__emoji {
+  font-size: clamp(1.4rem, 8vw, 3rem);
+  line-height: 1;
+}
+
+.placeholder-art__label {
+  font-size: clamp(0.6rem, 2.5vw, 0.8rem);
+  text-align: center;
+  padding: 0 4px;
+}
+
+.placeholder-art__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
