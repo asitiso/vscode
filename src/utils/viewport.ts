@@ -78,7 +78,7 @@ function readViewportState(windowLike: Pick<ViewportWindowLike, 'innerHeight' | 
 export function installViewportHeightSync(
   root: HTMLElement = document.documentElement,
   onChange?: (state: ViewportState) => void,
-  windowLike: ViewportWindowLike = window,
+  windowLike: ViewportWindowLike = window as unknown as ViewportWindowLike,
 ): () => void {
   let frameId: number | null = null;
   let disposed = false;
