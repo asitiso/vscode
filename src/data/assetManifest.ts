@@ -14,6 +14,16 @@ export const ASSET_MANIFEST: Record<string, string> = {
   'shoulder-press-character': '/assets/equipment/shoulder-press-character.png',
   'dumbbell-character': '/assets/equipment/dumbbell-character.png',
   'stretching-mat-character': '/assets/equipment/stretching-mat-character.png',
+  'rowing-machine-character': '/assets/equipment/Rowing Machine.png',
+  'leg-extension-character': '/assets/equipment/Leg Extension.png',
+  'leg-curl-character': '/assets/equipment/Leg Curl.png',
+  'smith-machine-character': '/assets/equipment/Smith Machine.png',
+  'pec-deck-fly-character': '/assets/equipment/Pec Deck Fly.png',
+  'seated-row-character': '/assets/equipment/Seated Row.png',
+  'cable-machine-character': '/assets/equipment/Cable Machine.png',
+  'barbell-character': '/assets/equipment/Barbell.png',
+  'kettlebell-character': '/assets/equipment/Kettlebell.png',
+  'ab-crunch-machine-character': '/assets/equipment/Ab Crunch Machine.png',
 
   // 운동 기구 캐릭터 "업그레이드" 버전 — 카드 중복 10장(4성) 달성 시 해금되는
   // 특별 일러스트 (CLAUDE.md 4-3절). pickDisplayIllustration()이 골라 쓴다.
