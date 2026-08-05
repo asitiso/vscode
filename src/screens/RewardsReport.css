@@ -24,42 +24,24 @@
   white-space: nowrap;
 }
 
-.rewards-report {
-  display: block;
-  padding-bottom: 8px;
-}
+.rewards-report { display: block; padding-bottom: 8px; }
+.report-exercise-link { display:block; width:100%; margin:4px 0 0; padding:0; border:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
+.report-exercise-link strong { color:#5f37d5; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:3px; }
+.report-exercise-link:disabled { cursor:default; }
+.report-exercise-link:disabled strong { color:inherit; text-decoration:none; }
+.workout-day-sheet__exercises article button { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:0; border:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
+.workout-day-sheet__exercises article button:disabled { cursor:default; }
+.workout-day-sheet__exercises article button>span { color:#6d43df; font-size:.7rem; font-weight:800; white-space:nowrap; }
 
 @media (max-width: 350px) {
-  .rewards-screen {
-    padding-inline: 12px;
-  }
-
-  .rewards-tabs {
-    padding: 4px;
-    gap: 3px;
-  }
-
-  .rewards-tabs button {
-    min-height: 40px;
-    padding-inline: 2px;
-    font-size: 0.68rem;
-  }
+  .rewards-screen { padding-inline: 12px; }
+  .rewards-tabs { padding: 4px; gap: 3px; }
+  .rewards-tabs button { min-height: 40px; padding-inline: 2px; font-size: 0.68rem; }
 }
 
 @media (max-height: 650px) {
-  .rewards-screen__header {
-    margin-bottom: 10px;
-  }
-
-  .rewards-screen__title {
-    font-size: 1.55rem;
-  }
-
-  .rewards-screen__desc {
-    font-size: 0.74rem;
-  }
-
-  .rewards-tabs {
-    margin-bottom: 11px;
-  }
+  .rewards-screen__header { margin-bottom: 10px; }
+  .rewards-screen__title { font-size: 1.55rem; }
+  .rewards-screen__desc { font-size: 0.74rem; }
+  .rewards-tabs { margin-bottom: 11px; }
 }
