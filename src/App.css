@@ -1,9 +1,13 @@
+:root {
+  --bottom-nav-height: 72px;
+}
+
 .app-shell {
   position: relative;
-  width: 100%;
-  max-width: 430px;
-  min-width: 320px;
-  height: 100dvh;
+  width: min(100%, 430px);
+  min-width: 0;
+  height: var(--app-viewport-height, 100dvh);
+  max-height: var(--app-viewport-height, 100dvh);
   margin: 0 auto;
   overflow: hidden;
   background: var(--bg-gradient);
@@ -13,15 +17,22 @@
     0 0 0 8px rgba(15, 35, 45, 0.12);
 }
 
-@media (min-width: 431px) {
-  .app-shell {
-    height: min(100dvh, 932px);
-    border-radius: 36px;
-    margin: 16px auto;
-  }
-}
-
 .app-shell__screen {
   position: absolute;
   inset: 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-shell[data-keyboard-open='true'] {
+  --bottom-nav-height: 0px;
+}
+
+@media (min-width: 431px) {
+  .app-shell {
+    height: min(var(--app-viewport-height, 100dvh), 932px);
+    border-radius: 36px;
+    margin: 16px auto;
+  }
 }
