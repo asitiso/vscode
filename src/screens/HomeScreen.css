@@ -220,17 +220,13 @@
 
 .recent-cards {
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
   gap: 8px;
   margin-top: 4px;
 }
 
 .recent-card {
   position: relative;
-  flex: 0 0 clamp(58px, 18vw, 78px);
-  width: clamp(58px, 18vw, 78px);
-  max-width: 78px;
+  flex: 1;
   aspect-ratio: 3 / 4;
   border-radius: 10px;
   overflow: hidden;
