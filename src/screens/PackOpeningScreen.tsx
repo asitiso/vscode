@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import './PackOpeningScreen.css';
+import './RewardEventsV2.css';
 import { useGame } from '../store/GameContext';
 import { PACKS_BY_ID } from '../data/packs';
-import { CARDS_BY_ID } from '../data/cards';
+import { CARDS, CARDS_BY_ID } from '../data/cards';
 import { PlaceholderArt } from '../components/PlaceholderArt';
-import { pickDisplayIllustration } from '../types';
+import { calcStarLevel, pickDisplayIllustration } from '../types';
 
 interface PackOpeningScreenProps {
   packId: string;
@@ -24,17 +25,35 @@ const RARITY_LABEL: Record<string, string> = {
 const PARTICLES = Array.from({ length: 18 }, (_, index) => index);
 
 export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
-  const { state, openPack } = useGame();
+  const { state, openPack, weeklyProgress } = useGame();
   const [phase, setPhase] = useState<OpeningPhase>('ready');
   const openedRef = useRef(false);
   const timersRef = useRef<number[]>([]);
 
   const pack = state.grantedPacks.find((p) => p.id === packId);
   const packDef = pack ? PACKS_BY_ID[pack.packDefId] : undefined;
+  const relatedLog = state.workoutLogs.find((log) => log.grantedPackIds.includes(packId));
   const refreshedPack = state.grantedPacks.find((p) => p.id === packId);
   const resultCard = refreshedPack?.resultCardId ? CARDS_BY_ID[refreshedPack.resultCardId] : null;
   const owned = resultCard ? state.ownedCards[resultCard.id] : null;
   const isNewCard = owned?.count === 1;
+
+  const previousCount = owned ? Math.max(0, owned.count - 1) : 0;
+  const previousStarLevel = previousCount > 0 ? calcStarLevel(previousCount) : 0;
+  const starGrew = Boolean(owned && previousCount > 0 && owned.starLevel > previousStarLevel);
+  const isPersonalBest = relatedLog?.feeling === 'personal-best';
+  const latestWorkout = state.workoutLogs[state.workoutLogs.length - 1];
+  const weeklyGoalTarget = state.user.weeklyGoal.targetSessionsPerWeek;
+  const weeklyGoalHit = Boolean(
+    relatedLog &&
+      latestWorkout?.id === relatedLog.id &&
+      weeklyProgress.sessionsThisWeek === weeklyGoalTarget &&
+      weeklyProgress.remainingThisWeek === 0,
+  );
+  const collectionCount = Object.keys(state.ownedCards).length;
+  const previousCollectionCount = Math.max(0, collectionCount - (isNewCard ? 1 : 0));
+  const collectionPercent = Math.round((collectionCount / CARDS.length) * 100);
+  const previousCollectionPercent = Math.round((previousCollectionCount / CARDS.length) * 100);
 
   useEffect(() => {
     return () => timersRef.current.forEach((timer) => window.clearTimeout(timer));
@@ -125,17 +144,75 @@ export function PackOpeningScreen({ packId, onDone }: PackOpeningScreenProps) {
               assetName={owned ? pickDisplayIllustration(resultCard, owned.starLevel) : resultCard.illustrationAsset}
               emoji="🃏"
             />
+            {starGrew && (
+              <div className="reward-v2__star-up" aria-label={`${owned?.starLevel}성으로 성장`}>
+                <span>STAR UP!</span>
+                <strong>{'★'.repeat(owned?.starLevel ?? 1)}</strong>
+              </div>
+            )}
           </div>
 
           <div className="pack-screen__result">
             <p className="pack-screen__rarity">{RARITY_LABEL[resultCard.rarity]}</p>
             <h2>{resultCard.name}</h2>
             {owned && <p className="pack-screen__stars">{'★'.repeat(owned.starLevel)} · 총 {owned.count}장</p>}
-            {owned && !isNewCard && owned.starLevel < 4 && (
+            {owned && !isNewCard && !starGrew && owned.starLevel < 4 && (
               <p className="pack-screen__growth-message">다음 별 성장에 한 걸음 더 가까워졌어요!</p>
             )}
             {owned?.starLevel === 4 && owned.count === 10 && resultCard.evolvedIllustrationAsset && (
               <p className="pack-screen__evolved-badge">✨ 특별 일러스트 해금!</p>
+            )}
+          </div>
+
+          <div className="reward-v2__events" aria-label="추가 보상 결과">
+            {starGrew && (
+              <article className="reward-v2__event reward-v2__event--star">
+                <span className="reward-v2__event-icon">🌟</span>
+                <div>
+                  <strong>{previousStarLevel}성 → {owned?.starLevel}성 성장!</strong>
+                  <p>중복 카드가 합쳐져 새로운 별이 켜졌어요.</p>
+                </div>
+              </article>
+            )}
+
+            {isPersonalBest && (
+              <article className="reward-v2__event reward-v2__event--trophy">
+                <span className="reward-v2__event-icon">🏆</span>
+                <div>
+                  <strong>오늘의 개인 기록 달성!</strong>
+                  <p>최고의 운동을 기념하는 트로피 이벤트예요.</p>
+                </div>
+              </article>
+            )}
+
+            {weeklyGoalHit && (
+              <article className="reward-v2__event reward-v2__event--weekly">
+                <span className="reward-v2__event-icon reward-v2__chest">🎁</span>
+                <div>
+                  <strong>주간 목표 보상 상자 개방!</strong>
+                  <p>이번 주 {weeklyGoalTarget}회 운동 목표를 완성했어요.</p>
+                </div>
+              </article>
+            )}
+
+            {isNewCard && (
+              <article className="reward-v2__event reward-v2__event--collection">
+                <div className="reward-v2__collection-head">
+                  <span>📚 도감 완성도</span>
+                  <strong>{previousCollectionPercent}% → {collectionPercent}%</strong>
+                </div>
+                <div className="reward-v2__collection-track" aria-hidden="true">
+                  <span
+                    style={
+                      {
+                        '--collection-before': `${previousCollectionPercent}%`,
+                        '--collection-after': `${collectionPercent}%`,
+                      } as CSSProperties
+                    }
+                  />
+                </div>
+                <p>{collectionCount}/{CARDS.length}종 발견 · 새로운 빈칸이 채워졌어요!</p>
+              </article>
             )}
           </div>
 
