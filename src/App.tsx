@@ -8,6 +8,7 @@ import { ComboPackOpeningScreen } from './screens/ComboPackOpeningScreen';
 import { CollectionScreen } from './screens/CollectionScreen';
 import { RewardsScreen } from './screens/RewardsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { CardSetCompletionModal } from './screens/CardSetCompletionModal';
 
 export type ScreenId = 'home' | 'record' | 'pack-opening' | 'collection' | 'rewards' | 'settings';
 
@@ -16,9 +17,7 @@ function AppShell() {
   const [activePackId, setActivePackId] = useState<string | null>(null);
 
   function navigate(next: ScreenId, params?: { packId?: string }) {
-    if (next === 'pack-opening' && params?.packId) {
-      setActivePackId(params.packId);
-    }
+    if (next === 'pack-opening' && params?.packId) setActivePackId(params.packId);
     setScreen(next);
   }
 
@@ -38,6 +37,7 @@ function AppShell() {
         {screen === 'settings' && <SettingsScreen />}
       </div>
       {showBottomNav && <BottomNav active={activeTab} onSelect={navigate} />}
+      <CardSetCompletionModal />
     </div>
   );
 }
