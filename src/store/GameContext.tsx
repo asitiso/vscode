@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNo
 import type {
   AppState,
   CustomExercise,
+  DailyMissionDayState,
   ExerciseLogType,
   FeelingTag,
   GrantedPack,
@@ -20,12 +21,14 @@ import {
   getLocalDateKey,
   selectFeaturedProgress,
 } from '../game/cardSets';
+import { evaluateDailyMission, generateDailyMissions } from '../game/dailyMission';
 
 export type CustomExerciseInput = { name: string; logType: ExerciseLogType };
 
 type Action =
   | { type: 'COMPLETE_WORKOUT'; entries: WorkoutSetEntry[]; feeling: FeelingTag; memo?: string }
   | { type: 'OPEN_PACK'; packId: string }
+  | { type: 'SELECT_DAILY_MISSION'; dayState: DailyMissionDayState; missionId: string; selectedAt: string }
   | { type: 'CREATE_CUSTOM_EXERCISE'; exercise: CustomExercise }
   | { type: 'UPDATE_CUSTOM_EXERCISE'; id: string; input: CustomExerciseInput; updatedAt: string }
   | { type: 'DELETE_CUSTOM_EXERCISE'; id: string }
@@ -40,9 +43,28 @@ function uid(prefix: string): string {
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
+    case 'SELECT_DAILY_MISSION': {
+      const existing = state.dailyMissions[action.dayState.date];
+      if (existing?.selectedMissionId || state.workoutLogs.some((log) => log.date === action.dayState.date)) {
+        return state;
+      }
+      if (!action.dayState.missions.some((mission) => mission.id === action.missionId)) return state;
+      return {
+        ...state,
+        dailyMissions: {
+          ...state.dailyMissions,
+          [action.dayState.date]: {
+            ...action.dayState,
+            selectedMissionId: action.missionId,
+            selectedAt: action.selectedAt,
+          },
+        },
+      };
+    }
+
     case 'COMPLETE_WORKOUT': {
       const now = new Date();
-      const today = now.toISOString().slice(0, 10);
+      const today = getLocalDateKey(now);
       const categories = categoriesFromEntries(action.entries);
       const grantedPack: GrantedPack = {
         id: uid('pack'),
@@ -59,10 +81,47 @@ function reducer(state: AppState, action: Action): AppState {
         grantedPackIds: [grantedPack.id],
         createdAt: now.toISOString(),
       };
+      const workoutLogs = [...state.workoutLogs, log];
+      const todayMission = state.dailyMissions[today];
+      const selectedMission = todayMission?.missions.find(
+        (mission) => mission.id === todayMission.selectedMissionId,
+      );
+      const missionResult = selectedMission
+        ? evaluateDailyMission(selectedMission, today, workoutLogs)
+        : null;
+      const shouldRewardMission = Boolean(
+        selectedMission
+        && missionResult?.completed
+        && !todayMission.completedAt
+        && !todayMission.rewardPackId,
+      );
+      const missionPack: GrantedPack | null = shouldRewardMission && selectedMission
+        ? {
+            id: uid('mission-pack'),
+            packDefId: selectedMission.rewardPackDefId,
+            grantedAt: now.toISOString(),
+            source: 'daily-mission',
+            sourceMissionId: selectedMission.id,
+          }
+        : null;
+      const dailyMissions = shouldRewardMission && missionPack && todayMission
+        ? {
+            ...state.dailyMissions,
+            [today]: {
+              ...todayMission,
+              completedAt: now.toISOString(),
+              rewardPackId: missionPack.id,
+            },
+          }
+        : state.dailyMissions;
+
       return {
         ...state,
-        workoutLogs: [...state.workoutLogs, log],
-        grantedPacks: [...state.grantedPacks, grantedPack],
+        workoutLogs,
+        grantedPacks: missionPack
+          ? [...state.grantedPacks, grantedPack, missionPack]
+          : [...state.grantedPacks, grantedPack],
+        dailyMissions,
       };
     }
 
@@ -76,6 +135,7 @@ function reducer(state: AppState, action: Action): AppState {
       const { card, pityTriggered } = drawCard(categories, state.user.legendaryPityCounter, {
         dailySetId: dailySet.id,
         completionSetId: pack.source === 'set-completion' ? pack.sourceSetId : undefined,
+        missionPack: pack.source === 'daily-mission',
       });
       const now = new Date().toISOString();
       const existing = state.ownedCards[card.id];
@@ -146,6 +206,7 @@ interface GameContextValue {
   state: AppState;
   completeWorkout: (entries: WorkoutSetEntry[], feeling: FeelingTag, memo?: string) => void;
   openPack: (packId: string) => void;
+  selectDailyMission: (missionId: string) => void;
   createCustomExercise: (input: CustomExerciseInput) => CustomExercise;
   updateCustomExercise: (id: string, input: CustomExerciseInput) => void;
   deleteCustomExercise: (id: string) => void;
@@ -159,6 +220,9 @@ interface GameContextValue {
   cardSetProgress: ReturnType<typeof getAllCardSetProgress>;
   dailyCardSet: ReturnType<typeof getDailyCardSet>;
   featuredCardSetProgress: ReturnType<typeof selectFeaturedProgress>;
+  todayMissionState: DailyMissionDayState;
+  todayMissionProgress: ReturnType<typeof evaluateDailyMission> | null;
+  canSelectDailyMission: boolean;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -167,7 +231,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, () => loadState() ?? createInitialState());
   useEffect(() => saveState(state), [state]);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getLocalDateKey();
   const todayLogged = state.workoutLogs.some((log) => log.date === today);
   const unopenedPacks = state.grantedPacks.filter((pack) => !pack.openedAt);
   const weeklyProgress = useMemo(
@@ -175,16 +239,36 @@ export function GameProvider({ children }: { children: ReactNode }) {
     [state.workoutLogs, state.user.weeklyGoal.targetSessionsPerWeek],
   );
   const cardSetProgress = useMemo(() => getAllCardSetProgress(state.ownedCards), [state.ownedCards]);
-  const dailyCardSet = getDailyCardSet(getLocalDateKey());
+  const dailyCardSet = getDailyCardSet(today);
   const featuredCardSetProgress = useMemo(
     () => selectFeaturedProgress(state.ownedCards, dailyCardSet.id),
     [state.ownedCards, dailyCardSet.id],
   );
+  const todayMissionState = useMemo<DailyMissionDayState>(
+    () => state.dailyMissions[today] ?? {
+      date: today,
+      missions: generateDailyMissions(today, state.workoutLogs, dailyCardSet.id),
+    },
+    [dailyCardSet.id, state.dailyMissions, state.workoutLogs, today],
+  );
+  const selectedMission = todayMissionState.missions.find(
+    (mission) => mission.id === todayMissionState.selectedMissionId,
+  );
+  const todayMissionProgress = selectedMission
+    ? evaluateDailyMission(selectedMission, today, state.workoutLogs)
+    : null;
+  const canSelectDailyMission = !todayLogged && !todayMissionState.selectedMissionId;
 
   const value: GameContextValue = {
     state,
     completeWorkout: (entries, feeling, memo) => dispatch({ type: 'COMPLETE_WORKOUT', entries, feeling, memo }),
     openPack: (packId) => dispatch({ type: 'OPEN_PACK', packId }),
+    selectDailyMission: (missionId) => dispatch({
+      type: 'SELECT_DAILY_MISSION',
+      dayState: todayMissionState,
+      missionId,
+      selectedAt: new Date().toISOString(),
+    }),
     createCustomExercise: (input) => {
       const now = new Date().toISOString();
       const exercise: CustomExercise = {
@@ -210,6 +294,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     cardSetProgress,
     dailyCardSet,
     featuredCardSetProgress,
+    todayMissionState,
+    todayMissionProgress,
+    canSelectDailyMission,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
