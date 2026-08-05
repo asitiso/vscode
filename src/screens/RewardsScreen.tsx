@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import './RewardsScreen.css';
+import './RewardsReport.css';
 import { useGame } from '../store/GameContext';
 import { PlaceholderArt } from '../components/PlaceholderArt';
 import { CARDS_BY_ID } from '../data/cards';
@@ -89,124 +90,67 @@ export function RewardsScreen() {
       </header>
 
       <div className="rewards-tabs" role="tablist" aria-label="보상 화면 탭">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'today'}
-          className={activeTab === 'today' ? 'is-active' : ''}
-          onClick={() => setActiveTab('today')}
-        >
-          오늘 활동
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'report'}
-          className={activeTab === 'report' ? 'is-active' : ''}
-          onClick={() => setActiveTab('report')}
-        >
-          운동 리포트
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'streak'}
-          className={activeTab === 'streak' ? 'is-active' : ''}
-          onClick={() => setActiveTab('streak')}
-        >
-          연속 보상
-        </button>
+        <button type="button" role="tab" aria-selected={activeTab === 'today'} className={activeTab === 'today' ? 'is-active' : ''} onClick={() => setActiveTab('today')}>오늘 활동</button>
+        <button type="button" role="tab" aria-selected={activeTab === 'report'} className={activeTab === 'report' ? 'is-active' : ''} onClick={() => setActiveTab('report')}>운동 리포트</button>
+        <button type="button" role="tab" aria-selected={activeTab === 'streak'} className={activeTab === 'streak' ? 'is-active' : ''} onClick={() => setActiveTab('streak')}>연속 보상</button>
       </div>
 
       {activeTab === 'today' && (
         <div className="rewards-today" role="tabpanel">
           <section className="today-summary-card">
             <div className="today-summary-card__heading">
-              <div>
-                <span>오늘 운동 요약</span>
-                <strong>{todayLogs.length > 0 ? '오늘도 멋지게 완료했어요!' : '아직 기록된 운동이 없어요'}</strong>
-              </div>
+              <div><span>오늘 운동 요약</span><strong>{todayLogs.length > 0 ? '오늘도 멋지게 완료했어요!' : '아직 기록된 운동이 없어요'}</strong></div>
               <span className="today-summary-card__badge">{todayLogs.length}회</span>
             </div>
-
             <div className="today-stat-grid">
               <div><strong>{exerciseCount}</strong><span>운동 종목</span></div>
               <div><strong>{totalMinutes || totalSets}</strong><span>{totalMinutes > 0 ? '운동 시간(분)' : '총 세트'}</span></div>
               <div><strong>{totalReps}</strong><span>총 반복</span></div>
             </div>
-
             {latestLog && (
               <div className="today-highlight">
                 <span>{latestLog.feeling === 'personal-best' ? '🏆' : '💪'}</span>
-                <div>
-                  <strong>{FEELING_LABELS[latestLog.feeling]}</strong>
-                  <p>{topExerciseName ? `${topExerciseName}을(를) 가장 집중해서 운동했어요.` : '오늘의 운동 기록이 저장됐어요.'}</p>
-                </div>
+                <div><strong>{FEELING_LABELS[latestLog.feeling]}</strong><p>{topExerciseName ? `${topExerciseName}을(를) 가장 집중해서 운동했어요.` : '오늘의 운동 기록이 저장됐어요.'}</p></div>
               </div>
             )}
           </section>
 
           <section className="today-reward-section">
             <div className="today-section-heading">
-              <div>
-                <span>오늘의 보상</span>
-                <strong>오늘 획득한 카드</strong>
-              </div>
+              <div><span>오늘의 보상</span><strong>오늘 획득한 카드</strong></div>
               <span>{todayCards.length}장</span>
             </div>
-
             {todayCards.length > 0 ? (
               <div className="today-card-strip">
                 {todayCards.map(({ pack, card, owned }) => (
                   <article key={pack.id} className={`today-reward-card today-reward-card--${card.rarity}`}>
                     <div className="today-reward-card__image">
-                      <PlaceholderArt
-                        assetName={pickDisplayIllustration(card, owned.starLevel)}
-                        emoji="🃏"
-                        label={card.name}
-                      />
+                      <PlaceholderArt assetName={pickDisplayIllustration(card, owned.starLevel)} emoji="🃏" label={card.name} />
                       <span className="today-reward-card__status">{owned.count === 1 ? 'NEW' : 'POWER UP'}</span>
                     </div>
                     <div className="today-reward-card__body">
                       <span className="today-reward-card__rarity">{RARITY_LABELS[card.rarity]}</span>
                       <h2>{card.name}</h2>
                       <p>{'★'.repeat(owned.starLevel)} · 총 {owned.count}장</p>
-                      <div className="today-reward-card__growth">
-                        <span>{getNextGrowthLabel(owned.count, owned.starLevel)}</span>
-                      </div>
+                      <div className="today-reward-card__growth"><span>{getNextGrowthLabel(owned.count, owned.starLevel)}</span></div>
                     </div>
                   </article>
                 ))}
               </div>
             ) : (
-              <div className="today-empty-card">
-                <span>🎁</span>
-                <strong>오늘 획득한 카드가 아직 없어요</strong>
-                <p>운동을 기록하고 카드팩을 열면 여기에 보상이 모여요.</p>
-              </div>
+              <div className="today-empty-card"><span>🎁</span><strong>오늘 획득한 카드가 아직 없어요</strong><p>운동을 기록하고 카드팩을 열면 여기에 보상이 모여요.</p></div>
             )}
           </section>
         </div>
       )}
 
-      {activeTab === 'report' && (
-        <div className="rewards-report" role="tabpanel">
-          <WorkoutReportPanel workoutLogs={state.workoutLogs} />
-        </div>
-      )}
+      {activeTab === 'report' && <div className="rewards-report" role="tabpanel"><WorkoutReportPanel workoutLogs={state.workoutLogs} /></div>}
 
       {activeTab === 'streak' && (
         <div className="rewards-list" role="tabpanel">
-          <div className="streak-summary">
-            <span>현재 연속 기록</span>
-            <strong>{weeklyProgress.streak}주 연속</strong>
-            <p>주간 목표를 달성할수록 새로운 꾸미기 보상이 열려요.</p>
-          </div>
+          <div className="streak-summary"><span>현재 연속 기록</span><strong>{weeklyProgress.streak}주 연속</strong><p>주간 목표를 달성할수록 새로운 꾸미기 보상이 열려요.</p></div>
           {rewards.map((reward) => (
-            <div key={reward.id} className={`rewards-item ${reward.locked ? 'rewards-item--locked' : ''}`}>
-              <span className="rewards-item__icon">{reward.locked ? '🔒' : '🎁'}</span>
-              <span>{reward.name}</span>
-            </div>
+            <div key={reward.id} className={`rewards-item ${reward.locked ? 'rewards-item--locked' : ''}`}><span className="rewards-item__icon">{reward.locked ? '🔒' : '🎁'}</span><span>{reward.name}</span></div>
           ))}
         </div>
       )}
