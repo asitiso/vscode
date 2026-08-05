@@ -40,6 +40,9 @@ export const ASSET_MANIFEST: Record<string, string> = {
   // 추후 기구 콘셉트에 맞는 마스코트로 교체 예정. 여러 종류 중 하나를 선택할 수 있다.
   'main-character': '/assets/characters/main-character.png',
   'main-character-2': '/assets/characters/main-character-2.png',
+  'main-character-3': '/assets/characters/main-character-3.png',
+  'main-character-4': '/assets/characters/main-character-4.png',
+  'main-character-5': '/assets/characters/main-character-5.png',
 
   // 화면별 배경 (public/assets/backgrounds/)
   'home-background': '/assets/backgrounds/home-background.png',
@@ -52,8 +55,11 @@ export const ASSET_MANIFEST: Record<string, string> = {
 
 /** 홈 화면에서 고를 수 있는 마스코트 캐릭터 목록 */
 export const SELECTABLE_CHARACTERS: { id: string; label: string }[] = [
-  { id: 'main-character', label: '고양이 트레이너' },
-  { id: 'main-character-2', label: '수달 트레이너' },
+  { id: 'main-character', label: '민트 토끼 트레이너' },
+  { id: 'main-character-2', label: '주황 여우 트레이너' },
+  { id: 'main-character-3', label: '아기 드래곤 트레이너' },
+  { id: 'main-character-4', label: '구름 강아지 트레이너' },
+  { id: 'main-character-5', label: '너구리 트레이너' },
 ];
 
 export function resolveAssetUrl(assetName: string): string | null {

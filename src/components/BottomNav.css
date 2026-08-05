@@ -51,8 +51,8 @@
 
 .bottom-nav__icon.placeholder-art__img {
   object-fit: contain;
-  filter: grayscale(0.35) opacity(0.72);
-  transition: filter 0.2s ease;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
 .bottom-nav__label {
@@ -65,9 +65,10 @@
 }
 
 .bottom-nav__item.is-active .bottom-nav__icon-wrap {
-  transform: translateY(-8px) scale(1.32);
+  transform: translateY(-6px) scale(1.15);
 }
 
 .bottom-nav__item.is-active .bottom-nav__icon.placeholder-art__img {
-  filter: drop-shadow(0 6px 10px rgba(255, 138, 61, 0.5));
+  opacity: 1;
+  filter: drop-shadow(0 6px 10px rgba(255, 138, 61, 0.4));
 }
