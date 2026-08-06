@@ -32,6 +32,11 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { margin: 0; background: #b9c8d1; }
-#root { min-height: 100dvh; display: flex; align-items: center; justify-content: center; }
+#root {
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
 h1, h2, h3 { font-family: var(--font-display); font-weight: 400; color: var(--ink); letter-spacing: .01em; }
 button, input, textarea { font-family: var(--font-body); }
