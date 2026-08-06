@@ -4,7 +4,6 @@ import './HomeLevelXp.css';
 import { useGame } from '../store/GameContext';
 import { PlaceholderArt } from '../components/PlaceholderArt';
 import { HomeCharacterInteraction } from './HomeCharacterInteraction';
-import { DailyMissionSheet } from './DailyMissionSheet';
 import { PACKS_BY_ID } from '../data/packs';
 import { CARDS_BY_ID } from '../data/cards';
 import { calculateExperienceProgress } from '../game/experience';
@@ -22,13 +21,8 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
     weeklyProgress,
     dailyCardSet,
     featuredCardSetProgress,
-    todayMissionState,
-    todayMissionProgress,
-    canSelectDailyMission,
-    selectDailyMission,
   } = useGame();
   const [showXp, setShowXp] = useState(false);
-  const [showMissionSheet, setShowMissionSheet] = useState(false);
   const levelControlRef = useRef<HTMLDivElement>(null);
   const nextPack = unopenedPacks[0];
   const goalTarget = state.user.weeklyGoal.targetSessionsPerWeek;
@@ -36,12 +30,6 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const experience = calculateExperienceProgress(state);
   const remaining = featuredCardSetProgress.missingCardIds.length;
   const missingName = remaining === 1 ? CARDS_BY_ID[featuredCardSetProgress.missingCardIds[0]]?.name : undefined;
-  const selectedMission = todayMissionState.missions.find(
-    (mission) => mission.id === todayMissionState.selectedMissionId,
-  );
-  const missionProgressPct = todayMissionProgress
-    ? Math.min(100, Math.round((todayMissionProgress.current / todayMissionProgress.target) * 100))
-    : 0;
   const characterDialogueContext = {
     hasUnopenedPack: unopenedPacks.length > 0,
     remainingWeeklySessions: weeklyProgress.remainingThisWeek,
@@ -65,20 +53,6 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [showXp]);
-
-  function handleRecordStart() {
-    if (canSelectDailyMission) {
-      setShowMissionSheet(true);
-      return;
-    }
-    onNavigate('record');
-  }
-
-  function handleMissionSelect(missionId: string) {
-    selectDailyMission(missionId);
-    setShowMissionSheet(false);
-    onNavigate('record');
-  }
 
   return (
     <div className="home-screen">
@@ -146,19 +120,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         </span>
       </button>
 
-      {selectedMission && (
-        <div className="home-screen__layer home-screen__mission-card">
-          <span>{todayMissionState.completedAt ? '오늘의 미션 완료 ✓' : '오늘의 미션'}</span>
-          <strong>{selectedMission.title}</strong>
-          <small>
-            {todayMissionProgress?.current ?? 0} / {todayMissionProgress?.target ?? selectedMission.targetCount}
-            {todayMissionState.completedAt ? ' · 보너스팩 지급 완료' : ''}
-          </small>
-          <div className="home-screen__mission-progress"><i style={{ width: `${missionProgressPct}%` }} /></div>
-        </div>
-      )}
-
-      <button type="button" className="home-screen__layer home-screen__cta" onClick={handleRecordStart}>
+      <button type="button" className="home-screen__layer home-screen__cta" onClick={() => onNavigate('record')}>
         <span className="home-screen__cta-icon">💪</span>
         {todayLogged ? '오늘 운동 추가 기록하기' : '오늘 운동 기록하기'}
       </button>
@@ -172,18 +134,10 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         <button type="button" className="home-screen__layer home-screen__pack" onClick={() => onNavigate('pack-opening', { packId: nextPack.id })}>
           <span className="home-screen__pack-glow" />
           <span className="home-screen__pack-badge">
-            {nextPack.source === 'set-completion' ? 'SET' : nextPack.source === 'daily-mission' ? 'MISSION' : 'NEW'}
+            {nextPack.source === 'set-completion' ? 'SET' : 'NEW'}
           </span>
           <PlaceholderArt assetName={PACKS_BY_ID[nextPack.packDefId]?.packAsset ?? 'pack-basic'} emoji="🎁" label={PACKS_BY_ID[nextPack.packDefId]?.name} />
         </button>
-      )}
-
-      {showMissionSheet && (
-        <DailyMissionSheet
-          missions={todayMissionState.missions}
-          onSelect={handleMissionSelect}
-          onClose={() => setShowMissionSheet(false)}
-        />
       )}
     </div>
   );
