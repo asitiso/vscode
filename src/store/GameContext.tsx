@@ -181,7 +181,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [cloudOperationMessage, setCloudOperationMessage] = useState('');
   const [lastCloudSavedAt, setLastCloudSavedAt] = useState<string | null>(null);
 
-  useEffect(() => saveState(state), [state]);
+  useEffect(() => {
+    saveState(state);
+  }, [state]);
 
   const today = getLocalDateKey();
   const todayLogged = state.workoutLogs.some((log) => log.date === today);
