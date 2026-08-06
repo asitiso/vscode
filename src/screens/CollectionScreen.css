@@ -184,7 +184,7 @@
   display: block;
   flex: 0 0 76%;
   min-height: 0;
-  padding: 3px;
+  padding: 0;
   overflow: hidden;
 }
 
@@ -192,6 +192,11 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.card-grid__item:not(.card-grid__item--locked) .card-grid__artwork {
+  transform: scale(1.58);
+  transform-origin: 50% 56%;
 }
 
 .card-grid__rarity {
@@ -255,6 +260,9 @@
 @media (max-width: 350px) {
   .card-grid { gap: 8px; }
   .card-grid__footer { padding-inline: 5px; }
+  .card-grid__item:not(.card-grid__item--locked) .card-grid__artwork {
+    transform: scale(1.5);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
