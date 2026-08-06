@@ -57,6 +57,15 @@ export const ASSET_MANIFEST: Record<string, string> = {
   'core-theme-character': '/assets/cards/rare/abdominal crunch machine mascot.png',
   'full-body-theme-character': '/assets/cards/rare/functional cable machine mascot.png',
 
+  // 슈퍼 레어 마스터 카드 전용 일러스트
+  'cardio-master-character': '/assets/cards/rare/super-rare spinning bike mascot.png',
+  'strength-master-character': '/assets/cards/rare/super-rare deadlift training machine mascot.png',
+  'flexibility-master-character': '/assets/cards/rare/super-rare rowing machine mascot.png',
+
+  // 레전드 카드 전용 일러스트
+  'leg-day-legend-character': '/assets/cards/rare/legendary celestial barbell mascot.png',
+  'full-body-legend-character': '/assets/cards/rare/legendary multi-functional cable machine mascot.png',
+
   // 운동 기구 캐릭터 "업그레이드" 버전 — 카드 중복 10장(4성) 달성 시 해금되는
   // 특별 일러스트 (CLAUDE.md 4-3절). pickDisplayIllustration()이 골라 쓴다.
   'treadmill-character-evolved': '/assets/equipment/treadmill-character2.png',
