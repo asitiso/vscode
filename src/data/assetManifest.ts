@@ -29,6 +29,24 @@ export const ASSET_MANIFEST: Record<string, string> = {
   'foam-roller-character': '/assets/equipment/Foam Roller.png',
   'pull-up-bar-character': '/assets/equipment/Pull-Up Bar.png',
 
+  // 신규 운동기구·스포츠 캐릭터
+  'gym-ball-character': '/assets/equipment/Gym Ball.png',
+  'arm-curl-machine-character': '/assets/equipment/Preacher Curl Machine.png',
+  'elliptical-character': '/assets/equipment/Elliptical Trainer.png',
+  'loop-band-character': '/assets/equipment/Resistance Band.png',
+  'hammer-curl-character': '/assets/equipment/Hex Dumbbell.png',
+  'decline-bench-character': '/assets/equipment/Decline Bench.png',
+  'outdoor-running-character': '/assets/equipment/Outdoor Running.png',
+  'swimming-character': '/assets/equipment/Swimming.png',
+  'badminton-character': '/assets/equipment/Badminton.png',
+  'golf-character': '/assets/equipment/Golf.png',
+  'tennis-character': '/assets/equipment/Tennis.png',
+  'pilates-reformer-character': '/assets/equipment/Pilates Reformer.png',
+  'trekking-character': '/assets/equipment/Trekking.png',
+  'crossfit-character': '/assets/equipment/Crossfit Battle Rope.png',
+  'outdoor-cycling-character': '/assets/equipment/Outdoor Cycling.png',
+  'climbing-character': '/assets/equipment/Climbing.png',
+
   // 운동 기구 캐릭터 "업그레이드" 버전 — 카드 중복 10장(4성) 달성 시 해금되는
   // 특별 일러스트 (CLAUDE.md 4-3절). pickDisplayIllustration()이 골라 쓴다.
   'treadmill-character-evolved': '/assets/equipment/treadmill-character2.png',
