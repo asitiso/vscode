@@ -9,6 +9,7 @@ export interface ViewportMeasurement {
 export interface ViewportState {
   layoutHeight: number;
   visibleHeight: number;
+  offsetTop: number;
   keyboardHeight: number;
   isKeyboardOpen: boolean;
 }
@@ -44,6 +45,7 @@ export function measureViewport(measurement: ViewportMeasurement): ViewportState
   return {
     layoutHeight,
     visibleHeight,
+    offsetTop,
     keyboardHeight: isKeyboardOpen ? rawDifference : 0,
     isKeyboardOpen,
   };
@@ -63,6 +65,7 @@ export function syncViewportCssVariables(
 
   target.setProperty('--app-layout-height', `${state.layoutHeight}px`);
   target.setProperty('--app-viewport-height', `${state.visibleHeight}px`);
+  target.setProperty('--app-viewport-offset-top', `${state.offsetTop}px`);
   target.setProperty('--keyboard-height', `${state.keyboardHeight}px`);
   target.setProperty('--keyboard-open', state.isKeyboardOpen ? '1' : '0');
 }
