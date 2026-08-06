@@ -108,7 +108,8 @@ export type PackType =
   | 'weekly-goal'
   | 'streak-reward'
   | 'special-challenge'
-  | 'set-completion';
+  | 'set-completion'
+  | 'level-milestone';
 
 export interface PackDefinition {
   id: string;
@@ -118,7 +119,7 @@ export interface PackDefinition {
   favoredCategories: ExerciseCategory[];
 }
 
-export type PackSource = 'workout' | 'set-completion';
+export type PackSource = 'workout' | 'set-completion' | 'level-milestone';
 
 export interface GrantedPack {
   id: string;
@@ -128,6 +129,7 @@ export interface GrantedPack {
   resultCardId?: string;
   source?: PackSource;
   sourceSetId?: string;
+  sourceMilestoneLevel?: number;
 }
 
 export const RARITY_DROP_RATE: Record<CardRarity, number> = {
@@ -167,5 +169,8 @@ export interface AppState {
   customExercises: CustomExercise[];
   completedSetIds: string[];
   rewardedSetIds: string[];
+  claimedLevelMilestones: number[];
+  earnedBadges: string[];
+  unlockedCosmetics: string[];
   recentCompletedSetId?: string;
 }
