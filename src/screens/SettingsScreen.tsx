@@ -75,6 +75,40 @@ export function SettingsScreen() {
         </div>
       </section>
 
+      <section className="settings-section">
+        <label className="settings-label">캐릭터 선택</label>
+        <div className="character-picker">
+          {SELECTABLE_CHARACTERS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              className={`character-picker__item ${state.user.selectedCharacterId === c.id ? 'character-picker__item--active' : ''}`}
+              onClick={() => setSelectedCharacter(c.id)}
+            >
+              <PlaceholderArt assetName={c.id} emoji="🐾" />
+              <span>{c.label}</span>
+              {state.user.selectedCharacterId === c.id && <span className="character-picker__badge">✓</span>}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="settings-section">
+        <label className="settings-label">주간 운동 목표 (회/주)</label>
+        <div className="chip-row">
+          {[2, 3, 4, 5, 6].map((n) => (
+            <button
+              key={n}
+              type="button"
+              className={`chip ${state.user.weeklyGoal.targetSessionsPerWeek === n ? 'chip--active' : ''}`}
+              onClick={() => setWeeklyGoal(n)}
+            >
+              {n}회
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="settings-section settings-section--cloud" aria-labelledby="cloud-save-title">
         <div className="cloud-save__heading">
           <div>
@@ -118,40 +152,6 @@ export function SettingsScreen() {
         <p className="cloud-save__notice">
           브라우저 데이터가 삭제되면 익명 저장키도 함께 삭제되어 이 백업을 다시 찾을 수 없습니다.
         </p>
-      </section>
-
-      <section className="settings-section">
-        <label className="settings-label">캐릭터 선택</label>
-        <div className="character-picker">
-          {SELECTABLE_CHARACTERS.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              className={`character-picker__item ${state.user.selectedCharacterId === c.id ? 'character-picker__item--active' : ''}`}
-              onClick={() => setSelectedCharacter(c.id)}
-            >
-              <PlaceholderArt assetName={c.id} emoji="🐾" />
-              <span>{c.label}</span>
-              {state.user.selectedCharacterId === c.id && <span className="character-picker__badge">✓</span>}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="settings-section">
-        <label className="settings-label">주간 운동 목표 (회/주)</label>
-        <div className="chip-row">
-          {[2, 3, 4, 5, 6].map((n) => (
-            <button
-              key={n}
-              type="button"
-              className={`chip ${state.user.weeklyGoal.targetSessionsPerWeek === n ? 'chip--active' : ''}`}
-              onClick={() => setWeeklyGoal(n)}
-            >
-              {n}회
-            </button>
-          ))}
-        </div>
       </section>
     </div>
   );
