@@ -15,6 +15,8 @@ import { loadCloudState, saveCloudState, type CloudSaveRecord } from './cloudSto
 import { categoriesFromEntries, drawCard } from '../game/cardDraw';
 import { selectPackForCategories } from '../game/packSelector';
 import { computeWeeklyProgress } from '../game/weeklyGoal';
+import { getMilestoneBadge, getMilestoneCosmetic, isLevelMilestone } from '../game/levelMilestones';
+import { PACKS_BY_ID } from '../data/packs';
 import {
   getAllCardSetProgress,
   getDailyCardSet,
@@ -25,9 +27,10 @@ import {
 export type CustomExerciseInput = { name: string; logType: ExerciseLogType };
 export type CloudOperationStatus = 'idle' | 'saving' | 'loading' | 'success' | 'error';
 
-type Action =
+export type Action =
   | { type: 'COMPLETE_WORKOUT'; entries: WorkoutSetEntry[]; feeling: FeelingTag; memo?: string }
   | { type: 'OPEN_PACK'; packId: string }
+  | { type: 'CLAIM_LEVEL_MILESTONE'; level: number; currentLevel: number }
   | { type: 'CREATE_CUSTOM_EXERCISE'; exercise: CustomExercise }
   | { type: 'UPDATE_CUSTOM_EXERCISE'; id: string; input: CustomExerciseInput; updatedAt: string }
   | { type: 'DELETE_CUSTOM_EXERCISE'; id: string }
@@ -41,7 +44,7 @@ function uid(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 }
 
-function reducer(state: AppState, action: Action): AppState {
+export function gameReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'COMPLETE_WORKOUT': {
       const now = new Date();
@@ -70,6 +73,31 @@ function reducer(state: AppState, action: Action): AppState {
       };
     }
 
+    case 'CLAIM_LEVEL_MILESTONE': {
+      if (!isLevelMilestone(action.level)) return state;
+      if (action.level > action.currentLevel) return state;
+      if (state.claimedLevelMilestones.includes(action.level)) return state;
+      if (!PACKS_BY_ID['pack-level-milestone']) return state;
+
+      const badge = getMilestoneBadge(action.level);
+      const cosmetic = getMilestoneCosmetic(action.level);
+      const pack: GrantedPack = {
+        id: `level-milestone-${action.level}`,
+        packDefId: 'pack-level-milestone',
+        grantedAt: new Date().toISOString(),
+        source: 'level-milestone',
+        sourceMilestoneLevel: action.level,
+      };
+
+      return {
+        ...state,
+        claimedLevelMilestones: [...state.claimedLevelMilestones, action.level].sort((a, b) => a - b),
+        earnedBadges: Array.from(new Set([...state.earnedBadges, badge.id])),
+        unlockedCosmetics: Array.from(new Set([...state.unlockedCosmetics, cosmetic.id])),
+        grantedPacks: [...state.grantedPacks, pack],
+      };
+    }
+
     case 'OPEN_PACK': {
       const pack = state.grantedPacks.find((item) => item.id === action.packId);
       if (!pack || pack.openedAt) return state;
@@ -80,6 +108,7 @@ function reducer(state: AppState, action: Action): AppState {
       const { card, pityTriggered } = drawCard(categories, state.user.legendaryPityCounter, {
         dailySetId: dailySet.id,
         completionSetId: pack.source === 'set-completion' ? pack.sourceSetId : undefined,
+        milestone: pack.source === 'level-milestone',
       });
       const now = new Date().toISOString();
       const existing = state.ownedCards[card.id];
@@ -106,8 +135,11 @@ function reducer(state: AppState, action: Action): AppState {
       const openedPacks = state.grantedPacks.map((item) =>
         item.id === pack.id ? { ...item, openedAt: now, resultCardId: card.id } : item,
       );
-      const legendaryPityCounter =
-        card.rarity === 'legendary' || pityTriggered ? 0 : state.user.legendaryPityCounter + 1;
+      const legendaryPityCounter = pack.source === 'level-milestone'
+        ? state.user.legendaryPityCounter
+        : card.rarity === 'legendary' || pityTriggered
+          ? 0
+          : state.user.legendaryPityCounter + 1;
 
       return {
         ...state,
@@ -152,6 +184,7 @@ interface GameContextValue {
   state: AppState;
   completeWorkout: (entries: WorkoutSetEntry[], feeling: FeelingTag, memo?: string) => void;
   openPack: (packId: string) => void;
+  claimLevelMilestone: (level: number, currentLevel: number) => void;
   createCustomExercise: (input: CustomExerciseInput) => CustomExercise;
   updateCustomExercise: (id: string, input: CustomExerciseInput) => void;
   deleteCustomExercise: (id: string) => void;
@@ -176,7 +209,7 @@ interface GameContextValue {
 const GameContext = createContext<GameContextValue | null>(null);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, () => loadState() ?? createInitialState());
+  const [state, dispatch] = useReducer(gameReducer, undefined, () => loadState() ?? createInitialState());
   const [cloudOperationStatus, setCloudOperationStatus] = useState<CloudOperationStatus>('idle');
   const [cloudOperationMessage, setCloudOperationMessage] = useState('');
   const [lastCloudSavedAt, setLastCloudSavedAt] = useState<string | null>(null);
@@ -251,6 +284,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     state,
     completeWorkout: (entries, feeling, memo) => dispatch({ type: 'COMPLETE_WORKOUT', entries, feeling, memo }),
     openPack: (packId) => dispatch({ type: 'OPEN_PACK', packId }),
+    claimLevelMilestone: (level, currentLevel) => dispatch({ type: 'CLAIM_LEVEL_MILESTONE', level, currentLevel }),
     createCustomExercise: (input) => {
       const now = new Date().toISOString();
       const exercise: CustomExercise = {
