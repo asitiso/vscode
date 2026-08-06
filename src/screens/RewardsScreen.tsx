@@ -45,6 +45,6 @@ export function RewardsScreen(){
       {activeTab==='report'&&<div className="rewards-report" role="tabpanel"><WorkoutReportPanel workoutLogs={state.workoutLogs} onSelectExercise={setSelectedExerciseId}/></div>}
       {activeTab==='streak'&&<div className="rewards-list" role="tabpanel"><div className="streak-summary"><span>현재 연속 기록</span><strong>{weeklyProgress.streak}주 연속</strong><p>주간 목표를 달성할수록 새로운 꾸미기 보상이 열려요.</p></div>{rewards.map((reward)=><div key={reward.id} className={`rewards-item ${reward.locked?'rewards-item--locked':''}`}><span className="rewards-item__icon">{reward.locked?'🔒':'🎁'}</span><span>{reward.name}</span></div>)}</div>}
     </>}
-    {selectedCard&&selectedOwned&&<CollectionCardDetailModal card={selectedCard} owned={selectedOwned} onClose={()=>setSelectedCardId(null)}/>} 
+    {selectedCard&&selectedOwned&&<CollectionCardDetailModal card={selectedCard} owned={selectedOwned} acquisitionLabel="오늘 획득" onClose={()=>setSelectedCardId(null)}/>} 
   </div>;
 }
