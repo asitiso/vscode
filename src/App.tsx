@@ -4,6 +4,7 @@ import './styles/GameUiPrimitives.css';
 import './App.css';
 import './MobileViewport.css';
 import './ScreenStability.css';
+import './styles/GameUiScreens.css';
 import { GameProvider } from './store/GameContext';
 import { BottomNav } from './components/BottomNav';
 import { HomeScreen } from './screens/HomeScreen';
