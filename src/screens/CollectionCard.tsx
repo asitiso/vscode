@@ -9,7 +9,7 @@ interface CollectionCardProps {
 
 export function CollectionCard({ card, owned, onSelect }: CollectionCardProps) {
   const accessibleName = owned ? `${card.name} 카드 자세히 보기` : '미발견 카드 자세히 보기';
-  const illustration = owned ? pickDisplayIllustration(card, owned.starLevel) : 'collection-card-locked';
+  const illustration = owned ? pickDisplayIllustration(card, owned.starLevel) : 'locked-card-silhouette';
 
   return (
     <button
