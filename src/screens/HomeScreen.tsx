@@ -4,9 +4,11 @@ import './HomeLevelXp.css';
 import { useGame } from '../store/GameContext';
 import { PlaceholderArt } from '../components/PlaceholderArt';
 import { HomeCharacterInteraction } from './HomeCharacterInteraction';
+import { LevelMilestoneModal } from './LevelMilestoneModal';
 import { PACKS_BY_ID } from '../data/packs';
 import { CARDS_BY_ID } from '../data/cards';
 import { calculateExperienceProgress } from '../game/experience';
+import { getHighestEarnedMilestoneBadge, getPendingLevelMilestone } from '../game/levelMilestones';
 import type { ScreenId } from '../App';
 
 interface HomeScreenProps {
@@ -21,13 +23,18 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
     weeklyProgress,
     dailyCardSet,
     featuredCardSetProgress,
+    claimLevelMilestone,
   } = useGame();
   const [showXp, setShowXp] = useState(false);
+  const [activeMilestone, setActiveMilestone] = useState<number | null>(null);
+  const [dismissedMilestone, setDismissedMilestone] = useState<number | null>(null);
   const levelControlRef = useRef<HTMLDivElement>(null);
   const nextPack = unopenedPacks[0];
   const goalTarget = state.user.weeklyGoal.targetSessionsPerWeek;
   const goalProgressPct = Math.min(100, Math.round((weeklyProgress.sessionsThisWeek / goalTarget) * 100));
   const experience = calculateExperienceProgress(state);
+  const pendingMilestone = getPendingLevelMilestone(experience.level, state.claimedLevelMilestones);
+  const highestBadge = getHighestEarnedMilestoneBadge(state.claimedLevelMilestones);
   const remaining = featuredCardSetProgress.missingCardIds.length;
   const missingName = remaining === 1 ? CARDS_BY_ID[featuredCardSetProgress.missingCardIds[0]]?.name : undefined;
   const characterDialogueContext = {
@@ -37,6 +44,12 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
     todayLogged,
     streak: weeklyProgress.streak,
   };
+
+  useEffect(() => {
+    if (activeMilestone === null && pendingMilestone !== null && dismissedMilestone !== pendingMilestone) {
+      setActiveMilestone(pendingMilestone);
+    }
+  }, [activeMilestone, dismissedMilestone, pendingMilestone]);
 
   useEffect(() => {
     if (!showXp) return;
@@ -53,6 +66,11 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [showXp]);
+
+  const closeMilestone = () => {
+    setDismissedMilestone(activeMilestone);
+    setActiveMilestone(null);
+  };
 
   return (
     <div className="home-screen">
@@ -74,6 +92,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
               <span className="hud-badge__title">Lv.{experience.level}</span>
               <span className="hud-badge__subtitle">{state.user.name}</span>
             </span>
+            {highestBadge && <span className="hud-level-milestone-badge">{highestBadge.label}</span>}
           </button>
           {showXp && (
             <section id="home-level-xp-popover" className="level-xp-popover" role="dialog" aria-labelledby="home-level-xp-title">
@@ -134,10 +153,21 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         <button type="button" className="home-screen__layer home-screen__pack" onClick={() => onNavigate('pack-opening', { packId: nextPack.id })}>
           <span className="home-screen__pack-glow" />
           <span className="home-screen__pack-badge">
-            {nextPack.source === 'set-completion' ? 'SET' : 'NEW'}
+            {nextPack.source === 'set-completion' ? 'SET' : nextPack.source === 'level-milestone' ? 'LV' : 'NEW'}
           </span>
           <PlaceholderArt assetName={PACKS_BY_ID[nextPack.packDefId]?.packAsset ?? 'pack-basic'} emoji="🎁" label={PACKS_BY_ID[nextPack.packDefId]?.name} />
         </button>
+      )}
+
+      {activeMilestone !== null && (
+        <LevelMilestoneModal
+          level={activeMilestone}
+          claimed={state.claimedLevelMilestones.includes(activeMilestone)}
+          characterName={state.user.name}
+          onClaim={() => claimLevelMilestone(activeMilestone, experience.level)}
+          onOpenPack={() => onNavigate('pack-opening', { packId: `level-milestone-${activeMilestone}` })}
+          onClose={closeMilestone}
+        />
       )}
     </div>
   );
