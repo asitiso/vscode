@@ -47,6 +47,16 @@ export const ASSET_MANIFEST: Record<string, string> = {
   'outdoor-cycling-character': '/assets/equipment/Outdoor Cycling.png',
   'climbing-character': '/assets/equipment/Climbing.png',
 
+  // 레어 테마 카드 전용 일러스트
+  'cardio-theme-character': '/assets/cards/rare/elliptical trainer mascot.png',
+  'legs-theme-character': '/assets/cards/rare/press machine mascot.png',
+  'chest-theme-character': '/assets/cards/rare/chest press machine mascot.png',
+  'back-theme-character': '/assets/cards/rare/lat pulldown machine mascot.png',
+  'shoulders-theme-character': '/assets/cards/rare/shoulder press machine mascot.png',
+  'arms-theme-character': '/assets/cards/rare/cable curl machine mascot.png',
+  'core-theme-character': '/assets/cards/rare/abdominal crunch machine mascot.png',
+  'full-body-theme-character': '/assets/cards/rare/functional cable machine mascot.png',
+
   // 운동 기구 캐릭터 "업그레이드" 버전 — 카드 중복 10장(4성) 달성 시 해금되는
   // 특별 일러스트 (CLAUDE.md 4-3절). pickDisplayIllustration()이 골라 쓴다.
   'treadmill-character-evolved': '/assets/equipment/treadmill-character2.png',
