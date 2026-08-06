@@ -4,8 +4,11 @@ const STORAGE_KEY = 'workout-card-game:v1';
 export const STATE_SCHEMA_VERSION = 1;
 
 type LegacyGrantedPack = Omit<GrantedPack, 'source'> & { source?: string; sourceMissionId?: string };
-type LegacyAppState = Omit<AppState, 'grantedPacks'> & {
+type LegacyAppState = Omit<AppState, 'grantedPacks' | 'claimedLevelMilestones' | 'earnedBadges' | 'unlockedCosmetics'> & {
   grantedPacks: LegacyGrantedPack[];
+  claimedLevelMilestones?: number[];
+  earnedBadges?: string[];
+  unlockedCosmetics?: string[];
   dailyMissions?: unknown;
 };
 
@@ -24,15 +27,23 @@ export function migrateState(parsed: LegacyAppState): AppState {
   if (!Array.isArray(parsed.customExercises)) parsed.customExercises = [];
   if (!Array.isArray(parsed.completedSetIds)) parsed.completedSetIds = [];
   if (!Array.isArray(parsed.rewardedSetIds)) parsed.rewardedSetIds = [];
+  if (!Array.isArray(parsed.claimedLevelMilestones)) parsed.claimedLevelMilestones = [];
+  if (!Array.isArray(parsed.earnedBadges)) parsed.earnedBadges = [];
+  if (!Array.isArray(parsed.unlockedCosmetics)) parsed.unlockedCosmetics = [];
   if (!Array.isArray(parsed.grantedPacks)) parsed.grantedPacks = [];
   const grantedPacks: GrantedPack[] = parsed.grantedPacks
     .filter((pack) => pack.source !== 'daily-mission' && pack.packDefId !== 'pack-daily-mission')
     .map(({ sourceMissionId: _sourceMissionId, ...pack }) => ({
       ...pack,
-      source: pack.source === 'set-completion' ? 'set-completion' : 'workout',
+      source:
+        pack.source === 'set-completion'
+          ? 'set-completion'
+          : pack.source === 'level-milestone'
+            ? 'level-milestone'
+            : 'workout',
     }));
   const { dailyMissions: _legacyDailyMissions, ...state } = parsed;
-  return { ...state, grantedPacks };
+  return { ...state, grantedPacks } as AppState;
 }
 
 export function normalizeAppState(value: unknown): AppState {
@@ -109,5 +120,8 @@ export function createInitialState(): AppState {
     customExercises: [],
     completedSetIds: [],
     rewardedSetIds: [],
+    claimedLevelMilestones: [],
+    earnedBadges: [],
+    unlockedCosmetics: [],
   };
 }
