@@ -1,10 +1,12 @@
 .settings-screen {
+  --settings-outline: #5c3b6f;
+  --settings-outline-soft: #80698c;
   height: 100%;
   overflow-y: auto;
   padding: clamp(14px, 4vw, 20px);
   padding-bottom: 100px;
   box-sizing: border-box;
-  background-image: linear-gradient(rgba(218, 229, 237, 0.72), rgba(196, 213, 224, 0.9) 40%),
+  background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.8) 40%),
     url('/assets/backgrounds/settings-background.jpg');
   background-size: cover;
   background-position: top center;
@@ -12,41 +14,40 @@
 
 .settings-screen__header {
   display: inline-block;
-  background: linear-gradient(135deg, #243b55, #315b78);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.92);
+  border: 3px solid var(--settings-outline);
   border-radius: 999px;
   padding: 6px 18px;
-  margin: 4px 0 16px;
-  box-shadow: 0 6px 14px rgba(29, 50, 68, 0.24);
+  margin: 4px 0 18px;
+  box-shadow: 0 5px 0 var(--settings-outline), 0 9px 16px rgba(48, 28, 60, 0.16);
 }
 
 .settings-screen__title {
   font-family: var(--font-display);
   font-size: clamp(1.1rem, 5vw, 1.35rem);
   margin: 0;
-  color: #ffffff;
+  color: var(--ink);
 }
 
 .settings-section {
   background: #ffffff;
   border-radius: 16px;
   padding: 14px;
-  margin-bottom: 14px;
-  box-shadow: 0 7px 18px rgba(35, 58, 75, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  border: 2px solid #afc3d0;
+  margin-bottom: 19px;
+  border: 3px solid var(--settings-outline);
+  box-shadow: 0 7px 0 var(--settings-outline), 0 12px 20px rgba(48, 28, 60, 0.14);
 }
 
 .settings-section--cloud {
-  border-color: #8fb6d6;
-  background: linear-gradient(180deg, #ffffff, #eaf4fb);
+  border-color: var(--settings-outline);
+  background: linear-gradient(180deg, #ffffff, #f4faff);
 }
 
 .settings-label {
   display: block;
   font-family: var(--font-display);
   font-size: 0.85rem;
-  color: #29465b;
-  font-weight: 800;
+  color: var(--ink-soft);
   margin-bottom: 8px;
 }
 
@@ -57,35 +58,36 @@
 
 .settings-input {
   flex: 1;
-  border: 2px solid #b8cbd6;
+  border: 2px solid var(--settings-outline-soft);
   border-radius: 10px;
   padding: 8px 10px;
   font-size: 0.9rem;
   box-sizing: border-box;
-  background: #edf4f7;
-  color: #243b55;
+  background: #f8fbfa;
 }
 
 .settings-input:focus {
   outline: none;
   border-color: var(--orange);
+  box-shadow: 0 0 0 2px rgba(255, 138, 61, 0.2);
   background: #ffffff;
 }
 
 .settings-save-btn {
-  border: none;
-  border-bottom: 3px solid #d9560f;
+  border: 2px solid var(--settings-outline);
+  border-bottom: 5px solid var(--settings-outline);
   background: linear-gradient(180deg, var(--yellow), var(--orange));
   color: #fff;
   border-radius: 10px;
   padding: 0 18px;
   font-family: var(--font-display);
   cursor: pointer;
-  transition: transform 0.1s ease;
+  transition: transform 0.1s ease, border-bottom-width 0.1s ease;
 }
 
 .settings-save-btn:active {
-  transform: translateY(2px);
+  transform: translateY(3px);
+  border-bottom-width: 2px;
 }
 
 .cloud-save__heading {
@@ -97,7 +99,7 @@
 
 .cloud-save__title {
   margin: 0 0 5px;
-  color: #243b55;
+  color: var(--ink);
   font-size: 0.95rem;
 }
 
@@ -106,7 +108,7 @@
 .cloud-save__time,
 .cloud-save__status {
   margin: 0;
-  color: #526b7a;
+  color: var(--ink-soft);
   line-height: 1.5;
 }
 
@@ -117,10 +119,10 @@
 .cloud-save__badge {
   flex: 0 0 auto;
   padding: 4px 8px;
+  border: 2px solid var(--settings-outline-soft);
   border-radius: 999px;
-  background: #dff1e7;
-  color: #14643f;
-  border: 1px solid #9dc8af;
+  background: #e9f7ef;
+  color: #18794e;
   font-size: 0.66rem;
   font-weight: 800;
 }
@@ -128,10 +130,9 @@
 .cloud-save__time {
   margin-top: 12px;
   padding: 9px 11px;
+  border: 2px solid var(--settings-outline-soft);
   border-radius: 10px;
-  background: #dcecf7;
-  border: 1px solid #a9c6da;
-  color: #315b78;
+  background: #eef7ff;
   font-size: 0.76rem;
   font-weight: 700;
 }
@@ -145,20 +146,26 @@
 
 .cloud-save__button {
   min-height: 42px;
-  border: 2px solid #aabfce;
-  border-bottom-width: 4px;
+  border: 3px solid var(--settings-outline);
+  border-bottom-width: 6px;
   border-radius: 12px;
-  background: #f7fafc;
-  color: #29465b;
+  background: #ffffff;
+  color: var(--ink);
   font-family: var(--font-display);
   font-size: 0.75rem;
   cursor: pointer;
+  transition: transform 0.1s ease, border-bottom-width 0.1s ease;
 }
 
 .cloud-save__button--primary {
-  border-color: #2f6f9f;
-  background: linear-gradient(180deg, #5eb7f2, #337fb8);
+  border-color: var(--settings-outline);
+  background: linear-gradient(180deg, #74c4ff, #438fd1);
   color: #ffffff;
+}
+
+.cloud-save__button:active:not(:disabled) {
+  transform: translateY(3px);
+  border-bottom-width: 3px;
 }
 
 .cloud-save__button:disabled {
@@ -173,11 +180,11 @@
 }
 
 .cloud-save__status--success {
-  color: #14643f;
+  color: #18794e;
 }
 
 .cloud-save__status--error {
-  color: #a61b12;
+  color: #b42318;
 }
 
 .cloud-save__notice {
@@ -194,19 +201,19 @@
 .chip {
   padding: 7px 15px;
   border-radius: 999px;
-  border: 2px solid #b8cbd6;
-  background: #f7fafc;
-  color: #29465b;
+  border: 2px solid var(--settings-outline);
+  background: #ffffff;
+  color: var(--ink);
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
 }
 
 .chip--active {
   background: linear-gradient(180deg, var(--yellow), var(--orange));
-  border-color: var(--orange-deep);
+  border-color: var(--settings-outline);
   color: #ffffff;
-  box-shadow: 0 3px 8px rgba(255, 138, 61, 0.4);
+  box-shadow: 0 4px 0 var(--settings-outline), 0 7px 10px rgba(92, 59, 111, 0.18);
 }
 
 .character-picker {
@@ -223,12 +230,12 @@
   gap: 6px;
   padding: 10px 6px;
   border-radius: 14px;
-  border: 2px solid #b8cbd6;
-  background: #edf4f7;
+  border: 2px solid var(--settings-outline);
+  background: #f8fbfa;
   cursor: pointer;
   font-family: var(--font-display);
   font-size: 0.68rem;
-  color: #405d70;
+  color: var(--ink-soft);
 }
 
 .character-picker__item .placeholder-art,
@@ -238,10 +245,10 @@
 }
 
 .character-picker__item--active {
-  border-color: var(--orange);
-  background: linear-gradient(180deg, #fff0dc, #ffd8ad);
-  color: #b84f13;
-  box-shadow: 0 4px 10px rgba(214, 86, 15, 0.18);
+  border: 3px solid var(--settings-outline);
+  background: linear-gradient(180deg, #fff2e2, #ffe3c4);
+  color: var(--orange-deep);
+  box-shadow: 0 5px 0 var(--settings-outline), 0 8px 12px rgba(92, 59, 111, 0.16);
 }
 
 .character-picker__badge {
@@ -250,6 +257,7 @@
   right: 4px;
   width: 18px;
   height: 18px;
+  border: 2px solid #ffffff;
   border-radius: 50%;
   background: var(--green);
   color: #fff;
