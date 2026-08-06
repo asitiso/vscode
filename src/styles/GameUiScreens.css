@@ -1,0 +1,249 @@
+/* Screen-level game polish. Loaded last so existing layout and behavior stay intact. */
+
+.home-screen,
+.record-screen,
+.collection-screen,
+.rewards-screen,
+.settings-screen,
+.workout-report-screen,
+.exercise-analysis-screen,
+.combo-pack-opening-screen,
+.pack-opening-screen {
+  color: var(--game-text-main);
+}
+
+/* Home: game lobby */
+.home-screen__top-panel {
+  gap: 10px;
+}
+
+.home-screen .hud-badge,
+.home-screen__info-panel,
+.home-screen__set-progress {
+  border: 1px solid var(--game-panel-border);
+  box-shadow: var(--game-shadow-raised), var(--game-inner-highlight);
+  backdrop-filter: blur(12px) saturate(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+}
+
+.home-screen .hud-badge {
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(241,245,255,.92));
+}
+
+.home-screen__info-panel,
+.home-screen__set-progress {
+  border-radius: var(--game-panel-radius);
+  background: linear-gradient(150deg, rgba(255,255,255,.97), rgba(238,244,255,.93));
+}
+
+.home-screen .progress-track,
+.home-screen .level-xp-progress {
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,.9);
+  background: rgba(86, 97, 145, .14);
+  box-shadow: inset 0 2px 5px rgba(45,58,100,.18);
+}
+
+.home-screen .progress-track__fill,
+.home-screen .level-xp-progress > span {
+  background: linear-gradient(90deg, var(--game-accent-secondary), #8de2ca);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 0 10px rgba(86,200,181,.35);
+}
+
+.home-screen__set-progress {
+  transition: transform var(--game-transition-fast) ease, box-shadow var(--game-transition-fast) ease;
+}
+
+.home-screen__set-progress:active {
+  transform: translateY(2px) scale(.99);
+  box-shadow: var(--game-shadow-pressed);
+}
+
+.home-screen__cta {
+  border: 1px solid rgba(255,255,255,.72) !important;
+  border-radius: 20px !important;
+  background: linear-gradient(180deg, #8689ff 0%, var(--game-accent-primary) 54%, var(--game-accent-primary-dark) 100%) !important;
+  box-shadow: 0 8px 0 #474bbb, 0 16px 26px rgba(69,74,184,.3), inset 0 2px 0 rgba(255,255,255,.55) !important;
+  text-shadow: 0 1px 2px rgba(31,35,102,.35);
+  transition: transform var(--game-transition-fast) ease, box-shadow var(--game-transition-fast) ease;
+}
+
+.home-screen__cta:active {
+  transform: translateY(5px) !important;
+  box-shadow: 0 3px 0 #474bbb, 0 8px 14px rgba(69,74,184,.22), inset 0 2px 0 rgba(255,255,255,.45) !important;
+}
+
+.home-screen__character::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: min(72%, 280px);
+  aspect-ratio: 2.4 / 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,255,255,.9) 0 28%, rgba(144,160,255,.28) 55%, transparent 72%);
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+.home-screen__pack {
+  filter: drop-shadow(0 10px 14px rgba(77,72,160,.26));
+}
+
+/* Record: training setup */
+.record-screen :is(section, article, fieldset),
+.record-screen__panel,
+.record-screen__exercise-card,
+.custom-exercise-editor {
+  border-color: var(--game-panel-border) !important;
+  border-radius: var(--game-panel-radius) !important;
+  box-shadow: var(--game-shadow-raised), var(--game-inner-highlight);
+}
+
+.record-screen :is(input, textarea, select),
+.custom-exercise-editor :is(input, textarea, select) {
+  border: 1px solid rgba(103,118,170,.24) !important;
+  border-radius: var(--game-control-radius) !important;
+  background: rgba(255,255,255,.94) !important;
+  box-shadow: inset 0 2px 5px rgba(53,67,116,.08);
+}
+
+.record-screen button:not(.bottom-nav__item),
+.custom-exercise-editor button {
+  min-height: 44px;
+  border-radius: var(--game-control-radius);
+  transition: transform var(--game-transition-fast) ease, filter var(--game-transition-fast) ease;
+}
+
+.record-screen button:active,
+.custom-exercise-editor button:active {
+  transform: translateY(1px) scale(.99);
+}
+
+/* Collection: card album */
+.collection-screen :is(.card, [class*='card-item'], [class*='collection-card']) {
+  border-radius: 18px;
+  box-shadow: 0 8px 18px rgba(53,67,116,.16), inset 0 1px 0 rgba(255,255,255,.8);
+  transition: transform var(--game-transition-fast) ease, box-shadow var(--game-transition-fast) ease;
+}
+
+.collection-screen :is(.card, [class*='card-item'], [class*='collection-card']):active {
+  transform: translateY(2px) scale(.985);
+}
+
+.collection-screen :is([class*='filter'], [class*='tab']) button,
+.collection-screen > button {
+  min-height: 40px;
+  border-radius: 999px;
+}
+
+.collection-screen :is([class*='progress'], [role='progressbar']) {
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.card-set-progress,
+[class*='card-set-progress'] {
+  border: 1px solid var(--game-panel-border);
+  border-radius: var(--game-panel-radius);
+  background: linear-gradient(145deg, rgba(255,255,255,.97), rgba(240,245,255,.94));
+  box-shadow: var(--game-shadow-raised), var(--game-inner-highlight);
+}
+
+/* Pack opening and reward moments */
+.combo-pack-opening-screen,
+.pack-opening-screen {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,.26), transparent 24%),
+    radial-gradient(circle at 50% 50%, rgba(112,116,246,.38), transparent 56%),
+    linear-gradient(180deg, #31375f, #171b38) !important;
+}
+
+.combo-pack-opening-screen :is(button, [class*='result']),
+.pack-opening-screen :is(button, [class*='result']) {
+  border-radius: var(--game-control-radius);
+}
+
+.combo-pack-opening-screen img,
+.pack-opening-screen img {
+  filter: drop-shadow(0 18px 28px rgba(0,0,0,.35));
+}
+
+/* Rewards: trophy board */
+.rewards-screen :is(section, article, [class*='reward-card'], [class*='achievement']) {
+  border: 1px solid var(--game-panel-border) !important;
+  border-radius: var(--game-panel-radius) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.97), rgba(241,245,255,.94));
+  box-shadow: var(--game-shadow-raised), var(--game-inner-highlight);
+}
+
+.rewards-screen :is([class*='progress'], [role='progressbar']) {
+  overflow: hidden;
+  border-radius: 999px;
+  box-shadow: inset 0 2px 5px rgba(45,58,100,.15);
+}
+
+/* Reports and analysis: player history panels */
+.workout-report-screen :is(section, article, [class*='summary'], [class*='stat']),
+.exercise-analysis-screen :is(section, article, [class*='summary'], [class*='stat']),
+.workout-day-detail-sheet {
+  border: 1px solid var(--game-panel-border) !important;
+  border-radius: var(--game-panel-radius) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(239,245,255,.95));
+  box-shadow: var(--game-shadow-raised), var(--game-inner-highlight);
+}
+
+.workout-report-screen svg,
+.exercise-analysis-screen svg {
+  filter: drop-shadow(0 4px 8px rgba(78,91,145,.12));
+}
+
+.workout-report-screen :is([class*='best'], [class*='record']),
+.exercise-analysis-screen :is([class*='best'], [class*='record']) {
+  border-color: rgba(245,181,67,.4) !important;
+  background: linear-gradient(145deg, #fffdf4, #fff4cf) !important;
+}
+
+/* Settings: clean game menu */
+.settings-screen :is(section, article, fieldset, [class*='settings-card']) {
+  border: 1px solid var(--game-panel-border) !important;
+  border-radius: var(--game-panel-radius) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(241,245,255,.95));
+  box-shadow: var(--game-shadow-raised), var(--game-inner-highlight);
+}
+
+.settings-screen :is(input, select, button) {
+  min-height: 44px;
+  border-radius: var(--game-control-radius);
+}
+
+/* Modals and sheets */
+[role='dialog'],
+.card-set-completion-modal,
+[class*='bottom-sheet'] {
+  border: 1px solid rgba(255,255,255,.75);
+  border-radius: 26px !important;
+  box-shadow: 0 24px 60px rgba(32,40,79,.3), inset 0 1px 0 rgba(255,255,255,.85);
+}
+
+@media (max-width: 350px) {
+  .home-screen__top-panel { gap: 5px; }
+  .home-screen .hud-badge { transform: scale(.94); transform-origin: center; }
+  .record-screen,
+  .collection-screen,
+  .rewards-screen,
+  .settings-screen,
+  .workout-report-screen,
+  .exercise-analysis-screen { --game-panel-radius: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-screen__set-progress,
+  .home-screen__cta,
+  .record-screen button,
+  .collection-screen :is(.card, [class*='card-item'], [class*='collection-card']) {
+    transition: none !important;
+  }
+}
