@@ -24,11 +24,16 @@ export function BottomNav({ active, onSelect }: BottomNavProps) {
           <button
             key={tab.id}
             type="button"
-            className={`bottom-nav__item ${isActive ? 'is-active' : ''}`}
-            onClick={() => onSelect(tab.id)}
+            className={`bottom-nav__item ${isActive ? 'bottom-nav__item--active' : ''}`}
+            aria-current={isActive ? 'page' : undefined}
+            onClick={() => {
+              if (!isActive) onSelect(tab.id);
+            }}
           >
-            <span className="bottom-nav__icon-wrap">
-              <PlaceholderArt assetName={tab.asset} emoji={tab.emoji} className="bottom-nav__icon" />
+            <span className="bottom-nav__icon-plate" aria-hidden="true">
+              <span className="bottom-nav__icon-wrap">
+                <PlaceholderArt assetName={tab.asset} emoji={tab.emoji} className="bottom-nav__icon" />
+              </span>
             </span>
             <span className="bottom-nav__label">{tab.label}</span>
           </button>

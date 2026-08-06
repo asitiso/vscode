@@ -14,6 +14,48 @@ export const ASSET_MANIFEST: Record<string, string> = {
   'shoulder-press-character': '/assets/equipment/shoulder-press-character.png',
   'dumbbell-character': '/assets/equipment/dumbbell-character.png',
   'stretching-mat-character': '/assets/equipment/stretching-mat-character.png',
+  'rowing-machine-character': '/assets/equipment/Rowing Machine.png',
+  'leg-extension-character': '/assets/equipment/Leg Extension.png',
+  'leg-curl-character': '/assets/equipment/Leg Curl.png',
+  'smith-machine-character': '/assets/equipment/Smith Machine.png',
+  'pec-deck-fly-character': '/assets/equipment/Pec Deck Fly.png',
+  'seated-row-character': '/assets/equipment/Seated Row.png',
+  'cable-machine-character': '/assets/equipment/Cable Machine.png',
+  'barbell-character': '/assets/equipment/Barbell.png',
+  'kettlebell-character': '/assets/equipment/Kettlebell.png',
+  'ab-crunch-machine-character': '/assets/equipment/Ab Crunch Machine.png',
+  'incline-bench-press-character': '/assets/equipment/Incline Bench Press.png',
+  'dip-station-character': '/assets/equipment/Dip Station.png',
+  'foam-roller-character': '/assets/equipment/Foam Roller.png',
+  'pull-up-bar-character': '/assets/equipment/Pull-Up Bar.png',
+
+  // 신규 운동기구·스포츠 캐릭터
+  'gym-ball-character': '/assets/equipment/Gym Ball.png',
+  'arm-curl-machine-character': '/assets/equipment/Preacher Curl Machine.png',
+  'elliptical-character': '/assets/equipment/Elliptical Trainer.png',
+  'loop-band-character': '/assets/equipment/Resistance Band.png',
+  'hammer-curl-character': '/assets/equipment/Hex Dumbbell.png',
+  'decline-bench-character': '/assets/equipment/Decline Bench.png',
+  'outdoor-running-character': '/assets/equipment/Outdoor Running.png',
+  'swimming-character': '/assets/equipment/Swimming.png',
+  'badminton-character': '/assets/equipment/Badminton.png',
+  'golf-character': '/assets/equipment/Golf.png',
+  'tennis-character': '/assets/equipment/Tennis.png',
+  'pilates-reformer-character': '/assets/equipment/Pilates Reformer.png',
+  'trekking-character': '/assets/equipment/Trekking.png',
+  'crossfit-character': '/assets/equipment/Crossfit Battle Rope.png',
+  'outdoor-cycling-character': '/assets/equipment/Outdoor Cycling.png',
+  'climbing-character': '/assets/equipment/Climbing.png',
+
+  // 레어 테마 카드 전용 일러스트
+  'cardio-theme-character': '/assets/cards/rare/elliptical trainer mascot.png',
+  'legs-theme-character': '/assets/cards/rare/press machine mascot.png',
+  'chest-theme-character': '/assets/cards/rare/chest press machine mascot.png',
+  'back-theme-character': '/assets/cards/rare/lat pulldown machine mascot.png',
+  'shoulders-theme-character': '/assets/cards/rare/shoulder press machine mascot.png',
+  'arms-theme-character': '/assets/cards/rare/cable curl machine mascot.png',
+  'core-theme-character': '/assets/cards/rare/abdominal crunch machine mascot.png',
+  'full-body-theme-character': '/assets/cards/rare/functional cable machine mascot.png',
 
   // 운동 기구 캐릭터 "업그레이드" 버전 — 카드 중복 10장(4성) 달성 시 해금되는
   // 특별 일러스트 (CLAUDE.md 4-3절). pickDisplayIllustration()이 골라 쓴다.
@@ -43,6 +85,17 @@ export const ASSET_MANIFEST: Record<string, string> = {
   'main-character-3': '/assets/characters/main-character-3.png',
   'main-character-4': '/assets/characters/main-character-4.png',
   'main-character-5': '/assets/characters/main-character-5.png',
+
+  // 카드팩 및 보상 상자 (public/assets/packs/)
+  // 모든 팩은 동일한 대표 보상 상자를 사용한다.
+  'pack-basic': '/assets/packs/reward-chest.svg',
+  'pack-lower-body': '/assets/packs/reward-chest.svg',
+  'pack-upper-body': '/assets/packs/reward-chest.svg',
+  'pack-cardio': '/assets/packs/reward-chest.svg',
+  'pack-full-body': '/assets/packs/reward-chest.svg',
+  'pack-weekly-goal': '/assets/packs/reward-chest.svg',
+  'pack-streak-reward': '/assets/packs/reward-chest.svg',
+  'pack-special-challenge': '/assets/packs/reward-chest.svg',
 
   // 화면별 배경 (public/assets/backgrounds/)
   'home-background': '/assets/backgrounds/home-background.png',
