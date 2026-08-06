@@ -1,0 +1,29 @@
+.record-screen {
+  min-height: 0;
+  padding-bottom: calc(var(--screen-bottom-space, 92px) + 30px);
+}
+
+.record-screen__actions {
+  flex-shrink: 0;
+  padding-bottom: max(6px, var(--safe-area-bottom, 0px));
+}
+
+.app-shell[data-keyboard-open='true'] .record-screen {
+  padding-bottom: 18px;
+  scroll-padding-bottom: calc(var(--keyboard-height, 0px) + 96px);
+}
+
+.app-shell[data-keyboard-open='true'] .record-screen__actions {
+  padding-bottom: 6px;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .record-screen input,
+  .record-screen textarea,
+  .record-screen select,
+  .settings-screen input,
+  .settings-screen textarea,
+  .settings-screen select {
+    font-size: 16px;
+  }
+}
