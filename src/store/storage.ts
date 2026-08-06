@@ -1,8 +1,12 @@
-import type { AppState } from '../types';
+import type { AppState, GrantedPack } from '../types';
 
 const STORAGE_KEY = 'workout-card-game:v1';
 
-type LegacyAppState = AppState & { dailyMissions?: unknown };
+type LegacyGrantedPack = Omit<GrantedPack, 'source'> & { source?: string; sourceMissionId?: string };
+type LegacyAppState = Omit<AppState, 'grantedPacks'> & {
+  grantedPacks: LegacyGrantedPack[];
+  dailyMissions?: unknown;
+};
 
 export function migrateState(parsed: LegacyAppState): AppState {
   if (!parsed.user.selectedCharacterId) parsed.user.selectedCharacterId = 'main-character';
@@ -10,14 +14,14 @@ export function migrateState(parsed: LegacyAppState): AppState {
   if (!Array.isArray(parsed.completedSetIds)) parsed.completedSetIds = [];
   if (!Array.isArray(parsed.rewardedSetIds)) parsed.rewardedSetIds = [];
   if (!Array.isArray(parsed.grantedPacks)) parsed.grantedPacks = [];
-  parsed.grantedPacks = parsed.grantedPacks
+  const grantedPacks: GrantedPack[] = parsed.grantedPacks
     .filter((pack) => pack.source !== 'daily-mission' && pack.packDefId !== 'pack-daily-mission')
-    .map((pack) => ({
+    .map(({ sourceMissionId: _sourceMissionId, ...pack }) => ({
       ...pack,
-      source: pack.source ?? 'workout',
+      source: pack.source === 'set-completion' ? 'set-completion' : 'workout',
     }));
   const { dailyMissions: _legacyDailyMissions, ...state } = parsed;
-  return state;
+  return { ...state, grantedPacks };
 }
 
 export function loadState(): AppState | null {
