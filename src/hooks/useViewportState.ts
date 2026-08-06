@@ -10,6 +10,7 @@ function getInitialViewportState(): ViewportState {
     return {
       layoutHeight: 0,
       visibleHeight: 0,
+      offsetTop: 0,
       keyboardHeight: 0,
       isKeyboardOpen: false,
     };
