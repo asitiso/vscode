@@ -1,6 +1,7 @@
+import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { WorkoutDayDetailSheet } from './WorkoutDayDetailSheet';
 
 it('선택한 날짜의 운동과 수치를 표시하고 닫을 수 있다', async () => {
