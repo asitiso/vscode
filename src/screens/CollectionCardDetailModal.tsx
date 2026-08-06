@@ -66,7 +66,7 @@ export function CollectionCardDetailModal({ card, owned, acquisitionLabel, onClo
               </div>
             </div>
 
-            <div className="collection-card-modal__content">
+            <div className="collection-card-modal__summary">
               <span className="collection-card-modal__rarity">{RARITY_LABEL[card.rarity]}</span>
               <h2 id={titleId}>{card.name}</h2>
               <div className="collection-card-modal__stars" aria-label={`별 ${owned.starLevel}개, 최대 4개`}>
@@ -80,7 +80,9 @@ export function CollectionCardDetailModal({ card, owned, acquisitionLabel, onClo
                 <span aria-hidden="true">🛡️</span>
                 <div><small>소속 세트</small><strong>{cardSet?.name ?? '세트 없음'}</strong></div>
               </div>
+            </div>
 
+            <div className="collection-card-modal__details">
               <section className="collection-card-modal__section">
                 <strong>카드 설명</strong>
                 <p>{card.description}</p>
