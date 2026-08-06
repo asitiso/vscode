@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 import type {
   AppState,
   CustomExercise,
@@ -11,6 +11,7 @@ import type {
 } from '../types';
 import { calcStarLevel } from '../types';
 import { createInitialState, loadState, saveState } from './storage';
+import { loadCloudState, saveCloudState, type CloudSaveRecord } from './cloudStorage';
 import { categoriesFromEntries, drawCard } from '../game/cardDraw';
 import { selectPackForCategories } from '../game/packSelector';
 import { computeWeeklyProgress } from '../game/weeklyGoal';
@@ -22,6 +23,7 @@ import {
 } from '../game/cardSets';
 
 export type CustomExerciseInput = { name: string; logType: ExerciseLogType };
+export type CloudOperationStatus = 'idle' | 'saving' | 'loading' | 'success' | 'error';
 
 type Action =
   | { type: 'COMPLETE_WORKOUT'; entries: WorkoutSetEntry[]; feeling: FeelingTag; memo?: string }
@@ -32,7 +34,8 @@ type Action =
   | { type: 'CLEAR_RECENT_COMPLETED_SET' }
   | { type: 'SET_USER_NAME'; name: string }
   | { type: 'SET_WEEKLY_GOAL'; target: number }
-  | { type: 'SET_SELECTED_CHARACTER'; characterId: string };
+  | { type: 'SET_SELECTED_CHARACTER'; characterId: string }
+  | { type: 'REPLACE_STATE'; state: AppState };
 
 function uid(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
@@ -138,6 +141,8 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, user: { ...state.user, weeklyGoal: { targetSessionsPerWeek: action.target } } };
     case 'SET_SELECTED_CHARACTER':
       return { ...state, user: { ...state.user, selectedCharacterId: action.characterId } };
+    case 'REPLACE_STATE':
+      return action.state;
     default:
       return state;
   }
@@ -154,6 +159,12 @@ interface GameContextValue {
   setUserName: (name: string) => void;
   setWeeklyGoal: (target: number) => void;
   setSelectedCharacter: (characterId: string) => void;
+  saveManualCloudSlot: () => Promise<string>;
+  loadManualCloudSlot: () => Promise<CloudSaveRecord | null>;
+  restoreManualCloudSlot: (record: CloudSaveRecord) => void;
+  cloudOperationStatus: CloudOperationStatus;
+  cloudOperationMessage: string;
+  lastCloudSavedAt: string | null;
   todayLogged: boolean;
   unopenedPacks: GrantedPack[];
   weeklyProgress: ReturnType<typeof computeWeeklyProgress>;
@@ -166,6 +177,10 @@ const GameContext = createContext<GameContextValue | null>(null);
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, () => loadState() ?? createInitialState());
+  const [cloudOperationStatus, setCloudOperationStatus] = useState<CloudOperationStatus>('idle');
+  const [cloudOperationMessage, setCloudOperationMessage] = useState('');
+  const [lastCloudSavedAt, setLastCloudSavedAt] = useState<string | null>(null);
+
   useEffect(() => saveState(state), [state]);
 
   const today = getLocalDateKey();
@@ -181,6 +196,54 @@ export function GameProvider({ children }: { children: ReactNode }) {
     () => selectFeaturedProgress(state.ownedCards, dailyCardSet.id),
     [state.ownedCards, dailyCardSet.id],
   );
+
+  async function saveManualCloudSlot(): Promise<string> {
+    setCloudOperationStatus('saving');
+    setCloudOperationMessage('중간 저장 중…');
+    try {
+      const savedAt = new Date().toISOString();
+      const result = await saveCloudState(state, savedAt);
+      setLastCloudSavedAt(result.clientSavedAt);
+      setCloudOperationStatus('success');
+      setCloudOperationMessage('중간 저장이 완료되었습니다.');
+      return result.clientSavedAt;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '중간 저장에 실패했습니다.';
+      setCloudOperationStatus('error');
+      setCloudOperationMessage(message);
+      throw error;
+    }
+  }
+
+  async function loadManualCloudSlot(): Promise<CloudSaveRecord | null> {
+    setCloudOperationStatus('loading');
+    setCloudOperationMessage('중간 저장을 확인하는 중…');
+    try {
+      const record = await loadCloudState();
+      if (!record) {
+        setCloudOperationStatus('idle');
+        setCloudOperationMessage('불러올 중간 저장이 없습니다.');
+        return null;
+      }
+      setLastCloudSavedAt(record.clientSavedAt);
+      setCloudOperationStatus('success');
+      setCloudOperationMessage('중간 저장을 찾았습니다.');
+      return record;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '중간 저장을 불러오지 못했습니다.';
+      setCloudOperationStatus('error');
+      setCloudOperationMessage(message);
+      throw error;
+    }
+  }
+
+  function restoreManualCloudSlot(record: CloudSaveRecord): void {
+    dispatch({ type: 'REPLACE_STATE', state: record.state });
+    saveState(record.state, record.clientSavedAt);
+    setLastCloudSavedAt(record.clientSavedAt);
+    setCloudOperationStatus('success');
+    setCloudOperationMessage('중간 저장을 불러왔습니다.');
+  }
 
   const value: GameContextValue = {
     state,
@@ -205,6 +268,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setUserName: (name) => dispatch({ type: 'SET_USER_NAME', name }),
     setWeeklyGoal: (target) => dispatch({ type: 'SET_WEEKLY_GOAL', target }),
     setSelectedCharacter: (characterId) => dispatch({ type: 'SET_SELECTED_CHARACTER', characterId }),
+    saveManualCloudSlot,
+    loadManualCloudSlot,
+    restoreManualCloudSlot,
+    cloudOperationStatus,
+    cloudOperationMessage,
+    lastCloudSavedAt,
     todayLogged,
     unopenedPacks,
     weeklyProgress,
