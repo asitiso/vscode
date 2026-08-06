@@ -28,6 +28,24 @@ export const CARDS: CardDefinition[] = [
   { id: 'card-foam-roller', exerciseId: 'foam-roller', name: '폼롤러', rarity: 'common', description: '뭉친 근육을 부드럽게 풀어주는 회복 카드.', illustrationAsset: 'foam-roller-character' },
   { id: 'card-pull-up-bar', exerciseId: 'pull-up-bar', name: '풀업 바', rarity: 'common', description: '높은 곳을 향해 끝까지 당겨 올라가는 카드.', illustrationAsset: 'pull-up-bar-character' },
 
+  // ── 신규 기구·스포츠 카드 (일반) ─────────────────────────
+  { id: 'card-gym-ball', exerciseId: 'gym-ball', name: '짐볼', rarity: 'common', description: '균형을 잡으며 코어를 부드럽게 깨우는 카드.', illustrationAsset: 'gym-ball-character' },
+  { id: 'card-arm-curl-machine', exerciseId: 'arm-curl-machine', name: '암 컬 머신', rarity: 'common', description: '팔의 힘을 집중해서 차곡차곡 쌓아가는 카드.', illustrationAsset: 'arm-curl-machine-character' },
+  { id: 'card-elliptical', exerciseId: 'elliptical', name: '일립티컬', rarity: 'common', description: '부드러운 리듬으로 전신을 움직이는 유산소 카드.', illustrationAsset: 'elliptical-character' },
+  { id: 'card-loop-band', exerciseId: 'loop-band', name: '루프 밴드', rarity: 'common', description: '가볍지만 탄탄하게 자극을 주는 밴드 카드.', illustrationAsset: 'loop-band-character' },
+  { id: 'card-hammer-curl', exerciseId: 'hammer-curl', name: '해머 컬', rarity: 'common', description: '묵직한 그립으로 팔 힘을 다지는 카드.', illustrationAsset: 'hammer-curl-character' },
+  { id: 'card-decline-bench', exerciseId: 'decline-bench', name: '디클라인 벤치', rarity: 'common', description: '가슴 하부를 강하게 공략하는 카드.', illustrationAsset: 'decline-bench-character' },
+  { id: 'card-outdoor-running', exerciseId: 'outdoor-running', name: '야외 러닝', rarity: 'common', description: '바람을 가르며 밖으로 달려나가는 카드.', illustrationAsset: 'outdoor-running-character' },
+  { id: 'card-swimming', exerciseId: 'swimming', name: '수영', rarity: 'common', description: '물살을 가르며 전신을 단련하는 카드.', illustrationAsset: 'swimming-character' },
+  { id: 'card-badminton', exerciseId: 'badminton', name: '배드민턴', rarity: 'common', description: '빠른 스텝과 반응으로 리듬을 만드는 카드.', illustrationAsset: 'badminton-character' },
+  { id: 'card-golf', exerciseId: 'golf', name: '골프', rarity: 'common', description: '정교한 스윙으로 집중력을 쌓는 카드.', illustrationAsset: 'golf-character' },
+  { id: 'card-tennis', exerciseId: 'tennis', name: '테니스', rarity: 'common', description: '민첩한 움직임과 타이밍이 돋보이는 카드.', illustrationAsset: 'tennis-character' },
+  { id: 'card-pilates-reformer', exerciseId: 'pilates-reformer', name: '필라테스 리포머', rarity: 'common', description: '균형과 코어를 정교하게 다듬는 카드.', illustrationAsset: 'pilates-reformer-character' },
+  { id: 'card-trekking', exerciseId: 'trekking', name: '트레킹', rarity: 'common', description: '꾸준한 걸음으로 체력을 쌓아가는 카드.', illustrationAsset: 'trekking-character' },
+  { id: 'card-crossfit', exerciseId: 'crossfit', name: '크로스핏', rarity: 'common', description: '강도 높은 움직임으로 한계를 넘는 카드.', illustrationAsset: 'crossfit-character' },
+  { id: 'card-outdoor-cycling', exerciseId: 'outdoor-cycling', name: '자전거 라이딩', rarity: 'common', description: '페달을 밟으며 지구력을 키우는 카드.', illustrationAsset: 'outdoor-cycling-character' },
+  { id: 'card-climbing', exerciseId: 'climbing', name: '클라이밍', rarity: 'common', description: '손끝과 코어의 힘으로 높이를 오르는 카드.', illustrationAsset: 'climbing-character' },
+
   // ── 테마 카드 (레어) ──────────────────────────────────────
   { id: 'card-cardio-theme', exerciseId: 'treadmill', name: '유산소 데이', rarity: 'rare', description: '숨이 차도록 달린 날에만 만날 수 있는 카드.', illustrationAsset: 'cardio-theme-character' },
   { id: 'card-legs-theme', exerciseId: 'leg-press', name: '하체 집중 데이', rarity: 'rare', description: '다음 날 계단이 무서워지는 그 카드.', illustrationAsset: 'legs-theme-character' },
