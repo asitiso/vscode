@@ -4,6 +4,7 @@
 
 .app-shell {
   position: relative;
+  top: var(--app-viewport-offset-top, 0px);
   width: min(100%, 430px);
   min-width: 0;
   height: var(--app-viewport-height, 100dvh);
@@ -34,6 +35,7 @@
 
 @media (min-width: 431px) {
   .app-shell {
+    top: 0;
     height: min(var(--app-viewport-height, 100dvh), 932px);
     margin: 16px auto;
     border-radius: 36px;
