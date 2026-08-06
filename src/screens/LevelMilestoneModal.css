@@ -1,0 +1,82 @@
+.level-milestone-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(20, 12, 43, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.level-milestone-modal {
+  position: relative;
+  width: min(100%, 390px);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  padding: 28px 22px 22px;
+  border: 2px solid rgba(255, 215, 112, 0.9);
+  border-radius: 28px;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(155deg, #45258e 0%, #25144f 55%, #17102f 100%);
+  box-shadow: 0 24px 70px rgba(13, 7, 34, 0.5), inset 0 0 36px rgba(255, 212, 105, 0.12);
+  animation: level-milestone-enter 240ms ease-out both;
+}
+
+.level-milestone-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 25px;
+}
+
+.level-milestone-modal__eyebrow {
+  margin: 0 0 6px;
+  color: #ffe18a;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.level-milestone-modal h2 { margin: 0; font-size: 30px; }
+.level-milestone-modal__dialogue { margin: 12px auto 8px; max-width: 310px; color: #e9e1ff; line-height: 1.55; }
+
+.level-milestone-gift {
+  position: relative;
+  width: 150px;
+  height: 126px;
+  margin: 8px auto 14px;
+  animation: level-milestone-gift 520ms 120ms cubic-bezier(.2,.8,.2,1) both;
+}
+.level-milestone-gift__box, .level-milestone-gift__lid, .level-milestone-gift__ribbon { position: absolute; display: block; }
+.level-milestone-gift__box { left: 18px; bottom: 5px; width: 114px; height: 78px; border-radius: 8px 8px 16px 16px; background: linear-gradient(135deg, #ffca48, #ef7c2e); box-shadow: 0 12px 28px rgba(255, 159, 54, .35); }
+.level-milestone-gift__lid { left: 9px; bottom: 78px; width: 132px; height: 28px; border-radius: 10px; background: linear-gradient(135deg, #ffe779, #f4a432); }
+.level-milestone-gift__ribbon { left: 65px; bottom: 5px; width: 20px; height: 101px; background: linear-gradient(#8e4cf4, #5f2ab8); }
+.level-milestone-gift__spark { position: absolute; color: #fff1a9; font-size: 25px; animation: level-milestone-spark 1.4s ease-in-out infinite; }
+.level-milestone-gift__spark--one { left: 4px; top: 8px; }
+.level-milestone-gift__spark--two { right: 4px; top: 22px; animation-delay: .35s; }
+
+.level-milestone-rewards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 18px; }
+.level-milestone-rewards div { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 3px; padding: 11px 5px; border: 1px solid rgba(255,255,255,.16); border-radius: 15px; background: rgba(255,255,255,.08); }
+.level-milestone-rewards span { font-size: 24px; }
+.level-milestone-rewards strong { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.level-milestone-rewards small { color: #cfc3ed; font-size: 10px; }
+
+.level-milestone-modal__primary, .level-milestone-modal__secondary { width: 100%; min-height: 48px; border: 0; border-radius: 15px; font-weight: 900; }
+.level-milestone-modal__primary { color: #311752; background: linear-gradient(135deg, #ffe37d, #ffb544); box-shadow: 0 8px 18px rgba(255, 184, 66, .28); }
+.level-milestone-modal__secondary { margin-top: 8px; color: #ddd3f3; background: transparent; }
+
+@keyframes level-milestone-enter { from { opacity: 0; transform: translateY(14px) scale(.96); } }
+@keyframes level-milestone-gift { from { opacity: 0; transform: translateY(-24px) scale(.78); } 70% { transform: translateY(4px) scale(1.04); } }
+@keyframes level-milestone-spark { 50% { opacity: .35; transform: scale(.7) rotate(25deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .level-milestone-modal, .level-milestone-gift, .level-milestone-gift__spark { animation: none; }
+}
