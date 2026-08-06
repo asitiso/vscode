@@ -7,6 +7,7 @@ const XP_PER_WEEKLY_GOAL = 150;
 const XP_PER_LEVEL_FACTOR = 500;
 
 export interface ExperienceProgress {
+  level: number;
   totalXp: number;
   currentLevelXp: number;
   requiredXp: number;
@@ -43,6 +44,12 @@ function getLevelStartXp(level: number): number {
   return XP_PER_LEVEL_FACTOR * ((completedLevels * (completedLevels + 1)) / 2);
 }
 
+export function calculateLevelFromXp(totalXp: number): number {
+  let level = 1;
+  while (totalXp >= getLevelStartXp(level + 1)) level += 1;
+  return level;
+}
+
 export function calculateExperienceProgress(state: AppState): ExperienceProgress {
   const workoutXp = state.workoutLogs.length * XP_PER_WORKOUT;
   const openedPackXp = state.grantedPacks.filter((pack) => Boolean(pack.openedAt)).length * XP_PER_OPENED_PACK;
@@ -54,7 +61,7 @@ export function calculateExperienceProgress(state: AppState): ExperienceProgress
   const weeklyGoalXp = completedGoalWeeks * XP_PER_WEEKLY_GOAL;
   const totalXp = workoutXp + openedPackXp + personalBestXp + weeklyGoalXp;
 
-  const level = Math.max(1, state.user.level);
+  const level = calculateLevelFromXp(totalXp);
   const requiredXp = level * XP_PER_LEVEL_FACTOR;
   const earnedInLevel = Math.max(0, totalXp - getLevelStartXp(level));
   const currentLevelXp = Math.min(requiredXp, earnedInLevel);
@@ -64,6 +71,7 @@ export function calculateExperienceProgress(state: AppState): ExperienceProgress
     : 0;
 
   return {
+    level,
     totalXp,
     currentLevelXp,
     requiredXp,
