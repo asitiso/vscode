@@ -11,6 +11,7 @@ describe('measureViewport', () => {
     expect(measureViewport({ innerHeight: 800 })).toEqual({
       layoutHeight: 800,
       visibleHeight: 800,
+      offsetTop: 0,
       keyboardHeight: 0,
       isKeyboardOpen: false,
     });
@@ -19,6 +20,7 @@ describe('measureViewport', () => {
   it('차이가 임계값 이상이면 키보드가 열린 것으로 판단한다', () => {
     expect(measureViewport({ innerHeight: 800, visualViewportHeight: 470 })).toMatchObject({
       visibleHeight: 470,
+      offsetTop: 0,
       keyboardHeight: 330,
       isKeyboardOpen: true,
     });
@@ -31,12 +33,13 @@ describe('measureViewport', () => {
     });
   });
 
-  it('visualViewport offsetTop을 키보드 높이에서 제외한다', () => {
+  it('visualViewport offsetTop을 보존하고 키보드 높이에서 제외한다', () => {
     expect(measureViewport({
       innerHeight: 800,
       visualViewportHeight: 610,
       visualViewportOffsetTop: 40,
     })).toMatchObject({
+      offsetTop: 40,
       keyboardHeight: 0,
       isKeyboardOpen: false,
     });
@@ -53,13 +56,15 @@ describe('mobile viewport helpers', () => {
     syncViewportCssVariables({
       layoutHeight: 800,
       visibleHeight: 470,
-      keyboardHeight: 330,
+      offsetTop: 24,
+      keyboardHeight: 306,
       isKeyboardOpen: true,
     }, { setProperty });
 
     expect(setProperty).toHaveBeenCalledWith('--app-layout-height', '800px');
     expect(setProperty).toHaveBeenCalledWith('--app-viewport-height', '470px');
-    expect(setProperty).toHaveBeenCalledWith('--keyboard-height', '330px');
+    expect(setProperty).toHaveBeenCalledWith('--app-viewport-offset-top', '24px');
+    expect(setProperty).toHaveBeenCalledWith('--keyboard-height', '306px');
     expect(setProperty).toHaveBeenCalledWith('--keyboard-open', '1');
   });
 });
