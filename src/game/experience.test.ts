@@ -30,6 +30,9 @@ function stateWithWorkouts(count: number): AppState {
     customExercises: [],
     completedSetIds: [],
     rewardedSetIds: [],
+    claimedLevelMilestones: [],
+    earnedBadges: [],
+    unlockedCosmetics: [],
   };
 }
 
