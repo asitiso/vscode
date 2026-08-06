@@ -1,6 +1,4 @@
 .settings-screen {
-  --settings-outline: #5c3b6f;
-  --settings-outline-soft: #80698c;
   height: 100%;
   overflow-y: auto;
   padding: clamp(14px, 4vw, 20px);
@@ -14,12 +12,11 @@
 
 .settings-screen__header {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.92);
-  border: 3px solid var(--settings-outline);
+  background: rgba(255, 255, 255, 0.88);
   border-radius: 999px;
   padding: 6px 18px;
-  margin: 4px 0 18px;
-  box-shadow: 0 5px 0 var(--settings-outline), 0 9px 16px rgba(48, 28, 60, 0.16);
+  margin: 4px 0 16px;
+  box-shadow: 0 4px 10px rgba(30, 50, 60, 0.1);
 }
 
 .settings-screen__title {
@@ -33,13 +30,13 @@
   background: #ffffff;
   border-radius: 16px;
   padding: 14px;
-  margin-bottom: 19px;
-  border: 3px solid var(--settings-outline);
-  box-shadow: 0 7px 0 var(--settings-outline), 0 12px 20px rgba(48, 28, 60, 0.14);
+  margin-bottom: 14px;
+  box-shadow: 0 4px 10px rgba(30, 50, 60, 0.1);
+  border: 2px solid #eef3f2;
 }
 
 .settings-section--cloud {
-  border-color: var(--settings-outline);
+  border-color: #cde6ff;
   background: linear-gradient(180deg, #ffffff, #f4faff);
 }
 
@@ -58,7 +55,7 @@
 
 .settings-input {
   flex: 1;
-  border: 2px solid var(--settings-outline-soft);
+  border: 2px solid #e4eeec;
   border-radius: 10px;
   padding: 8px 10px;
   font-size: 0.9rem;
@@ -69,25 +66,23 @@
 .settings-input:focus {
   outline: none;
   border-color: var(--orange);
-  box-shadow: 0 0 0 2px rgba(255, 138, 61, 0.2);
   background: #ffffff;
 }
 
 .settings-save-btn {
-  border: 2px solid var(--settings-outline);
-  border-bottom: 5px solid var(--settings-outline);
+  border: none;
+  border-bottom: 3px solid #d9560f;
   background: linear-gradient(180deg, var(--yellow), var(--orange));
   color: #fff;
   border-radius: 10px;
   padding: 0 18px;
   font-family: var(--font-display);
   cursor: pointer;
-  transition: transform 0.1s ease, border-bottom-width 0.1s ease;
+  transition: transform 0.1s ease;
 }
 
 .settings-save-btn:active {
-  transform: translateY(3px);
-  border-bottom-width: 2px;
+  transform: translateY(2px);
 }
 
 .cloud-save__heading {
@@ -119,7 +114,6 @@
 .cloud-save__badge {
   flex: 0 0 auto;
   padding: 4px 8px;
-  border: 2px solid var(--settings-outline-soft);
   border-radius: 999px;
   background: #e9f7ef;
   color: #18794e;
@@ -130,7 +124,6 @@
 .cloud-save__time {
   margin-top: 12px;
   padding: 9px 11px;
-  border: 2px solid var(--settings-outline-soft);
   border-radius: 10px;
   background: #eef7ff;
   font-size: 0.76rem;
@@ -146,26 +139,20 @@
 
 .cloud-save__button {
   min-height: 42px;
-  border: 3px solid var(--settings-outline);
-  border-bottom-width: 6px;
+  border: 2px solid #cbd9e6;
+  border-bottom-width: 4px;
   border-radius: 12px;
   background: #ffffff;
   color: var(--ink);
   font-family: var(--font-display);
   font-size: 0.75rem;
   cursor: pointer;
-  transition: transform 0.1s ease, border-bottom-width 0.1s ease;
 }
 
 .cloud-save__button--primary {
-  border-color: var(--settings-outline);
+  border-color: #3d85c6;
   background: linear-gradient(180deg, #74c4ff, #438fd1);
   color: #ffffff;
-}
-
-.cloud-save__button:active:not(:disabled) {
-  transform: translateY(3px);
-  border-bottom-width: 3px;
 }
 
 .cloud-save__button:disabled {
@@ -201,7 +188,7 @@
 .chip {
   padding: 7px 15px;
   border-radius: 999px;
-  border: 2px solid var(--settings-outline);
+  border: 2px solid #dcecea;
   background: #ffffff;
   color: var(--ink);
   font-size: 0.8rem;
@@ -211,9 +198,9 @@
 
 .chip--active {
   background: linear-gradient(180deg, var(--yellow), var(--orange));
-  border-color: var(--settings-outline);
+  border-color: var(--orange-deep);
   color: #ffffff;
-  box-shadow: 0 4px 0 var(--settings-outline), 0 7px 10px rgba(92, 59, 111, 0.18);
+  box-shadow: 0 3px 8px rgba(255, 138, 61, 0.4);
 }
 
 .character-picker {
@@ -230,7 +217,7 @@
   gap: 6px;
   padding: 10px 6px;
   border-radius: 14px;
-  border: 2px solid var(--settings-outline);
+  border: 2px solid #e4eeec;
   background: #f8fbfa;
   cursor: pointer;
   font-family: var(--font-display);
@@ -245,10 +232,9 @@
 }
 
 .character-picker__item--active {
-  border: 3px solid var(--settings-outline);
+  border-color: var(--orange);
   background: linear-gradient(180deg, #fff2e2, #ffe3c4);
   color: var(--orange-deep);
-  box-shadow: 0 5px 0 var(--settings-outline), 0 8px 12px rgba(92, 59, 111, 0.16);
 }
 
 .character-picker__badge {
@@ -257,7 +243,6 @@
   right: 4px;
   width: 18px;
   height: 18px;
-  border: 2px solid #ffffff;
   border-radius: 50%;
   background: var(--green);
   color: #fff;
