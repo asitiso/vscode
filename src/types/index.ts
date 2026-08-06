@@ -108,8 +108,7 @@ export type PackType =
   | 'weekly-goal'
   | 'streak-reward'
   | 'special-challenge'
-  | 'set-completion'
-  | 'daily-mission';
+  | 'set-completion';
 
 export interface PackDefinition {
   id: string;
@@ -119,7 +118,7 @@ export interface PackDefinition {
   favoredCategories: ExerciseCategory[];
 }
 
-export type PackSource = 'workout' | 'set-completion' | 'daily-mission';
+export type PackSource = 'workout' | 'set-completion';
 
 export interface GrantedPack {
   id: string;
@@ -129,7 +128,6 @@ export interface GrantedPack {
   resultCardId?: string;
   source?: PackSource;
   sourceSetId?: string;
-  sourceMissionId?: string;
 }
 
 export const RARITY_DROP_RATE: Record<CardRarity, number> = {
@@ -145,39 +143,7 @@ export const SET_COMPLETION_DROP_RATE: Record<Exclude<CardRarity, 'common'>, num
   legendary: 0.05,
 };
 
-export const DAILY_MISSION_DROP_RATE: Record<CardRarity, number> = {
-  common: 0.5,
-  rare: 0.35,
-  'super-rare': 0.13,
-  legendary: 0.02,
-};
-
 export const LEGENDARY_PITY_THRESHOLD = 20;
-
-export type DailyMissionDifficulty = 'easy' | 'normal' | 'hard';
-export type DailyMissionKind = 'category-one' | 'category-two' | 'any-two' | 'focus-set-two';
-
-export interface DailyMissionDefinition {
-  id: string;
-  date: string;
-  difficulty: DailyMissionDifficulty;
-  kind: DailyMissionKind;
-  title: string;
-  description: string;
-  rewardPackDefId: 'pack-daily-mission';
-  targetCount: number;
-  category?: ExerciseCategory;
-  focusSetId?: string;
-}
-
-export interface DailyMissionDayState {
-  date: string;
-  missions: DailyMissionDefinition[];
-  selectedMissionId?: string;
-  selectedAt?: string;
-  completedAt?: string;
-  rewardPackId?: string;
-}
 
 export interface WeeklyGoal {
   targetSessionsPerWeek: number;
@@ -202,5 +168,4 @@ export interface AppState {
   completedSetIds: string[];
   rewardedSetIds: string[];
   recentCompletedSetId?: string;
-  dailyMissions: Record<string, DailyMissionDayState>;
 }
