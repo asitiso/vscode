@@ -8,7 +8,7 @@ export const REWARD_ASSET_MANIFEST: Record<string, string> = {
   'achievement-badges': '/assets/packs/original achievement badge icons.png',
   'daily-mission-complete': '/assets/packs/original daily mission completion mascot.png',
   'workout-streak': '/assets/packs/original workout streak flame mascot.png',
-  'locked-card-silhouette': '/assets/packs/mysterious unrevealed exercise-machine collectible mascot.png',
+  'locked-card-silhouette': '/assets/packs/original cute mysterious undiscovered-card mascot.png',
 };
 
 export function resolveRewardAssetUrl(assetName: string): string | null {
