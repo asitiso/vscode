@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { PlaceholderArt } from '../components/PlaceholderArt';
 import { getMilestoneBadge, getMilestoneCosmetic, getMilestoneDialogue } from '../game/levelMilestones';
 import './LevelMilestoneModal.css';
 
@@ -38,17 +39,14 @@ export function LevelMilestoneModal({
   return (
     <div className="level-milestone-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="level-milestone-modal" role="dialog" aria-modal="true" aria-labelledby="level-milestone-title">
+        <PlaceholderArt assetName="level-up-effect" emoji="✨" className="level-milestone-modal__effect" />
         <button type="button" className="level-milestone-modal__close" onClick={onClose} aria-label="닫기">×</button>
         <p className="level-milestone-modal__eyebrow">LEVEL MILESTONE</p>
         <h2 id="level-milestone-title">🎉 Lv.{level} 달성!</h2>
         <p className="level-milestone-modal__dialogue">{getMilestoneDialogue(level, characterName)}</p>
 
-        <div className="level-milestone-gift" aria-hidden="true">
-          <span className="level-milestone-gift__spark level-milestone-gift__spark--one">✦</span>
-          <span className="level-milestone-gift__spark level-milestone-gift__spark--two">✦</span>
-          <span className="level-milestone-gift__lid" />
-          <span className="level-milestone-gift__box" />
-          <span className="level-milestone-gift__ribbon" />
+        <div className="level-milestone-gift">
+          <PlaceholderArt assetName="milestone-reward-chest" emoji="🎁" label="레벨 마일스톤 보상 상자" className="level-milestone-gift__image" />
         </div>
 
         <div className="level-milestone-rewards">
