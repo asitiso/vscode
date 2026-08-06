@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import './styles/GameUiTokens.css';
 import './styles/GameUiPrimitives.css';
 import './App.css';
@@ -15,11 +15,14 @@ import { RewardsScreen } from './screens/RewardsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { CardSetCompletionModal } from './screens/CardSetCompletionModal';
 import { useViewportState } from './hooks/useViewportState';
+import { useFocusedFieldVisibility } from './hooks/useFocusedFieldVisibility';
 
 export type ScreenId = 'home' | 'record' | 'pack-opening' | 'collection' | 'rewards' | 'settings';
 
 function AppShell() {
   const viewport = useViewportState();
+  const shellRef = useRef<HTMLDivElement>(null);
+  useFocusedFieldVisibility(shellRef);
   const [screen, setScreen] = useState<ScreenId>('home');
   const [activePackId, setActivePackId] = useState<string | null>(null);
 
@@ -37,7 +40,7 @@ function AppShell() {
   const activeTab: ScreenId = screen === 'pack-opening' ? 'home' : screen;
 
   return (
-    <div className="app-shell" data-keyboard-open={viewport.isKeyboardOpen ? 'true' : 'false'}>
+    <div ref={shellRef} className="app-shell" data-keyboard-open={viewport.isKeyboardOpen ? 'true' : 'false'}>
       <div className="app-shell__screen">
         {screen === 'home' && <HomeScreen onNavigate={navigate} />}
         {screen === 'record' && <RecordScreen onDone={() => navigate('home')} onNavigate={navigate} />}
