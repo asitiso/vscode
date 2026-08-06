@@ -2,27 +2,29 @@ import type { AppState } from '../types';
 
 const STORAGE_KEY = 'workout-card-game:v1';
 
-export function migrateState(parsed: AppState): AppState {
+type LegacyAppState = AppState & { dailyMissions?: unknown };
+
+export function migrateState(parsed: LegacyAppState): AppState {
   if (!parsed.user.selectedCharacterId) parsed.user.selectedCharacterId = 'main-character';
   if (!Array.isArray(parsed.customExercises)) parsed.customExercises = [];
   if (!Array.isArray(parsed.completedSetIds)) parsed.completedSetIds = [];
   if (!Array.isArray(parsed.rewardedSetIds)) parsed.rewardedSetIds = [];
-  if (!parsed.dailyMissions || typeof parsed.dailyMissions !== 'object' || Array.isArray(parsed.dailyMissions)) {
-    parsed.dailyMissions = {};
-  }
   if (!Array.isArray(parsed.grantedPacks)) parsed.grantedPacks = [];
-  parsed.grantedPacks = parsed.grantedPacks.map((pack) => ({
-    ...pack,
-    source: pack.source ?? 'workout',
-  }));
-  return parsed;
+  parsed.grantedPacks = parsed.grantedPacks
+    .filter((pack) => pack.source !== 'daily-mission' && pack.packDefId !== 'pack-daily-mission')
+    .map((pack) => ({
+      ...pack,
+      source: pack.source ?? 'workout',
+    }));
+  const { dailyMissions: _legacyDailyMissions, ...state } = parsed;
+  return state;
 }
 
 export function loadState(): AppState | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return migrateState(JSON.parse(raw) as AppState);
+    return migrateState(JSON.parse(raw) as LegacyAppState);
   } catch (err) {
     console.warn('저장된 데이터를 불러오지 못했습니다.', err);
     return null;
@@ -55,6 +57,5 @@ export function createInitialState(): AppState {
     customExercises: [],
     completedSetIds: [],
     rewardedSetIds: [],
-    dailyMissions: {},
   };
 }
