@@ -1,0 +1,184 @@
+/* Cross-screen safeguards. Visual styling stays owned by each screen stylesheet. */
+.home-screen,
+.collection-screen,
+.rewards-screen,
+.settings-screen,
+.exercise-analysis-screen,
+.combo-pack-opening-screen {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.collection-screen,
+.rewards-screen,
+.settings-screen,
+.exercise-analysis-screen {
+  padding-bottom: calc(var(--app-bottom-nav-height, 72px) + 24px + env(safe-area-inset-bottom));
+  scroll-padding-bottom: calc(var(--app-bottom-nav-height, 72px) + 24px + env(safe-area-inset-bottom));
+}
+
+.collection-screen img,
+.rewards-screen img,
+.exercise-analysis-screen img,
+.combo-pack-opening-screen img,
+.home-screen img {
+  max-width: 100%;
+}
+
+.collection-grid,
+.card-grid,
+.reward-card-grid,
+.report-metric-grid,
+.exercise-best-grid,
+.exercise-total-grid {
+  min-width: 0;
+}
+
+.collection-card,
+.card-item,
+.today-reward-card,
+.report-metric-card,
+.exercise-best-grid > div,
+.exercise-total-grid > div {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.collection-card strong,
+.collection-card p,
+.card-item strong,
+.card-item p,
+.today-reward-card h2,
+.today-reward-card p,
+.report-metric-card strong,
+.report-top-exercise strong,
+.exercise-analysis-screen h1,
+.exercise-analysis-screen h2,
+.exercise-analysis-screen strong,
+.exercise-analysis-screen p,
+.exercise-history-list strong,
+.exercise-history-list p {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.report-range-tabs,
+.rewards-tabs,
+.report-period-nav {
+  min-width: 0;
+}
+
+.report-range-tabs button,
+.rewards-tabs button,
+.report-period-nav button,
+.exercise-analysis__back {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.report-period-nav > div,
+.report-section__heading,
+.today-section-heading,
+.exercise-section-heading {
+  min-width: 0;
+}
+
+.report-period-nav strong,
+.report-section__heading strong,
+.report-section__heading span,
+.today-section-heading strong,
+.exercise-section-heading strong,
+.exercise-section-heading span {
+  overflow-wrap: anywhere;
+}
+
+.exercise-trend-chart,
+.exercise-trend-chart svg {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Generic overlay containment for existing sheets that do not yet share a wrapper. */
+.daily-mission-sheet,
+.custom-exercise-editor,
+.card-detail-modal,
+.pack-result-modal {
+  max-height: var(--app-viewport-height, 100dvh);
+  overflow: hidden;
+}
+
+.daily-mission-sheet__panel,
+.custom-exercise-editor__panel,
+.card-detail-modal__panel,
+.pack-result-modal__panel {
+  max-height: calc(var(--app-viewport-height, 100dvh) - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+button[aria-label='닫기'] {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (max-width: 350px) {
+  .collection-screen,
+  .rewards-screen,
+  .settings-screen,
+  .exercise-analysis-screen {
+    padding-inline: 12px;
+  }
+
+  .collection-grid,
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .report-metric-grid,
+  .exercise-total-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .exercise-best-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .report-calendar {
+    gap: 3px;
+  }
+
+  .report-calendar button {
+    min-width: 0;
+    padding-inline: 1px;
+  }
+
+  .report-metric-card strong,
+  .exercise-total-grid strong,
+  .exercise-best-grid strong {
+    font-size: clamp(.9rem, 6vw, 1.2rem);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .home-screen,
+  .collection-screen,
+  .rewards-screen,
+  .record-screen,
+  .settings-screen,
+  .exercise-analysis-screen,
+  .combo-pack-opening-screen {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .combo-pack-opening-screen {
+    min-height: var(--app-viewport-height, 100dvh);
+    height: auto;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}

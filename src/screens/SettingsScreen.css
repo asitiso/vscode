@@ -35,6 +35,11 @@
   border: 2px solid #eef3f2;
 }
 
+.settings-section--cloud {
+  border-color: #cde6ff;
+  background: linear-gradient(180deg, #ffffff, #f4faff);
+}
+
 .settings-label {
   display: block;
   font-family: var(--font-display);
@@ -78,6 +83,100 @@
 
 .settings-save-btn:active {
   transform: translateY(2px);
+}
+
+.cloud-save__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cloud-save__title {
+  margin: 0 0 5px;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.cloud-save__description,
+.cloud-save__notice,
+.cloud-save__time,
+.cloud-save__status {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.cloud-save__description {
+  font-size: 0.76rem;
+}
+
+.cloud-save__badge {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e9f7ef;
+  color: #18794e;
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.cloud-save__time {
+  margin-top: 12px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: #eef7ff;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.cloud-save__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cloud-save__button {
+  min-height: 42px;
+  border: 2px solid #cbd9e6;
+  border-bottom-width: 4px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.cloud-save__button--primary {
+  border-color: #3d85c6;
+  background: linear-gradient(180deg, #74c4ff, #438fd1);
+  color: #ffffff;
+}
+
+.cloud-save__button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.cloud-save__status {
+  margin-top: 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.cloud-save__status--success {
+  color: #18794e;
+}
+
+.cloud-save__status--error {
+  color: #b42318;
+}
+
+.cloud-save__notice {
+  margin-top: 8px;
+  font-size: 0.68rem;
 }
 
 .chip-row {
@@ -151,4 +250,10 @@
   align-items: center;
   justify-content: center;
   font-size: 0.65rem;
+}
+
+@media (max-width: 390px) {
+  .cloud-save__actions {
+    grid-template-columns: 1fr;
+  }
 }

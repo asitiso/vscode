@@ -1,0 +1,301 @@
+.workout-report-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 8px;
+}
+
+.report-range-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  padding: 4px;
+  border-radius: 16px;
+  background: #edf2f2;
+}
+
+.report-range-tabs button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  cursor: pointer;
+}
+
+.report-range-tabs button.is-active {
+  background: #fff;
+  color: var(--orange-deep);
+  box-shadow: 0 4px 12px rgba(29, 51, 60, 0.09);
+}
+
+.report-period-nav {
+  display: grid;
+  grid-template-columns: 42px 1fr 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fff5df, #fff);
+  border: 1px solid #ffe5b6;
+}
+
+.report-period-nav button {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--orange-deep);
+  font-size: 1.65rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(29, 51, 60, 0.08);
+}
+
+.report-period-nav button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.report-period-nav div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.report-period-nav span {
+  color: var(--orange-deep);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+}
+
+.report-period-nav strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.report-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.report-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 14px;
+  border-radius: 17px;
+  background: #fff;
+  border: 1px solid #e9eeee;
+  box-shadow: 0 5px 14px rgba(29, 51, 60, 0.07);
+}
+
+.report-metric-card > span {
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+}
+
+.report-metric-card strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.report-metric-card small {
+  margin-left: 3px;
+  font-size: 0.65rem;
+}
+
+.report-metric-card em {
+  color: #8a969b;
+  font-size: 0.63rem;
+  font-style: normal;
+}
+
+.report-metric-card em.is-up { color: #1b9b66; }
+.report-metric-card em.is-down { color: #e45d5d; }
+
+.report-top-exercise,
+.report-section {
+  padding: 16px;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid #e9eeee;
+  box-shadow: 0 5px 14px rgba(29, 51, 60, 0.07);
+}
+
+.report-top-exercise {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: linear-gradient(135deg, #effbf6, #fff);
+}
+
+.report-top-exercise span,
+.report-section__heading span {
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+}
+
+.report-top-exercise strong,
+.report-section__heading strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+}
+
+.report-top-exercise p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+
+.report-section__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+
+.report-week-list {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.report-week-list button {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 9px 2px;
+  border: 0;
+  border-radius: 13px;
+  background: #f2f5f5;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.report-week-list button.has-workout {
+  background: #fff4df;
+  color: var(--orange-deep);
+}
+
+.report-week-list__day { font-family: var(--font-display); font-size: 0.7rem; }
+.report-week-list__date { font-size: 0.6rem; }
+.report-week-list strong { font-size: 0.72rem; }
+.report-week-list small { font-size: 0.55rem; }
+
+.report-calendar__weekdays,
+.report-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.report-calendar__weekdays {
+  margin-bottom: 5px;
+  color: var(--ink-soft);
+  font-size: 0.65rem;
+  text-align: center;
+}
+
+.report-calendar button,
+.report-calendar__empty {
+  min-height: 52px;
+  border: 0;
+  border-radius: 11px;
+  background: #f5f7f7;
+}
+
+.report-calendar button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  padding: 6px 2px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.report-calendar button.has-workout {
+  background: #fff7e8;
+  color: var(--ink);
+  border: 1px solid #ffe4ad;
+}
+
+.report-calendar button > span { font-size: 0.68rem; }
+.report-calendar button strong { font-size: 0.58rem; color: var(--orange-deep); }
+
+.report-calendar__dots {
+  display: flex;
+  gap: 2px;
+  min-height: 5px;
+}
+
+.report-calendar__dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #88b9a7;
+}
+
+.report-calendar__dots i[data-category='cardio'] { background: #49a9de; }
+.report-calendar__dots i[data-category='legs'] { background: #ff9d55; }
+.report-calendar__dots i[data-category='back'] { background: #7f87d8; }
+.report-calendar__dots i[data-category='chest'] { background: #ef6f83; }
+.report-calendar__dots i[data-category='stretching'] { background: #65b887; }
+.report-calendar__dots i[data-category='etc'] { background: #9faab0; }
+
+.report-category-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.report-category-bars > div > div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  color: var(--ink);
+  font-size: 0.72rem;
+}
+
+.report-category-bars__track {
+  display: block;
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf1f1;
+}
+
+.report-category-bars__track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--yellow), var(--orange));
+}
+
+.report-empty-inline {
+  margin: 6px 0 0;
+  padding: 18px;
+  border-radius: 15px;
+  background: #f5f7f7;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+@media (max-width: 350px) {
+  .report-week-list { gap: 3px; }
+  .report-week-list button { padding-inline: 1px; }
+  .report-metric-grid { gap: 7px; }
+}
