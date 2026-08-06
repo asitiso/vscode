@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import './MobileViewport.css';
 import './ScreenStability.css';
-import { GameProvider, useGame } from './store/GameContext';
+import { GameProvider } from './store/GameContext';
 import { BottomNav } from './components/BottomNav';
 import { HomeScreen } from './screens/HomeScreen';
 import { RecordScreen } from './screens/RecordScreen';
@@ -16,7 +16,6 @@ import { useViewportState } from './hooks/useViewportState';
 export type ScreenId = 'home' | 'record' | 'pack-opening' | 'collection' | 'rewards' | 'settings';
 
 function AppShell() {
-  const { canSelectDailyMission } = useGame();
   const viewport = useViewportState();
   const [screen, setScreen] = useState<ScreenId>('home');
   const [activePackId, setActivePackId] = useState<string | null>(null);
@@ -28,10 +27,6 @@ function AppShell() {
 
   function navigateFromBottomNav(next: ScreenId) {
     if (next === screen) return;
-    if (next === 'record' && canSelectDailyMission) {
-      setScreen('home');
-      return;
-    }
     navigate(next);
   }
 
