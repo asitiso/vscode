@@ -1,6 +1,6 @@
 import type { Exercise } from '../types';
 
-// 기본 운동기구 24종. characterAsset은 public/assets/equipment 아래
+// 기본 운동기구 및 스포츠 40종. characterAsset은 public/assets/equipment 아래
 // PNG와 assetManifest의 키를 통해 연결된다.
 export const EXERCISES: Exercise[] = [
   { id: 'treadmill', name: '러닝머신', category: 'cardio', logType: 'duration', characterAsset: 'treadmill-character', linkedCardIds: ['card-treadmill', 'card-cardio-theme'] },
@@ -27,6 +27,24 @@ export const EXERCISES: Exercise[] = [
   { id: 'dip-station', name: '딥스 스탠드', category: 'chest', logType: 'weight-reps-sets', characterAsset: 'dip-station-character', linkedCardIds: ['card-dip-station'] },
   { id: 'foam-roller', name: '폼롤러', category: 'stretching', logType: 'duration', characterAsset: 'foam-roller-character', linkedCardIds: ['card-foam-roller'] },
   { id: 'pull-up-bar', name: '풀업 바', category: 'back', logType: 'weight-reps-sets', characterAsset: 'pull-up-bar-character', linkedCardIds: ['card-pull-up-bar'] },
+
+  // 신규 운동기구·스포츠 카드 16종
+  { id: 'gym-ball', name: '짐볼', category: 'stretching', logType: 'duration', characterAsset: 'gym-ball-character', linkedCardIds: ['card-gym-ball'] },
+  { id: 'arm-curl-machine', name: '암 컬 머신', category: 'arms', logType: 'weight-reps-sets', characterAsset: 'arm-curl-machine-character', linkedCardIds: ['card-arm-curl-machine'] },
+  { id: 'elliptical', name: '일립티컬', category: 'cardio', logType: 'duration', characterAsset: 'elliptical-character', linkedCardIds: ['card-elliptical'] },
+  { id: 'loop-band', name: '루프 밴드', category: 'stretching', logType: 'duration', characterAsset: 'loop-band-character', linkedCardIds: ['card-loop-band'] },
+  { id: 'hammer-curl', name: '해머 컬', category: 'arms', logType: 'weight-reps-sets', characterAsset: 'hammer-curl-character', linkedCardIds: ['card-hammer-curl'] },
+  { id: 'decline-bench', name: '디클라인 벤치', category: 'chest', logType: 'weight-reps-sets', characterAsset: 'decline-bench-character', linkedCardIds: ['card-decline-bench'] },
+  { id: 'outdoor-running', name: '야외 러닝', category: 'cardio', logType: 'duration', characterAsset: 'outdoor-running-character', linkedCardIds: ['card-outdoor-running'] },
+  { id: 'swimming', name: '수영', category: 'cardio', logType: 'duration', characterAsset: 'swimming-character', linkedCardIds: ['card-swimming'] },
+  { id: 'badminton', name: '배드민턴', category: 'cardio', logType: 'duration', characterAsset: 'badminton-character', linkedCardIds: ['card-badminton'] },
+  { id: 'golf', name: '골프', category: 'etc', logType: 'duration', characterAsset: 'golf-character', linkedCardIds: ['card-golf'] },
+  { id: 'tennis', name: '테니스', category: 'cardio', logType: 'duration', characterAsset: 'tennis-character', linkedCardIds: ['card-tennis'] },
+  { id: 'pilates-reformer', name: '필라테스 리포머', category: 'stretching', logType: 'duration', characterAsset: 'pilates-reformer-character', linkedCardIds: ['card-pilates-reformer'] },
+  { id: 'trekking', name: '트레킹', category: 'cardio', logType: 'duration', characterAsset: 'trekking-character', linkedCardIds: ['card-trekking'] },
+  { id: 'crossfit', name: '크로스핏', category: 'etc', logType: 'duration', characterAsset: 'crossfit-character', linkedCardIds: ['card-crossfit'] },
+  { id: 'outdoor-cycling', name: '자전거 라이딩', category: 'cardio', logType: 'duration', characterAsset: 'outdoor-cycling-character', linkedCardIds: ['card-outdoor-cycling'] },
+  { id: 'climbing', name: '클라이밍', category: 'back', logType: 'duration', characterAsset: 'climbing-character', linkedCardIds: ['card-climbing'] },
 ];
 
 export const EXERCISES_BY_ID: Record<string, Exercise> = Object.fromEntries(
