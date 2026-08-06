@@ -10,11 +10,14 @@
   max-height: var(--app-viewport-height, 100dvh);
   margin: 0 auto;
   overflow: hidden;
-  background: var(--bg-gradient);
+  background:
+    radial-gradient(circle at 50% -10%, var(--game-bg-glow), transparent 34%),
+    linear-gradient(180deg, var(--game-bg-top), var(--game-bg-bottom));
+  color: var(--game-text-main);
   box-shadow:
-    0 24px 60px rgba(15, 35, 45, 0.35),
-    0 0 0 6px #ffffff,
-    0 0 0 8px rgba(15, 35, 45, 0.12);
+    0 24px 60px rgba(38, 53, 94, 0.28),
+    0 0 0 6px rgba(255, 255, 255, 0.96),
+    0 0 0 8px rgba(77, 94, 139, 0.12);
 }
 
 .app-shell__screen {
@@ -32,7 +35,7 @@
 @media (min-width: 431px) {
   .app-shell {
     height: min(var(--app-viewport-height, 100dvh), 932px);
-    border-radius: 36px;
     margin: 16px auto;
+    border-radius: 36px;
   }
 }
