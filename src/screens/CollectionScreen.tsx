@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import './CollectionScreen.css';
 import { CARDS } from '../data/cards';
 import { useGame } from '../store/GameContext';
-import { PlaceholderArt } from '../components/PlaceholderArt';
 import { CARD_SETS } from '../game/cardSets';
-import { pickDisplayIllustration, type CardRarity } from '../types';
+import type { CardRarity } from '../types';
+import { CollectionCard } from './CollectionCard';
+import { CollectionCardDetailModal } from './CollectionCardDetailModal';
 
 const RARITY_LABEL: Record<CardRarity, string> = {
   common: '일반',
@@ -20,6 +21,8 @@ export function CollectionScreen() {
   const { state, cardSetProgress, dailyCardSet } = useGame();
   const [rarityFilter, setRarityFilter] = useState<CardRarity | 'all'>('all');
   const [setFilter, setSetFilter] = useState<SetFilter>('all');
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const selectedButtonRef = useRef<HTMLElement | null>(null);
   const selectedSet = setFilter === 'all' ? undefined : CARD_SETS.find((set) => set.id === setFilter);
   const selectedProgress = selectedSet
     ? cardSetProgress.find((progress) => progress.set.id === selectedSet.id)
@@ -34,8 +37,20 @@ export function CollectionScreen() {
     [rarityFilter, selectedSet],
   );
 
+  const selectedCard = selectedCardId ? CARDS.find((card) => card.id === selectedCardId) : undefined;
+  const selectedOwned = selectedCard ? state.ownedCards[selectedCard.id] : undefined;
   const ownedCount = Object.keys(state.ownedCards).length;
   const completion = Math.round((ownedCount / CARDS.length) * 100);
+
+  const openCard = (cardId: string) => {
+    selectedButtonRef.current = document.activeElement as HTMLElement | null;
+    setSelectedCardId(cardId);
+  };
+
+  const closeCard = () => {
+    setSelectedCardId(null);
+    window.requestAnimationFrame(() => selectedButtonRef.current?.focus());
+  };
 
   return (
     <div className="collection-screen">
@@ -85,16 +100,14 @@ export function CollectionScreen() {
       </div>
 
       <div className="card-grid">
-        {filteredCards.map((card) => {
-          const owned = state.ownedCards[card.id];
-          return (
-            <div key={card.id} className={`card-grid__item card-grid__item--${card.rarity} ${!owned ? 'card-grid__item--locked' : ''} ${owned?.starLevel === 4 ? 'card-grid__item--evolved' : ''}`}>
-              <PlaceholderArt assetName={owned ? pickDisplayIllustration(card, owned.starLevel) : card.illustrationAsset} emoji={owned ? '🃏' : '❔'} label={owned ? card.name : undefined} />
-              {owned && <span className="card-grid__stars">{'★'.repeat(owned.starLevel)}</span>}
-            </div>
-          );
-        })}
+        {filteredCards.map((card) => (
+          <CollectionCard key={card.id} card={card} owned={state.ownedCards[card.id]} onSelect={openCard} />
+        ))}
       </div>
+
+      {selectedCard && (
+        <CollectionCardDetailModal card={selectedCard} owned={selectedOwned} onClose={closeCard} />
+      )}
     </div>
   );
 }
