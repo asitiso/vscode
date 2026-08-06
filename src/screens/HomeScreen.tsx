@@ -71,7 +71,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           >
             <span className="hud-badge__icon">⭐</span>
             <span className="hud-badge__text">
-              <span className="hud-badge__title">Lv.{state.user.level}</span>
+              <span className="hud-badge__title">Lv.{experience.level}</span>
               <span className="hud-badge__subtitle">{state.user.name}</span>
             </span>
           </button>
@@ -79,7 +79,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             <section id="home-level-xp-popover" className="level-xp-popover" role="dialog" aria-labelledby="home-level-xp-title">
               <div className="level-xp-popover__heading">
                 <span className="level-xp-popover__star">⭐</span>
-                <div><strong id="home-level-xp-title">Lv.{state.user.level}</strong><span>다음 레벨 진행도</span></div>
+                <div><strong id="home-level-xp-title">Lv.{experience.level}</strong><span>다음 레벨 진행도</span></div>
                 <b>{experience.progressPercent}%</b>
               </div>
               <div className="level-xp-popover__numbers">
