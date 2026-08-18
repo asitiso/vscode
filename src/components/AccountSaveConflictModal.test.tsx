@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AccountSaveConflictModal } from './AccountSaveConflictModal';
 
 const game = vi.hoisted(() => ({
@@ -12,6 +12,8 @@ const game = vi.hoisted(() => ({
 vi.mock('../store/GameContext', () => ({
   useGame: () => game,
 }));
+
+afterEach(() => cleanup());
 
 describe('AccountSaveConflictModal', () => {
   beforeEach(() => {
