@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import './HomeScreen.css';
 import './HomeLevelXp.css';
 import { useGame } from '../store/GameContext';
+import { useWorkoutSessionTimer } from '../hooks/useWorkoutSessionTimer';
 import { PlaceholderArt } from '../components/PlaceholderArt';
 import { HomeCharacterInteraction } from './HomeCharacterInteraction';
+import { HomeWorkoutTimerButton } from './HomeWorkoutTimerButton';
 import { LevelMilestoneModal } from './LevelMilestoneModal';
 import { getHomeGroupShortcutCopy } from './homeGroupShortcut';
 import { PACKS_BY_ID } from '../data/packs';
@@ -26,6 +28,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
     featuredCardSetProgress,
     claimLevelMilestone,
   } = useGame();
+  const workoutTimer = useWorkoutSessionTimer();
   const [showXp, setShowXp] = useState(false);
   const [activeMilestone, setActiveMilestone] = useState<number | null>(null);
   const [dismissedMilestone, setDismissedMilestone] = useState<number | null>(null);
@@ -152,6 +155,13 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         <span className="home-screen__cta-icon">💪</span>
         {todayLogged ? '오늘 운동 추가 기록하기' : '오늘 운동 기록하기'}
       </button>
+
+      <HomeWorkoutTimerButton
+        status={workoutTimer.status}
+        elapsedSeconds={workoutTimer.elapsedSeconds}
+        onStart={workoutTimer.start}
+        onStop={workoutTimer.stop}
+      />
 
       <div className="home-screen__layer home-screen__character">
         <span className="character-platform" />
