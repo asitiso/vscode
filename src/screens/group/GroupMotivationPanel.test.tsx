@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { GroupMotivationPanel } from './GroupMotivationPanel';
 import type { GroupMemberSummary } from '../../group/groupTypes';
 
@@ -10,6 +10,8 @@ const members: GroupMemberSummary[] = [
   { userId: 'me', nickname: '나', todaySeconds: 1800, weeklySeconds: 7200, weeklyGoalPercent: 60, isActive: true },
   { userId: 'b', nickname: '혜미', todaySeconds: 3000, weeklySeconds: 10800, weeklyGoalPercent: 90, isActive: false },
 ];
+
+afterEach(cleanup);
 
 describe('GroupMotivationPanel', () => {
   it('지금 운동 중 인원, 오늘 순위, 내 추격 정보를 보여준다', () => {
