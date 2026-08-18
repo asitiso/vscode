@@ -447,7 +447,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
         if (decision === 'upload-local') {
           const savedAt = ensureLocalEnvelope(stateRef.current);
-          await saveAccountSnapshot(stateRef.current, savedAt, { expectedRevisionOverride: null });
+          await saveAccountSnapshot(stateRef.current, savedAt);
           return;
         }
 
