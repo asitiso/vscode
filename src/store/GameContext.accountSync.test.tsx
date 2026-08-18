@@ -108,4 +108,43 @@ describe('GameProvider account sync', () => {
     expect(savedState.workoutLogs).toHaveLength(1);
     expect(cloud.save.mock.calls[0][2]).toBe(1);
   });
+
+  it('uses the revision created by an important save that races first account linking', async () => {
+    auth.user = { id: 'user-1' };
+
+    let resolveLoad!: (value: null) => void;
+    cloud.load.mockReturnValue(new Promise<null>((resolve) => { resolveLoad = resolve; }));
+
+    let resolveFirstSave!: (value: {
+      schemaVersion: number;
+      revision: number;
+      clientSavedAt: string;
+      updatedAt: string;
+    }) => void;
+    cloud.save
+      .mockReturnValueOnce(new Promise((resolve) => { resolveFirstSave = resolve; }))
+      .mockResolvedValueOnce({
+        schemaVersion: 1,
+        revision: 2,
+        clientSavedAt: '2026-08-18T10:01:00.000Z',
+        updatedAt: '2026-08-18T10:01:01.000Z',
+      });
+
+    render(<GameProvider><Probe /></GameProvider>);
+    fireEvent.click(screen.getByText('workout'));
+    await waitFor(() => expect(cloud.save).toHaveBeenCalledTimes(1));
+    expect(cloud.save.mock.calls[0][2]).toBeNull();
+
+    resolveLoad(null);
+    await Promise.resolve();
+    resolveFirstSave({
+      schemaVersion: 1,
+      revision: 1,
+      clientSavedAt: '2026-08-18T10:00:00.000Z',
+      updatedAt: '2026-08-18T10:00:01.000Z',
+    });
+
+    await waitFor(() => expect(cloud.save).toHaveBeenCalledTimes(2));
+    expect(cloud.save.mock.calls[1][2]).toBe(1);
+  });
 });
