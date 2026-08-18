@@ -1,3 +1,0 @@
-{
-  "buildCommand": "npm test && npm run build"
-}
