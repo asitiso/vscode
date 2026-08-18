@@ -6,6 +6,7 @@ import { useWorkoutSessionTimer } from '../hooks/useWorkoutSessionTimer';
 import { PlaceholderArt } from '../components/PlaceholderArt';
 import { HomeCharacterInteraction } from './HomeCharacterInteraction';
 import { HomeWorkoutTimerButton } from './HomeWorkoutTimerButton';
+import { HomeWorkoutCta } from './HomeWorkoutCta';
 import { LevelMilestoneModal } from './LevelMilestoneModal';
 import { getHomeGroupShortcutCopy } from './homeGroupShortcut';
 import { PACKS_BY_ID } from '../data/packs';
@@ -157,10 +158,12 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         </span>
       </button>
 
-      <button type="button" className="home-screen__layer home-screen__cta" onClick={() => onNavigate('record')}>
-        <span className="home-screen__cta-icon">💪</span>
-        {todayLogged ? '오늘 운동 추가 기록하기' : '오늘 운동 기록하기'}
-      </button>
+      <HomeWorkoutCta
+        status={workoutTimer.status}
+        onStart={workoutTimer.start}
+        onStop={workoutTimer.stop}
+        onNavigate={() => onNavigate('record')}
+      />
 
       <div className="home-screen__layer home-screen__character">
         <span className="character-platform" />
