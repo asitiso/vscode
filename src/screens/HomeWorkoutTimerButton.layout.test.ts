@@ -8,10 +8,9 @@ const styles = readFileSync(
 );
 
 describe('home workout timer layout', () => {
-  it('기록 버튼 아래 왼쪽 운동 공간에 원형 타이머 버튼을 배치한다', () => {
-    expect(styles).toContain('.home-screen__workout-timer');
-    expect(styles).toContain('left: 7%');
-    expect(styles).toContain('top: 48%');
-    expect(styles).toContain('border-radius: 50%');
+  it('상단 HUD 안에서 그룹과 연속 배지 사이에 맞는 캡슐 스타일을 사용한다', () => {
+    expect(styles).toContain('.hud-badge--workout');
+    expect(styles).not.toContain('left: 7%');
+    expect(styles).not.toContain('top: 48%');
   });
 });
