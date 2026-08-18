@@ -6,7 +6,7 @@ import { normalizeExerciseName, validateCustomExerciseName } from './customExerc
 const customExercises: CustomExercise[] = [
   {
     id: 'custom-1',
-    name: '배드민턴',
+    name: '나만의 운동',
     category: 'etc',
     logType: 'duration',
     createdAt: '2026-08-05T00:00:00.000Z',
@@ -30,7 +30,7 @@ describe('validateCustomExerciseName', () => {
   });
 
   it('사용자 운동 중복을 대소문자와 공백 차이 없이 거부한다', () => {
-    expect(validateCustomExerciseName(' 배드민턴 ', customExercises, EXERCISES).error).toBe('duplicate-custom');
+    expect(validateCustomExerciseName(' 나만의   운동 ', customExercises, EXERCISES).error).toBe('duplicate-custom');
   });
 
   it('기본 운동 이름 중복을 거부한다', () => {
@@ -38,6 +38,6 @@ describe('validateCustomExerciseName', () => {
   });
 
   it('수정 중인 자기 자신은 중복에서 제외한다', () => {
-    expect(validateCustomExerciseName('배드민턴', customExercises, EXERCISES, 'custom-1').error).toBeNull();
+    expect(validateCustomExerciseName('나만의 운동', customExercises, EXERCISES, 'custom-1').error).toBeNull();
   });
 });
