@@ -10,6 +10,7 @@ import './screens/RecordSessionTimer.css';
 import { GameProvider } from './store/GameContext';
 import { GroupAuthProvider } from './group/GroupAuthContext';
 import { BottomNav } from './components/BottomNav';
+import { AccountSaveConflictModal } from './components/AccountSaveConflictModal';
 import { HomeScreen } from './screens/HomeScreen';
 import { RecordScreen } from './screens/RecordScreen';
 import { ComboPackOpeningScreen } from './screens/ComboPackOpeningScreen';
@@ -58,6 +59,7 @@ function AppShell() {
       </div>
       {showBottomNav && <BottomNav active={activeTab} onSelect={navigateFromBottomNav} />}
       <CardSetCompletionModal />
+      <AccountSaveConflictModal />
     </div>
   );
 }
