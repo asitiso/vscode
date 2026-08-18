@@ -7,6 +7,7 @@ import './ScreenStability.css';
 import './MobileInputLayout.css';
 import './styles/GameUiScreens.css';
 import { GameProvider } from './store/GameContext';
+import { GroupAuthProvider } from './group/GroupAuthContext';
 import { BottomNav } from './components/BottomNav';
 import { HomeScreen } from './screens/HomeScreen';
 import { RecordScreen } from './screens/RecordScreen';
@@ -14,11 +15,12 @@ import { ComboPackOpeningScreen } from './screens/ComboPackOpeningScreen';
 import { CollectionScreen } from './screens/CollectionScreen';
 import { RewardsScreen } from './screens/RewardsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { GroupEntryScreen } from './screens/group/GroupEntryScreen';
 import { CardSetCompletionModal } from './screens/CardSetCompletionModal';
 import { useViewportState } from './hooks/useViewportState';
 import { useFocusedFieldVisibility } from './hooks/useFocusedFieldVisibility';
 
-export type ScreenId = 'home' | 'record' | 'pack-opening' | 'collection' | 'rewards' | 'settings';
+export type ScreenId = 'home' | 'record' | 'pack-opening' | 'collection' | 'rewards' | 'settings' | 'group';
 
 function AppShell() {
   const viewport = useViewportState();
@@ -37,8 +39,8 @@ function AppShell() {
     navigate(next);
   }
 
-  const showBottomNav = screen !== 'pack-opening' && !viewport.isKeyboardOpen;
-  const activeTab: ScreenId = screen === 'pack-opening' ? 'home' : screen;
+  const showBottomNav = screen !== 'pack-opening' && screen !== 'group' && !viewport.isKeyboardOpen;
+  const activeTab: ScreenId = screen === 'pack-opening' ? 'home' : screen === 'group' ? 'settings' : screen;
 
   return (
     <div ref={shellRef} className="app-shell" data-keyboard-open={viewport.isKeyboardOpen ? 'true' : 'false'}>
@@ -50,7 +52,8 @@ function AppShell() {
         )}
         {screen === 'collection' && <CollectionScreen />}
         {screen === 'rewards' && <RewardsScreen />}
-        {screen === 'settings' && <SettingsScreen />}
+        {screen === 'settings' && <SettingsScreen onNavigate={navigate} />}
+        {screen === 'group' && <GroupEntryScreen onBack={() => navigate('settings')} />}
       </div>
       {showBottomNav && <BottomNav active={activeTab} onSelect={navigateFromBottomNav} />}
       <CardSetCompletionModal />
@@ -60,9 +63,11 @@ function AppShell() {
 
 function App() {
   return (
-    <GameProvider>
-      <AppShell />
-    </GameProvider>
+    <GroupAuthProvider>
+      <GameProvider>
+        <AppShell />
+      </GameProvider>
+    </GroupAuthProvider>
   );
 }
 
