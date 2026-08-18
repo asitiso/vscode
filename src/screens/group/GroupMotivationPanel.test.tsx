@@ -15,20 +15,20 @@ describe('GroupMotivationPanel', () => {
   it('지금 운동 중 인원, 오늘 순위, 내 추격 정보를 보여준다', () => {
     render(<GroupMotivationPanel members={members} currentUserId="me" onSelectMember={vi.fn()} />);
 
-    expect(screen.getByText('지금 2명 운동 중')).toBeInTheDocument();
+    expect(screen.getByText(/지금 2명 운동 중/)).toBeInTheDocument();
     expect(screen.getByText('오늘 총 2시간 30분')).toBeInTheDocument();
     expect(screen.getByText('내 순위 3위')).toBeInTheDocument();
-    expect(screen.getByText('혜미님까지 20분')).toBeInTheDocument();
+    expect(screen.getByText(/혜미님까지 20분/)).toBeInTheDocument();
     expect(screen.getAllByText(/운동 중/).length).toBeGreaterThan(1);
   });
 
   it('이번 주 탭으로 바꾸면 주간 기준 순위와 목표 달성률을 보여준다', () => {
     render(<GroupMotivationPanel members={members} currentUserId="me" onSelectMember={vi.fn()} />);
 
-    fireEvent.click(screen.getByRole('button', { name: '이번 주 순위' }));
+    fireEvent.click(screen.getByRole('tab', { name: '이번 주 순위' }));
 
     expect(screen.getByText('이번 주 총 7시간 30분')).toBeInTheDocument();
-    expect(screen.getByText('민서님까지 목표 20%p')).toBeInTheDocument();
+    expect(screen.getByText(/민서님까지 목표 20%p/)).toBeInTheDocument();
     expect(screen.getAllByText('주간 목표 90%').length).toBeGreaterThan(0);
   });
 });
