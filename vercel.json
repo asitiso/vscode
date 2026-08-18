@@ -1,0 +1,3 @@
+{
+  "buildCommand": "npx vitest run src/screens/HomeWorkoutTimerButton.test.tsx src/screens/HomeWorkoutTimerButton.layout.test.ts src/screens/HomeScreen.hudLayout.test.ts"
+}
