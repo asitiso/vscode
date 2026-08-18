@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import './RecordScreen.css';
 import { EXERCISES, EXERCISE_CATEGORY_LABELS } from '../data/exercises';
 import { useGame } from '../store/GameContext';
+import { useWorkoutSessionTimer } from '../hooks/useWorkoutSessionTimer';
 import { CustomExerciseEditor } from './CustomExerciseEditor';
 import type { CustomExercise, ExerciseCategory, ExerciseLogType, FeelingTag, WorkoutSetEntry } from '../types';
 import type { ScreenId } from '../App';
@@ -15,9 +16,17 @@ const FEELINGS: { id: FeelingTag; label: string; emoji: string }[] = [
   { id: 'completed-anyway', label: '그래도 운동 완료', emoji: '💪' },
 ];
 
+function formatTimer(seconds: number) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return [h, m, s].map((n) => String(n).padStart(2, '0')).join(':');
+}
+
 export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNavigate: (screen: ScreenId) => void }) {
   const game = useGame();
   const { state } = game;
+  const workoutTimer = useWorkoutSessionTimer();
   const [category, setCategory] = useState<ExerciseCategory>(CATEGORIES[0]);
   const [entries, setEntries] = useState<Record<string, WorkoutSetEntry>>({});
   const [feeling, setFeeling] = useState<FeelingTag | null>(null);
@@ -76,10 +85,30 @@ export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNav
     if (editing?.id === item.id) closeEditor();
   }
   const selected = Object.values(entries);
-  const complete = () => { if (selected.length && feeling) { game.completeWorkout(selected, feeling, memo.trim() || undefined); onDone(); } };
+  const complete = async () => {
+    if (!selected.length || !feeling) return;
+    if (workoutTimer.status === 'running') await workoutTimer.stop();
+    game.completeWorkout(selected, feeling, memo.trim() || undefined);
+    onDone();
+  };
+  const cancel = async () => {
+    if (workoutTimer.status === 'running') await workoutTimer.stop();
+    onNavigate('home');
+  };
 
   return <div className="record-screen">
     <header className="record-screen__header"><span className="record-screen__eyebrow">TODAY WORKOUT</span><h1 className="record-screen__title">오늘 운동 기록</h1><p className="record-screen__desc">운동을 선택하고 오늘의 기록을 남겨보세요.</p></header>
+
+    <section className={`record-session-timer ${workoutTimer.status === 'running' ? 'record-session-timer--active' : ''}`}>
+      {workoutTimer.status === 'running' ? <>
+        <div><span className="record-session-timer__label">운동 중 🔥</span><strong>{formatTimer(workoutTimer.elapsedSeconds)}</strong><small>그룹에는 운동시간과 현재 운동 중 상태만 공유됩니다.</small></div>
+        <button type="button" onClick={() => void workoutTimer.stop()}>종료</button>
+      </> : <>
+        <div><span className="record-session-timer__label">운동 세션 타이머</span><strong>운동을 시작할 준비가 됐나요?</strong><small>로그인하지 않아도 타이머는 사용할 수 있어요.</small></div>
+        <button type="button" onClick={() => void workoutTimer.start()}>▶ 운동 시작</button>
+      </>}
+    </section>
+
     <section className="record-card record-card--exercise">
       <div className="record-card__heading"><div><span className="record-card__kicker">운동 선택</span><h2>오늘의 운동</h2></div><span className="record-card__count">{selected.length}개 선택</span></div>
       {recent.length > 0 && <div className="record-group"><h3>최근 운동</h3><div className="chip-row">{recent.map((e) => <button key={e.id} type="button" className={`chip ${entries[e.id] ? 'chip--active' : ''}`} onClick={() => toggle(e)}>{e.name}</button>)}</div></div>}
@@ -95,6 +124,6 @@ export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNav
     {selected.length > 0 && <section className="record-card"><div className="record-card__heading"><div><span className="record-card__kicker">운동 수치</span><h2>운동 기록</h2></div><span className="record-card__count">{selected.length}종목</span></div><div className="set-card-list">{selected.map((entry) => { const exercise = resolve(entry.exerciseId, entry); if (!exercise) return null; return <div className="set-card" key={entry.exerciseId}><div className="set-card__name">{exercise.name}</div>{exercise.logType === 'duration' ? <div className="set-card__fields set-card__fields--single"><label>시간(분)<input type="number" inputMode="numeric" min="0" value={entry.durationMinutes ?? 0} onChange={(e) => patch(entry.exerciseId, { durationMinutes: Number(e.target.value) })} /></label></div> : <div className="set-card__fields"><label>무게(kg)<input type="number" inputMode="decimal" min="0" value={entry.weightKg ?? 0} onChange={(e) => patch(entry.exerciseId, { weightKg: Number(e.target.value) })} /></label><label>횟수<input type="number" inputMode="numeric" min="0" value={entry.reps ?? 0} onChange={(e) => patch(entry.exerciseId, { reps: Number(e.target.value) })} /></label><label>세트<input type="number" inputMode="numeric" min="0" value={entry.sets ?? 0} onChange={(e) => patch(entry.exerciseId, { sets: Number(e.target.value) })} /></label></div>}</div>; })}</div></section>}
     <section className="record-card"><div className="record-card__heading"><div><span className="record-card__kicker">컨디션 체크</span><h2>오늘의 느낌</h2></div><span className={`record-card__status ${feeling ? 'record-card__status--complete' : ''}`}>{feeling ? '선택 완료' : '필수'}</span></div><div className="feeling-grid">{FEELINGS.map((f) => <button key={f.id} type="button" className={`feeling-btn ${feeling === f.id ? 'feeling-btn--active' : ''}`} onClick={() => setFeeling(f.id)}><span className="feeling-btn__emoji">{f.emoji}</span><span>{f.label}</span></button>)}</div></section>
     <section className="record-card record-card--memo"><div className="record-card__heading"><div><span className="record-card__kicker">선택 입력</span><h2>오늘의 메모</h2></div><span className="record-card__optional">선택</span></div><textarea className="memo-input" placeholder="오늘 운동에서 기억하고 싶은 점을 짧게 적어보세요." value={memo} onChange={(e) => setMemo(e.target.value)} rows={3} /></section>
-    <div className="record-screen__actions"><button type="button" className="secondary-btn" onClick={() => onNavigate('home')}>취소</button><button type="button" className="primary-btn" disabled={!selected.length || !feeling} onClick={complete}>기록 완료</button></div>
+    <div className="record-screen__actions"><button type="button" className="secondary-btn" onClick={() => void cancel()}>취소</button><button type="button" className="primary-btn" disabled={!selected.length || !feeling} onClick={() => void complete()}>기록 완료</button></div>
   </div>;
 }
