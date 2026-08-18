@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameProvider, useGame } from './GameContext';
 
 const auth = vi.hoisted(() => ({ user: null as { id: string } | null }));
@@ -39,6 +39,8 @@ function Probe() {
     </div>
   );
 }
+
+afterEach(() => cleanup());
 
 describe('GameProvider account sync', () => {
   beforeEach(() => {
