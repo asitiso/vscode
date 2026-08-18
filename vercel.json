@@ -1,3 +1,3 @@
 {
-  "buildCommand": "npx vitest run src/navigation/bottomNavState.test.ts src/screens/group/GroupScreens.layout.test.ts src/components/BottomNav.test.tsx"
+  "buildCommand": "npm test && npm run build"
 }
