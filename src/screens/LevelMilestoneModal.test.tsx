@@ -1,8 +1,10 @@
 /** @vitest-environment jsdom */
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LevelMilestoneModal } from './LevelMilestoneModal';
+
+afterEach(() => cleanup());
 
 describe('LevelMilestoneModal', () => {
   it('renders an accessible reward dialog and claims once per click', async () => {
