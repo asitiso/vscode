@@ -21,8 +21,13 @@ import { GroupEntryScreen } from './screens/group/GroupEntryScreen';
 import { CardSetCompletionModal } from './screens/CardSetCompletionModal';
 import { useViewportState } from './hooks/useViewportState';
 import { useFocusedFieldVisibility } from './hooks/useFocusedFieldVisibility';
+import {
+  getBottomNavState,
+  type AppNavigationScreenId,
+  type BottomNavTabId,
+} from './navigation/bottomNavState';
 
-export type ScreenId = 'home' | 'record' | 'pack-opening' | 'collection' | 'rewards' | 'settings' | 'group';
+export type ScreenId = AppNavigationScreenId;
 
 function AppShell() {
   const viewport = useViewportState();
@@ -36,13 +41,12 @@ function AppShell() {
     setScreen(next);
   }
 
-  function navigateFromBottomNav(next: ScreenId) {
+  function navigateFromBottomNav(next: BottomNavTabId) {
     if (next === screen) return;
     navigate(next);
   }
 
-  const showBottomNav = screen !== 'pack-opening' && screen !== 'group' && !viewport.isKeyboardOpen;
-  const activeTab: ScreenId = screen === 'pack-opening' ? 'home' : screen === 'group' ? 'settings' : screen;
+  const bottomNav = getBottomNavState(screen, viewport.isKeyboardOpen);
 
   return (
     <div ref={shellRef} className="app-shell" data-keyboard-open={viewport.isKeyboardOpen ? 'true' : 'false'}>
@@ -57,7 +61,7 @@ function AppShell() {
         {screen === 'settings' && <SettingsScreen onNavigate={navigate} />}
         {screen === 'group' && <GroupEntryScreen onBack={() => navigate('settings')} />}
       </div>
-      {showBottomNav && <BottomNav active={activeTab} onSelect={navigateFromBottomNav} />}
+      {bottomNav.visible && <BottomNav active={bottomNav.active} onSelect={navigateFromBottomNav} />}
       <CardSetCompletionModal />
       <AccountSaveConflictModal />
     </div>
