@@ -1,5 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import screens from './GameUiScreens.css?raw';
+
+const screens = readFileSync(
+  fileURLToPath(new URL('./GameUiScreens.css', import.meta.url)),
+  'utf8',
+);
 
 describe('screen game UI polish', () => {
   it('covers all primary app screens', () => {
