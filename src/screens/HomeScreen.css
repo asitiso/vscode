@@ -106,3 +106,40 @@
 .home-screen__cta { left: 6%; right: 6%; top: 39%; z-index: 50; height: clamp(50px, 13vw, 60px); border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(180deg, var(--yellow) 0%, var(--orange) 55%, var(--orange-deep) 100%); color: #ffffff; font-family: var(--font-display); font-size: clamp(0.95rem, 3.8vw, 1.1rem); border: none; border-bottom: 4px solid #d9560f; box-shadow: 0 6px 16px rgba(255, 138, 61, 0.5); cursor: pointer; transition: transform 0.1s ease, border-bottom-width 0.1s ease; }
 .home-screen__cta:active { transform: translateY(3px); border-bottom-width: 1px; }
 .home-screen__cta-icon { font-size: 1.15em; }
+
+/* ── 홈 운동 타이머 ───────────────────────────────────────── */
+.home-screen__workout-timer {
+  left: 7%;
+  top: 48%;
+  z-index: 55;
+  display: flex;
+  width: 56px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0;
+  border: 2px solid rgba(111, 73, 216, 0.2);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  color: #5d36cf;
+  box-shadow: 0 8px 20px rgba(76, 52, 136, 0.2);
+  cursor: pointer;
+  transition: width 0.18s ease, transform 0.12s ease, background 0.18s ease;
+}
+.home-screen__workout-timer:active { transform: scale(0.95); }
+.home-screen__workout-timer-icon { font-size: 1.45rem; line-height: 1; }
+.home-screen__workout-timer--running {
+  width: 112px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(111, 73, 216, 0.98), rgba(91, 67, 201, 0.98));
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(91, 67, 201, 0.35);
+}
+.home-screen__workout-timer-time {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
