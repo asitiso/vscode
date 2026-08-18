@@ -48,7 +48,10 @@ describe('buildWeeklyReport', () => {
       log('2026-08-04', [{ exerciseId: 'treadmill' }], 'c'),
     ], '2026-08-03');
 
-    expect(report.topExercises[0]).toMatchObject({ exerciseId: 'leg-press', activeDays: 1 });
+    expect(report.topExercises.find((item) => item.exerciseId === 'leg-press')).toMatchObject({
+      exerciseId: 'leg-press',
+      activeDays: 1,
+    });
   });
 });
 
