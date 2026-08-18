@@ -126,6 +126,12 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             <span className="hud-badge__subtitle">{groupShortcut.subtitle}</span>
           </span>
         </button>
+        <HomeWorkoutTimerButton
+          status={workoutTimer.status}
+          elapsedSeconds={workoutTimer.elapsedSeconds}
+          onStart={workoutTimer.start}
+          onStop={workoutTimer.stop}
+        />
         <div className="hud-badge hud-badge--streak">
           <span className="hud-badge__icon">🔥</span>
           <div className="hud-badge__text"><span className="hud-badge__title">{weeklyProgress.streak}주 연속</span><span className="hud-badge__subtitle">주간 목표 달성</span></div>
@@ -155,13 +161,6 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         <span className="home-screen__cta-icon">💪</span>
         {todayLogged ? '오늘 운동 추가 기록하기' : '오늘 운동 기록하기'}
       </button>
-
-      <HomeWorkoutTimerButton
-        status={workoutTimer.status}
-        elapsedSeconds={workoutTimer.elapsedSeconds}
-        onStart={workoutTimer.start}
-        onStop={workoutTimer.stop}
-      />
 
       <div className="home-screen__layer home-screen__character">
         <span className="character-platform" />
