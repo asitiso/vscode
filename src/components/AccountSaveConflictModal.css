@@ -1,0 +1,86 @@
+.account-save-conflict {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(18, 32, 38, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.account-save-conflict__card {
+  width: min(100%, 360px);
+  box-sizing: border-box;
+  border-radius: 22px;
+  padding: 20px;
+  background: #ffffff;
+  border: 2px solid #eef3f2;
+  box-shadow: 0 18px 40px rgba(18, 32, 38, 0.24);
+  color: var(--ink);
+}
+
+.account-save-conflict__eyebrow {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--orange-deep);
+}
+
+.account-save-conflict__card h2 {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+}
+
+.account-save-conflict__card p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.account-save-conflict__actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.account-save-conflict__button {
+  min-height: 46px;
+  border-radius: 12px;
+  border: 2px solid #dce7e5;
+  background: #ffffff;
+  color: var(--ink);
+  font-family: var(--font-display);
+  cursor: pointer;
+}
+
+.account-save-conflict__button--server {
+  border-color: #4d98d6;
+  background: linear-gradient(180deg, #75c5ff, #468fce);
+  color: #ffffff;
+}
+
+.account-save-conflict__button--device {
+  border-color: #f2b26b;
+  background: #fff7ec;
+  color: #9d4a13;
+}
+
+.account-save-conflict__button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.account-save-conflict__card small {
+  display: block;
+  margin-top: 12px;
+  color: var(--ink-soft);
+  font-size: 0.66rem;
+  line-height: 1.45;
+}
