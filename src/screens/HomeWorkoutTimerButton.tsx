@@ -25,15 +25,18 @@ export function HomeWorkoutTimerButton({ status, elapsedSeconds, onStart, onStop
   return (
     <button
       type="button"
-      className={`home-screen__layer home-screen__workout-timer ${running ? 'home-screen__workout-timer--running' : ''}`}
+      className={`hud-badge hud-badge--workout ${running ? 'hud-badge--workout-running' : ''}`}
       aria-label={running ? `운동 타이머 ${elapsedLabel} 종료` : '운동 타이머 시작'}
       onClick={() => {
         if (running) void onStop();
         else void onStart();
       }}
     >
-      <span className="home-screen__workout-timer-icon" aria-hidden="true">⏱</span>
-      {running && <span className="home-screen__workout-timer-time" aria-live="polite">{elapsedLabel}</span>}
+      <span className="hud-badge__icon" aria-hidden="true">⏱</span>
+      <span className="hud-badge__text">
+        <span className="hud-badge__title">{running ? elapsedLabel : '운동'}</span>
+        <span className="hud-badge__subtitle">{running ? '운동 중 · 탭해 종료' : '타이머 시작'}</span>
+      </span>
     </button>
   );
 }
