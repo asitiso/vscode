@@ -8,10 +8,12 @@ const css = readFileSync(
 )
 
 describe('home HUD layout', () => {
-  it('keeps level, group, workout, and streak badges in four equal columns', () => {
-    expect(css).toMatch(
-      /\.home-screen__top-panel\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\);/,
-    )
+  it('keeps level, group, workout, and streak badges in four equal columns on one row', () => {
+    const panelBlock = css.match(/\.home-screen__top-panel\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
+
+    expect(panelBlock).toMatch(/grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\);/)
+    expect(panelBlock).toMatch(/grid-template-rows:\s*minmax\(0,\s*1fr\);/)
+    expect(panelBlock).toMatch(/grid-auto-flow:\s*column;/)
   })
 
   it('does not keep the old floating circular workout timer position', () => {
