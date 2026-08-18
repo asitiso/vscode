@@ -30,9 +30,10 @@
   left: 4%;
   right: 4%;
   z-index: 40;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(4px, 1.5vw, 8px);
 }
 
 .hud-badge {
@@ -43,6 +44,39 @@
   border-radius: 999px;
   padding: 5px clamp(10px, 3vw, 14px) 5px 5px;
   box-shadow: 0 4px 10px rgba(30, 50, 60, 0.14);
+}
+
+.hud-badge--level {
+  justify-self: start;
+}
+
+.hud-badge--streak {
+  justify-self: end;
+}
+
+.hud-badge--group {
+  justify-self: center;
+  min-width: 0;
+  border: 1px solid rgba(116, 103, 221, 0.16);
+  padding-right: clamp(8px, 2vw, 11px);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.hud-badge--group:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 6px rgba(30, 50, 60, 0.14);
+}
+
+.hud-badge--group .hud-badge__icon {
+  background: linear-gradient(160deg, #d9d5ff, #8f83ed);
+}
+
+.hud-badge--group .hud-badge__title,
+.hud-badge--group .hud-badge__subtitle {
+  white-space: nowrap;
 }
 
 .hud-badge__icon {
@@ -76,6 +110,27 @@
 .hud-badge__subtitle {
   font-size: clamp(0.55rem, 2.2vw, 0.65rem);
   color: var(--ink-soft);
+}
+
+@media (max-width: 390px) {
+  .home-screen__top-panel {
+    left: 3%;
+    right: 3%;
+    gap: 3px;
+  }
+
+  .hud-badge {
+    gap: 4px;
+    padding-right: 7px;
+  }
+
+  .hud-badge--group {
+    padding-right: 6px;
+  }
+
+  .hud-badge--group .hud-badge__subtitle {
+    display: none;
+  }
 }
 
 /* ── 캐릭터 (하단) ────────────────────────────────────────── */
