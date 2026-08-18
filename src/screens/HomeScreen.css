@@ -158,7 +158,9 @@
 .recent-card--legendary { border-color: var(--rarity-legendary); background: var(--rarity-legendary-bg); }
 .recent-card__stars { position: absolute; bottom: 2px; right: 4px; font-size: 0.6rem; color: var(--rarity-legendary); text-shadow: 0 0 2px rgba(0, 0, 0, 0.5); }
 
-/* ── 오늘 운동 기록하기 버튼 ──────────────────────────────── */
-.home-screen__cta { left: 6%; right: 6%; top: 39%; z-index: 50; height: clamp(50px, 13vw, 60px); border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(180deg, var(--yellow) 0%, var(--orange) 55%, var(--orange-deep) 100%); color: #ffffff; font-family: var(--font-display); font-size: clamp(0.95rem, 3.8vw, 1.1rem); border: none; border-bottom: 4px solid #d9560f; box-shadow: 0 6px 16px rgba(255, 138, 61, 0.5); cursor: pointer; transition: transform 0.1s ease, border-bottom-width 0.1s ease; }
+/* ── 홈 운동 시작/종료 메인 버튼 ─────────────────────────── */
+.home-screen__cta { left: 6%; right: 6%; top: 39%; z-index: 50; height: clamp(54px, 14vw, 62px); border-radius: 999px; display: flex; align-items: center; justify-content: center; gap: 9px; background: linear-gradient(180deg, var(--yellow) 0%, var(--orange) 55%, var(--orange-deep) 100%); color: #ffffff; font-family: var(--font-display); font-size: clamp(1rem, 4vw, 1.15rem); border: none; border-bottom: 4px solid #d9560f; box-shadow: 0 7px 18px rgba(255, 138, 61, 0.5); cursor: pointer; transition: transform 0.1s ease, border-bottom-width 0.1s ease, box-shadow 0.18s ease, background 0.18s ease; }
+.home-screen__cta--running { background: linear-gradient(180deg, #8f7cf2 0%, #6f49d8 58%, #5730b8 100%); border-bottom: 4px solid #45269b; box-shadow: 0 7px 18px rgba(91, 67, 201, 0.42); }
 .home-screen__cta:active { transform: translateY(3px); border-bottom-width: 1px; }
-.home-screen__cta-icon { font-size: 1.15em; }
+.home-screen__cta-icon { font-size: clamp(1.15rem, 4.8vw, 1.35rem); line-height: 1; }
+.home-screen__cta--running .home-screen__cta-icon { transform: scale(0.92); }
