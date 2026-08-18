@@ -7,9 +7,13 @@ const css = readFileSync(
   'utf8',
 )
 
+function readClassBlock(className: string) {
+  return css.match(new RegExp(`(?:^|\\n)\\.${className}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1] ?? ''
+}
+
 describe('home HUD layout', () => {
   it('keeps level, group, workout, and streak badges in four equal columns on one row', () => {
-    const panelBlock = css.match(/\.home-screen__top-panel\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
+    const panelBlock = readClassBlock('home-screen__top-panel')
 
     expect(panelBlock).toMatch(/grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\);/)
     expect(panelBlock).toMatch(/grid-template-rows:\s*minmax\(0,\s*1fr\);/)
@@ -17,10 +21,10 @@ describe('home HUD layout', () => {
   })
 
   it('uses compact near-square capsules with a large icon/title row and full-width subtitle row', () => {
-    const badgeBlock = css.match(/\.hud-badge\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
-    const iconBlock = css.match(/\.hud-badge__icon\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
-    const titleBlock = css.match(/\.hud-badge__title\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
-    const subtitleBlock = css.match(/\.hud-badge__subtitle\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
+    const badgeBlock = readClassBlock('hud-badge')
+    const iconBlock = readClassBlock('hud-badge__icon')
+    const titleBlock = readClassBlock('hud-badge__title')
+    const subtitleBlock = readClassBlock('hud-badge__subtitle')
 
     expect(badgeBlock).toMatch(/display:\s*grid;/)
     expect(badgeBlock).toMatch(/min-height:\s*clamp\(66px,\s*18vw,\s*72px\);/)
