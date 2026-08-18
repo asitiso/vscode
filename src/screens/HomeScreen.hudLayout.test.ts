@@ -8,15 +8,14 @@ const css = readFileSync(
 )
 
 describe('home HUD layout', () => {
-  it('keeps level, group, and streak badges at equal widths', () => {
+  it('keeps level, group, workout, and streak badges in four equal columns', () => {
     expect(css).toMatch(
-      /\.home-screen__top-panel\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);/,
+      /\.home-screen__top-panel\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\);/,
     )
   })
 
-  it('does not override the three equal columns on narrow screens', () => {
-    const narrowBlock = css.match(/@media \(max-width: 390px\)\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
-
-    expect(narrowBlock).not.toMatch(/grid-template-columns:/)
+  it('does not keep the old floating circular workout timer position', () => {
+    expect(css).not.toContain('left: 7%')
+    expect(css).not.toContain('top: 48%')
   })
 })
