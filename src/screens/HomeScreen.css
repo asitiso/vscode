@@ -16,7 +16,7 @@
   right: 4%;
   z-index: 40;
   display: grid;
-  grid-template-columns: minmax(0, 32fr) minmax(0, 32fr) minmax(0, 36fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
   gap: clamp(4px, 1.5vw, 8px);
 }
@@ -68,7 +68,7 @@
 .hud-badge__subtitle { overflow: hidden; font-size: clamp(0.52rem, 2vw, 0.62rem); color: var(--ink-soft); white-space: nowrap; text-overflow: ellipsis; }
 
 @media (max-width: 390px) {
-  .home-screen__top-panel { left: 3%; right: 3%; gap: 3px; grid-template-columns: minmax(0, 31fr) minmax(0, 31fr) minmax(0, 38fr); }
+  .home-screen__top-panel { left: 3%; right: 3%; gap: 3px; }
   .hud-badge { gap: 4px; padding-right: 5px; }
   .hud-badge__icon { width: 25px; height: 25px; font-size: 0.82rem; }
   .hud-badge__title { font-size: clamp(0.64rem, 2.7vw, 0.76rem); }
