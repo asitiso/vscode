@@ -5,6 +5,7 @@ import { useGame } from '../store/GameContext';
 import { PlaceholderArt } from '../components/PlaceholderArt';
 import { HomeCharacterInteraction } from './HomeCharacterInteraction';
 import { LevelMilestoneModal } from './LevelMilestoneModal';
+import { getHomeGroupShortcutCopy } from './homeGroupShortcut';
 import { PACKS_BY_ID } from '../data/packs';
 import { CARDS_BY_ID } from '../data/cards';
 import { calculateExperienceProgress } from '../game/experience';
@@ -37,6 +38,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const highestBadge = getHighestEarnedMilestoneBadge(state.claimedLevelMilestones);
   const remaining = featuredCardSetProgress.missingCardIds.length;
   const missingName = remaining === 1 ? CARDS_BY_ID[featuredCardSetProgress.missingCardIds[0]]?.name : undefined;
+  const groupShortcut = getHomeGroupShortcutCopy();
   const characterDialogueContext = {
     hasUnopenedPack: unopenedPacks.length > 0,
     remainingWeeklySessions: weeklyProgress.remainingThisWeek,
@@ -114,6 +116,13 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             </section>
           )}
         </div>
+        <button type="button" className="hud-badge hud-badge--group" onClick={() => onNavigate('group')} aria-label="내 그룹 열기">
+          <span className="hud-badge__icon">👥</span>
+          <span className="hud-badge__text">
+            <span className="hud-badge__title">{groupShortcut.title}</span>
+            <span className="hud-badge__subtitle">{groupShortcut.subtitle}</span>
+          </span>
+        </button>
         <div className="hud-badge hud-badge--streak">
           <span className="hud-badge__icon">🔥</span>
           <div className="hud-badge__text"><span className="hud-badge__title">{weeklyProgress.streak}주 연속</span><span className="hud-badge__subtitle">주간 목표 달성</span></div>
