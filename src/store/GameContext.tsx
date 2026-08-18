@@ -1,4 +1,14 @@
-import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import type {
   AppState,
   CustomExercise,
@@ -10,8 +20,23 @@ import type {
   WorkoutSetEntry,
 } from '../types';
 import { calcStarLevel } from '../types';
-import { createInitialState, loadState, saveState } from './storage';
+import { createInitialState, loadStateEnvelope, saveState } from './storage';
 import { loadCloudState, saveCloudState, type CloudSaveRecord } from './cloudStorage';
+import {
+  AccountRevisionConflictError,
+  loadAccountCloudState,
+  saveAccountCloudState,
+  type AccountCloudSaveMetadata,
+  type AccountCloudSaveRecord,
+} from './accountCloudStorage';
+import {
+  isLocalDirty,
+  loadAccountSyncMetadata,
+  saveAccountSyncMetadata,
+  type AccountSyncMetadata,
+} from './accountSyncMetadata';
+import { createAccountSaveQueue, decideAccountReconciliation } from './accountSyncCoordinator';
+import { useGroupAuth } from '../group/GroupAuthContext';
 import { categoriesFromEntries, drawCard } from '../game/cardDraw';
 import { selectPackForCategories } from '../game/packSelector';
 import { computeWeeklyProgress } from '../game/weeklyGoal';
@@ -26,6 +51,12 @@ import {
 
 export type CustomExerciseInput = { name: string; logType: ExerciseLogType };
 export type CloudOperationStatus = 'idle' | 'saving' | 'loading' | 'success' | 'error';
+export type AccountSyncStatus = 'signed-out' | 'checking' | 'linked' | 'saving' | 'error' | 'conflict';
+
+export interface AccountSaveConflict {
+  server: AccountCloudSaveRecord;
+  localSavedAt: string;
+}
 
 export type Action =
   | { type: 'COMPLETE_WORKOUT'; entries: WorkoutSetEntry[]; feeling: FeelingTag; memo?: string }
@@ -198,6 +229,13 @@ interface GameContextValue {
   cloudOperationStatus: CloudOperationStatus;
   cloudOperationMessage: string;
   lastCloudSavedAt: string | null;
+  accountSyncStatus: AccountSyncStatus;
+  accountSyncMessage: string;
+  accountLastSavedAt: string | null;
+  accountConflict: AccountSaveConflict | null;
+  saveAccountNow: () => Promise<void>;
+  resolveAccountConflict: (choice: 'server' | 'device') => Promise<void>;
+  prepareAccountSignOut: () => Promise<'ready' | 'save-failed'>;
   todayLogged: boolean;
   unopenedPacks: GrantedPack[];
   weeklyProgress: ReturnType<typeof computeWeeklyProgress>;
@@ -206,17 +244,264 @@ interface GameContextValue {
   featuredCardSetProgress: ReturnType<typeof selectFeaturedProgress>;
 }
 
+interface AccountSaveRequest {
+  userId: string;
+  state: AppState;
+  localSavedAt: string;
+  expectedRevisionOverride?: number | null;
+}
+
 const GameContext = createContext<GameContextValue | null>(null);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(gameReducer, undefined, () => loadState() ?? createInitialState());
+  const { user } = useGroupAuth();
+  const [initialEnvelope] = useState(() => loadStateEnvelope());
+  const [state, dispatch] = useReducer(
+    gameReducer,
+    undefined,
+    () => initialEnvelope?.state ?? createInitialState(),
+  );
   const [cloudOperationStatus, setCloudOperationStatus] = useState<CloudOperationStatus>('idle');
   const [cloudOperationMessage, setCloudOperationMessage] = useState('');
   const [lastCloudSavedAt, setLastCloudSavedAt] = useState<string | null>(null);
+  const [accountSyncStatus, setAccountSyncStatus] = useState<AccountSyncStatus>(user ? 'checking' : 'signed-out');
+  const [accountSyncMessage, setAccountSyncMessage] = useState('');
+  const [accountLastSavedAt, setAccountLastSavedAt] = useState<string | null>(null);
+  const [accountConflict, setAccountConflictState] = useState<AccountSaveConflict | null>(null);
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const userIdRef = useRef<string | null>(user?.id ?? null);
+  userIdRef.current = user?.id ?? null;
+  const localSavedAtRef = useRef<string | null>(initialEnvelope?.savedAt ?? null);
+  const metadataRef = useRef<AccountSyncMetadata | null>(null);
+  const accountConflictRef = useRef<AccountSaveConflict | null>(null);
+  const initialStateEffectSeenRef = useRef(false);
+  const skipNextStateSaveRef = useRef(false);
+  const pendingImportantSaveRef = useRef(false);
+
+  function setAccountConflict(value: AccountSaveConflict | null): void {
+    accountConflictRef.current = value;
+    setAccountConflictState(value);
+  }
+
+  const saveQueueRef = useRef(
+    createAccountSaveQueue<AccountSaveRequest, AccountCloudSaveMetadata>(async (request) => {
+      if (userIdRef.current !== request.userId) {
+        throw new Error('계정이 변경되어 이전 계정 저장을 중단했습니다.');
+      }
+      const expectedRevision = Object.prototype.hasOwnProperty.call(request, 'expectedRevisionOverride')
+        ? request.expectedRevisionOverride ?? null
+        : metadataRef.current?.serverRevision ?? null;
+      return saveAccountCloudState(request.state, request.localSavedAt, expectedRevision);
+    }),
+  );
+
+  const ensureLocalEnvelope = useCallback((snapshot: AppState = stateRef.current): string => {
+    if (localSavedAtRef.current) return localSavedAtRef.current;
+    const envelope = saveState(snapshot);
+    localSavedAtRef.current = envelope.savedAt;
+    return envelope.savedAt;
+  }, []);
+
+  const persistMetadata = useCallback((metadata: AccountSyncMetadata) => {
+    metadataRef.current = metadata;
+    saveAccountSyncMetadata(metadata);
+  }, []);
+
+  const applyServerRecord = useCallback((record: AccountCloudSaveRecord, userId: string) => {
+    skipNextStateSaveRef.current = true;
+    dispatch({ type: 'REPLACE_STATE', state: record.state });
+    const envelope = saveState(record.state, record.clientSavedAt);
+    localSavedAtRef.current = envelope.savedAt;
+    persistMetadata({
+      userId,
+      serverRevision: record.revision,
+      lastSyncedLocalSavedAt: envelope.savedAt,
+      lastServerUpdatedAt: record.updatedAt,
+      linked: true,
+    });
+    setAccountLastSavedAt(record.clientSavedAt);
+    setAccountConflict(null);
+    setAccountSyncStatus('linked');
+    setAccountSyncMessage('계정 데이터를 불러왔습니다.');
+  }, [persistMetadata]);
+
+  const saveAccountSnapshot = useCallback(async (
+    snapshot: AppState,
+    localSavedAt: string,
+    options: { expectedRevisionOverride?: number | null; silentError?: boolean } = {},
+  ): Promise<AccountCloudSaveMetadata> => {
+    const userId = userIdRef.current;
+    if (!userId) throw new Error('로그인이 필요합니다.');
+    if (accountConflictRef.current && !Object.prototype.hasOwnProperty.call(options, 'expectedRevisionOverride')) {
+      throw new Error('저장 데이터 충돌을 먼저 해결해 주세요.');
+    }
+
+    if (!options.silentError) {
+      setAccountSyncStatus('saving');
+      setAccountSyncMessage('계정에 저장하는 중…');
+    }
+
+    const request: AccountSaveRequest = { userId, state: snapshot, localSavedAt };
+    if (Object.prototype.hasOwnProperty.call(options, 'expectedRevisionOverride')) {
+      request.expectedRevisionOverride = options.expectedRevisionOverride ?? null;
+    }
+
+    try {
+      const result = await saveQueueRef.current.enqueue(request);
+      if (userIdRef.current !== userId) return result;
+      persistMetadata({
+        userId,
+        serverRevision: result.revision,
+        lastSyncedLocalSavedAt: localSavedAt,
+        lastServerUpdatedAt: result.updatedAt,
+        linked: true,
+      });
+      setAccountLastSavedAt(result.clientSavedAt);
+      setAccountSyncStatus('linked');
+      setAccountSyncMessage('계정에 저장되었습니다.');
+      return result;
+    } catch (error) {
+      if (error instanceof AccountRevisionConflictError) {
+        try {
+          const latest = await loadAccountCloudState();
+          if (latest && userIdRef.current === userId) {
+            const conflictLocalSavedAt = localSavedAtRef.current ?? localSavedAt;
+            setAccountConflict({ server: latest, localSavedAt: conflictLocalSavedAt });
+            setAccountSyncStatus('conflict');
+            setAccountSyncMessage('다른 기기의 최신 저장 데이터가 있습니다.');
+          } else if (userIdRef.current === userId) {
+            setAccountSyncStatus('error');
+            setAccountSyncMessage('최신 계정 저장 데이터를 확인하지 못했습니다.');
+          }
+        } catch (loadError) {
+          if (userIdRef.current === userId) {
+            setAccountSyncStatus('error');
+            setAccountSyncMessage(loadError instanceof Error ? loadError.message : '최신 계정 저장 데이터를 확인하지 못했습니다.');
+          }
+        }
+      } else if (!options.silentError && userIdRef.current === userId) {
+        setAccountSyncStatus('error');
+        setAccountSyncMessage(error instanceof Error ? error.message : '계정 저장에 실패했습니다.');
+      }
+      throw error;
+    }
+  }, [persistMetadata]);
+
+  const saveCurrentAccountIfDirty = useCallback(async (options: { silentError?: boolean } = {}) => {
+    const userId = userIdRef.current;
+    if (!userId) return;
+    if (accountConflictRef.current) throw new Error('저장 데이터 충돌을 먼저 해결해 주세요.');
+    const localSavedAt = ensureLocalEnvelope(stateRef.current);
+    if (!isLocalDirty(localSavedAt, metadataRef.current)) return;
+    await saveAccountSnapshot(stateRef.current, localSavedAt, options);
+  }, [ensureLocalEnvelope, saveAccountSnapshot]);
 
   useEffect(() => {
-    saveState(state);
-  }, [state]);
+    if (!initialStateEffectSeenRef.current) {
+      initialStateEffectSeenRef.current = true;
+      return;
+    }
+    if (skipNextStateSaveRef.current) {
+      skipNextStateSaveRef.current = false;
+      return;
+    }
+
+    const envelope = saveState(state);
+    localSavedAtRef.current = envelope.savedAt;
+
+    if (pendingImportantSaveRef.current) {
+      pendingImportantSaveRef.current = false;
+      void saveAccountSnapshot(state, envelope.savedAt).catch(() => undefined);
+    }
+  }, [state, saveAccountSnapshot]);
+
+  useEffect(() => {
+    const userId = user?.id ?? null;
+    userIdRef.current = userId;
+
+    if (!userId) {
+      metadataRef.current = null;
+      setAccountConflict(null);
+      setAccountSyncStatus('signed-out');
+      setAccountSyncMessage('');
+      setAccountLastSavedAt(null);
+      return;
+    }
+
+    let alive = true;
+    setAccountSyncStatus('checking');
+    setAccountSyncMessage('계정 저장 데이터를 확인하는 중…');
+
+    void (async () => {
+      try {
+        const serverRecord = await loadAccountCloudState();
+        if (!alive || userIdRef.current !== userId) return;
+
+        const metadata = loadAccountSyncMetadata(userId);
+        metadataRef.current = metadata;
+        const localSavedAt = localSavedAtRef.current;
+        const localDirty = isLocalDirty(localSavedAt, metadata);
+        const decision = decideAccountReconciliation({ metadata, serverRecord, localSavedAt, localDirty });
+
+        if (decision === 'upload-local') {
+          const savedAt = ensureLocalEnvelope(stateRef.current);
+          await saveAccountSnapshot(stateRef.current, savedAt, { expectedRevisionOverride: null });
+          return;
+        }
+
+        if (!serverRecord) return;
+
+        if (decision === 'use-server') {
+          applyServerRecord(serverRecord, userId);
+          return;
+        }
+
+        if (decision === 'prompt') {
+          const savedAt = ensureLocalEnvelope(stateRef.current);
+          setAccountConflict({ server: serverRecord, localSavedAt: savedAt });
+          setAccountLastSavedAt(serverRecord.clientSavedAt);
+          setAccountSyncStatus('conflict');
+          setAccountSyncMessage('계정 데이터와 이 기기 데이터 중 사용할 데이터를 선택해 주세요.');
+          return;
+        }
+
+        persistMetadata({
+          userId,
+          serverRevision: serverRecord.revision,
+          lastSyncedLocalSavedAt: metadata?.lastSyncedLocalSavedAt ?? serverRecord.clientSavedAt,
+          lastServerUpdatedAt: serverRecord.updatedAt,
+          linked: true,
+        });
+        setAccountLastSavedAt(serverRecord.clientSavedAt);
+        setAccountSyncStatus('linked');
+        setAccountSyncMessage('계정 저장이 연결되어 있습니다.');
+      } catch (error) {
+        if (!alive || userIdRef.current !== userId) return;
+        if (accountConflictRef.current) return;
+        setAccountSyncStatus('error');
+        setAccountSyncMessage(error instanceof Error ? error.message : '계정 저장 데이터를 확인하지 못했습니다.');
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [user?.id, applyServerRecord, ensureLocalEnvelope, persistMetadata, saveAccountSnapshot]);
+
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState !== 'hidden') return;
+      if (!userIdRef.current || accountConflictRef.current) return;
+      const localSavedAt = localSavedAtRef.current;
+      if (!isLocalDirty(localSavedAt, metadataRef.current)) return;
+      void saveCurrentAccountIfDirty({ silentError: true }).catch(() => undefined);
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [saveCurrentAccountIfDirty]);
 
   const today = getLocalDateKey();
   const todayLogged = state.workoutLogs.some((log) => log.date === today);
@@ -237,7 +522,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setCloudOperationMessage('중간 저장 중…');
     try {
       const savedAt = new Date().toISOString();
-      const result = await saveCloudState(state, savedAt);
+      const result = await saveCloudState(stateRef.current, savedAt);
       setLastCloudSavedAt(result.clientSavedAt);
       setCloudOperationStatus('success');
       setCloudOperationMessage('중간 저장이 완료되었습니다.');
@@ -275,16 +560,85 @@ export function GameProvider({ children }: { children: ReactNode }) {
   function restoreManualCloudSlot(record: CloudSaveRecord): void {
     dispatch({ type: 'REPLACE_STATE', state: record.state });
     saveState(record.state, record.clientSavedAt);
+    localSavedAtRef.current = record.clientSavedAt;
     setLastCloudSavedAt(record.clientSavedAt);
     setCloudOperationStatus('success');
     setCloudOperationMessage('중간 저장을 불러왔습니다.');
   }
 
+  async function saveAccountNow(): Promise<void> {
+    if (!userIdRef.current) {
+      setAccountSyncStatus('signed-out');
+      setAccountSyncMessage('로그인하면 계정 저장을 사용할 수 있습니다.');
+      return;
+    }
+    if (accountConflictRef.current) {
+      setAccountSyncStatus('conflict');
+      setAccountSyncMessage('저장 데이터 충돌을 먼저 해결해 주세요.');
+      return;
+    }
+    const localSavedAt = ensureLocalEnvelope(stateRef.current);
+    if (!isLocalDirty(localSavedAt, metadataRef.current)) {
+      setAccountSyncStatus('linked');
+      setAccountSyncMessage('이미 최신 상태입니다.');
+      return;
+    }
+    await saveAccountSnapshot(stateRef.current, localSavedAt);
+  }
+
+  async function resolveAccountConflict(choice: 'server' | 'device'): Promise<void> {
+    const conflict = accountConflictRef.current;
+    const userId = userIdRef.current;
+    if (!conflict || !userId) return;
+
+    if (choice === 'server') {
+      applyServerRecord(conflict.server, userId);
+      return;
+    }
+
+    const localSavedAt = ensureLocalEnvelope(stateRef.current);
+    await saveAccountSnapshot(stateRef.current, localSavedAt, {
+      expectedRevisionOverride: conflict.server.revision,
+    });
+    setAccountConflict(null);
+    setAccountSyncStatus('linked');
+    setAccountSyncMessage('이 기기 데이터를 계정에 저장했습니다.');
+  }
+
+  async function prepareAccountSignOut(): Promise<'ready' | 'save-failed'> {
+    if (!userIdRef.current) return 'ready';
+    if (accountConflictRef.current) return 'save-failed';
+    const localSavedAt = localSavedAtRef.current;
+    if (!isLocalDirty(localSavedAt, metadataRef.current)) return 'ready';
+    try {
+      await saveCurrentAccountIfDirty();
+      return 'ready';
+    } catch {
+      return 'save-failed';
+    }
+  }
+
   const value: GameContextValue = {
     state,
-    completeWorkout: (entries, feeling, memo) => dispatch({ type: 'COMPLETE_WORKOUT', entries, feeling, memo }),
-    openPack: (packId) => dispatch({ type: 'OPEN_PACK', packId }),
-    claimLevelMilestone: (level, currentLevel) => dispatch({ type: 'CLAIM_LEVEL_MILESTONE', level, currentLevel }),
+    completeWorkout: (entries, feeling, memo) => {
+      pendingImportantSaveRef.current = Boolean(userIdRef.current);
+      dispatch({ type: 'COMPLETE_WORKOUT', entries, feeling, memo });
+    },
+    openPack: (packId) => {
+      const pack = stateRef.current.grantedPacks.find((item) => item.id === packId);
+      pendingImportantSaveRef.current = Boolean(userIdRef.current && pack && !pack.openedAt);
+      dispatch({ type: 'OPEN_PACK', packId });
+    },
+    claimLevelMilestone: (level, currentLevel) => {
+      pendingImportantSaveRef.current = Boolean(
+        userIdRef.current
+        && isLevelMilestone(level)
+        && level <= currentLevel
+        && !stateRef.current.claimedLevelMilestones.includes(level)
+        && PACKS_BY_ID['pack-level-milestone'],
+      );
+      dispatch({ type: 'CLAIM_LEVEL_MILESTONE', level, currentLevel });
+    },
     createCustomExercise: (input) => {
       const now = new Date().toISOString();
       const exercise: CustomExercise = {
@@ -310,6 +664,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
     cloudOperationStatus,
     cloudOperationMessage,
     lastCloudSavedAt,
+    accountSyncStatus,
+    accountSyncMessage,
+    accountLastSavedAt,
+    accountConflict,
+    saveAccountNow,
+    resolveAccountConflict,
+    prepareAccountSignOut,
     todayLogged,
     unopenedPacks,
     weeklyProgress,
