@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createInitialState, loadState } from './storage';
+import { createInitialState, loadState, loadStateEnvelope, saveState } from './storage';
 
 describe('storage migration', () => {
   beforeEach(() => localStorage.clear());
@@ -76,5 +76,11 @@ describe('storage migration', () => {
     };
     localStorage.setItem('workout-card-game:v1', JSON.stringify(oldState));
     expect(loadState()?.grantedPacks).toEqual([]);
+  });
+
+  it('저장 envelope의 savedAt을 읽을 때 그대로 보존한다', () => {
+    const savedAt = '2026-08-18T10:15:30.000Z';
+    saveState(createInitialState(), savedAt);
+    expect(loadStateEnvelope()?.savedAt).toBe(savedAt);
   });
 });
