@@ -1,8 +1,8 @@
 import './BottomNav.css';
 import { PlaceholderArt } from './PlaceholderArt';
-import type { ScreenId } from '../App';
+import type { BottomNavTabId } from '../navigation/bottomNavState';
 
-const TABS: { id: ScreenId; label: string; emoji: string; asset: string }[] = [
+const TABS: { id: BottomNavTabId; label: string; emoji: string; asset: string }[] = [
   { id: 'home', label: '홈', emoji: '🏠', asset: 'nav-home' },
   { id: 'record', label: '기록', emoji: '📝', asset: 'nav-record' },
   { id: 'collection', label: '도감', emoji: '🗂️', asset: 'nav-collection' },
@@ -11,8 +11,8 @@ const TABS: { id: ScreenId; label: string; emoji: string; asset: string }[] = [
 ];
 
 interface BottomNavProps {
-  active: ScreenId;
-  onSelect: (id: ScreenId) => void;
+  active: BottomNavTabId | null;
+  onSelect: (id: BottomNavTabId) => void;
 }
 
 export function BottomNav({ active, onSelect }: BottomNavProps) {
