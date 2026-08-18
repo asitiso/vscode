@@ -16,6 +16,21 @@ describe('home HUD layout', () => {
     expect(panelBlock).toMatch(/grid-auto-flow:\s*column;/)
   })
 
+  it('uses compact near-square capsules with a large icon/title row and full-width subtitle row', () => {
+    const badgeBlock = css.match(/\.hud-badge\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
+    const iconBlock = css.match(/\.hud-badge__icon\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
+    const titleBlock = css.match(/\.hud-badge__title\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
+    const subtitleBlock = css.match(/\.hud-badge__subtitle\s*\{([\s\S]*?)\n\}/)?.[1] ?? ''
+
+    expect(badgeBlock).toMatch(/display:\s*grid;/)
+    expect(badgeBlock).toMatch(/min-height:\s*clamp\(66px,\s*18vw,\s*72px\);/)
+    expect(badgeBlock).toMatch(/grid-template-columns:\s*auto\s+minmax\(0,\s*1fr\);/)
+    expect(iconBlock).toMatch(/width:\s*clamp\(29px,\s*8vw,\s*32px\);/)
+    expect(titleBlock).toMatch(/font-size:\s*clamp\(0\.78rem,\s*3\.25vw,\s*0\.88rem\);/)
+    expect(subtitleBlock).toMatch(/grid-column:\s*1\s*\/\s*-1;/)
+    expect(subtitleBlock).toMatch(/font-size:\s*clamp\(0\.6rem,\s*2\.45vw,\s*0\.68rem\);/)
+  })
+
   it('does not keep the old floating circular workout timer position', () => {
     expect(css).not.toContain('left: 7%')
     expect(css).not.toContain('top: 48%')
