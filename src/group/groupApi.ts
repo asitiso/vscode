@@ -149,6 +149,7 @@ export async function loadGroupDetail(groupId: string): Promise<GroupDetail> {
     client.from('group_members').select('user_id').eq('group_id', groupId),
   ]);
   throwMapped(groupError); throwMapped(membershipsError);
+  if (!group) throw new Error('NOT_GROUP_MEMBER');
   const userIds = (memberships ?? []).map((row) => row.user_id);
   if (!userIds.length) throw new Error('NOT_GROUP_MEMBER');
 
