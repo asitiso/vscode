@@ -3,6 +3,7 @@ import './SettingsScreen.css';
 import { useGame } from '../store/GameContext';
 import { SELECTABLE_CHARACTERS } from '../data/assetManifest';
 import { PlaceholderArt } from '../components/PlaceholderArt';
+import { GroupNicknameSettings } from './group/GroupNicknameSettings';
 import type { ScreenId } from '../App';
 
 function formatSavedAt(value: string | null): string {
@@ -86,6 +87,8 @@ export function SettingsScreen({ onNavigate }: { onNavigate: (screen: ScreenId) 
         </div>
         <button type="button" className="settings-save-btn" onClick={() => onNavigate('group')}>그룹 보기</button>
       </section>
+
+      <GroupNicknameSettings />
 
       <section className="settings-section settings-section--cloud" aria-labelledby="cloud-save-title">
         <div className="cloud-save__heading">
