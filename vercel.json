@@ -1,0 +1,3 @@
+{
+  "buildCommand": "npx vitest run src/store/account src/store/GameContext.accountSync src/components/AccountSaveConflictModal src/store/storage src/group/GroupAuthContext && npm run build"
+}
