@@ -2,6 +2,7 @@ interface HomeWorkoutTimerButtonProps {
   status: 'idle' | 'running';
   elapsedSeconds: number;
   onStart: () => void | Promise<void>;
+  onStop: () => void | Promise<void>;
 }
 
 function formatElapsed(seconds: number) {
@@ -17,7 +18,7 @@ function formatElapsed(seconds: number) {
   return [minutes, secs].map((value) => String(value).padStart(2, '0')).join(':');
 }
 
-export function HomeWorkoutTimerButton({ status, elapsedSeconds, onStart }: HomeWorkoutTimerButtonProps) {
+export function HomeWorkoutTimerButton({ status, elapsedSeconds, onStart, onStop }: HomeWorkoutTimerButtonProps) {
   const running = status === 'running';
   const elapsedLabel = formatElapsed(elapsedSeconds);
 
@@ -25,10 +26,10 @@ export function HomeWorkoutTimerButton({ status, elapsedSeconds, onStart }: Home
     <button
       type="button"
       className={`home-screen__layer home-screen__workout-timer ${running ? 'home-screen__workout-timer--running' : ''}`}
-      aria-label={running ? `운동 타이머 ${elapsedLabel} 진행 중` : '운동 타이머 시작'}
-      aria-disabled={running || undefined}
+      aria-label={running ? `운동 타이머 ${elapsedLabel} 종료` : '운동 타이머 시작'}
       onClick={() => {
-        if (!running) void onStart();
+        if (running) void onStop();
+        else void onStart();
       }}
     >
       <span className="home-screen__workout-timer-icon" aria-hidden="true">⏱</span>
