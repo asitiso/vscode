@@ -1,6 +1,15 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import tokens from './GameUiTokens.css?raw';
-import primitives from './GameUiPrimitives.css?raw';
+
+const tokens = readFileSync(
+  fileURLToPath(new URL('./GameUiTokens.css', import.meta.url)),
+  'utf8',
+);
+const primitives = readFileSync(
+  fileURLToPath(new URL('./GameUiPrimitives.css', import.meta.url)),
+  'utf8',
+);
 
 describe('game UI styles', () => {
   it('공통 게임 UI 토큰을 제공한다', () => {
