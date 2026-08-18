@@ -9,8 +9,8 @@ const css = readFileSync(
 
 describe('home workout CTA styling', () => {
   it('keeps the primary start button large and gives the running state a distinct purple treatment', () => {
-    const base = css.match(/\.home-screen__cta\s*\{([\s\S]*?)\n\}/)?.[1] ?? '';
-    const running = css.match(/\.home-screen__cta--running\s*\{([\s\S]*?)\n\}/)?.[1] ?? '';
+    const base = css.match(/\.home-screen__cta\s*\{([^}]*)\}/)?.[1] ?? '';
+    const running = css.match(/\.home-screen__cta--running\s*\{([^}]*)\}/)?.[1] ?? '';
 
     expect(base).toMatch(/height:\s*clamp\(54px,\s*14vw,\s*62px\);/);
     expect(base).toMatch(/font-size:\s*clamp\(1rem,\s*4vw,\s*1\.15rem\);/);
