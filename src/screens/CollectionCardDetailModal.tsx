@@ -16,6 +16,7 @@ interface CollectionCardDetailModalProps {
   card: CardDefinition;
   owned?: OwnedCard;
   acquisitionLabel?: string;
+  personalBestLabel?: string;
   onClose: () => void;
 }
 
@@ -26,7 +27,7 @@ function getNextGrowthText(owned: OwnedCard): string {
   return `${remaining}장 더 모으면 ${nextStar}성으로 레벨 업!`;
 }
 
-export function CollectionCardDetailModal({ card, owned, acquisitionLabel, onClose }: CollectionCardDetailModalProps) {
+export function CollectionCardDetailModal({ card, owned, acquisitionLabel, personalBestLabel, onClose }: CollectionCardDetailModalProps) {
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const cardSet = owned ? findSetForCard(card.id) : undefined;
@@ -87,6 +88,13 @@ export function CollectionCardDetailModal({ card, owned, acquisitionLabel, onClo
                 <strong>카드 설명</strong>
                 <p>{card.description}</p>
               </section>
+
+              {personalBestLabel && (
+                <section className="collection-card-modal__section">
+                  <strong>내 최고 기록</strong>
+                  <p>{personalBestLabel}</p>
+                </section>
+              )}
 
               <section className="collection-card-modal__section collection-card-modal__acquisition">
                 <strong>획득 정보</strong>
