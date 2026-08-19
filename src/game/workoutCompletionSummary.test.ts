@@ -22,6 +22,7 @@ describe('buildWorkoutCompletionSummary', () => {
       durationSeconds: 1938,
       xpGain: 100,
       personalBests: [],
+      personalBestBonusXp: 0,
       weeklySessions: 1,
       weeklyGoalTarget: 3,
       weeklyRemaining: 2,
@@ -31,7 +32,7 @@ describe('buildWorkoutCompletionSummary', () => {
     });
   });
 
-  it('carries detected personal best details into the completion summary', () => {
+  it('adds 50 XP when an automatic personal best is detected', () => {
     const summary = buildWorkoutCompletionSummary({
       durationSeconds: 900,
       feeling: 'moderate',
@@ -42,9 +43,11 @@ describe('buildWorkoutCompletionSummary', () => {
     });
 
     expect(summary.personalBests).toEqual([detectedBest]);
+    expect(summary.personalBestBonusXp).toBe(50);
+    expect(summary.xpGain).toBe(150);
   });
 
-  it('adds the legacy personal-best feeling XP bonus', () => {
+  it('does not award XP from the manual personal-best feeling without an actual record', () => {
     const summary = buildWorkoutCompletionSummary({
       durationSeconds: 900,
       feeling: 'personal-best',
@@ -54,9 +57,31 @@ describe('buildWorkoutCompletionSummary', () => {
       countsTowardWeeklyGoal: true,
     });
 
+    expect(summary.personalBestBonusXp).toBe(0);
+    expect(summary.xpGain).toBe(100);
+  });
+
+  it('awards the personal best bonus only once when multiple exercises break records', () => {
+    const summary = buildWorkoutCompletionSummary({
+      durationSeconds: 900,
+      feeling: 'moderate',
+      personalBests: [
+        detectedBest,
+        {
+          exerciseId: 'run',
+          exerciseName: '러닝',
+          metric: 'duration',
+          previousValue: 30,
+          value: 40,
+        },
+      ],
+      sessionsThisWeek: 1,
+      weeklyGoalTarget: 3,
+      countsTowardWeeklyGoal: false,
+    });
+
+    expect(summary.personalBestBonusXp).toBe(50);
     expect(summary.xpGain).toBe(150);
-    expect(summary.weeklySessions).toBe(2);
-    expect(summary.packCount).toBe(1);
   });
 
   it('adds the weekly-goal XP bonus and weekly reward pack only when this workout completes the goal', () => {
