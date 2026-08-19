@@ -65,4 +65,36 @@ describe('experience level', () => {
     expect(progress.workoutXp).toBe(300);
     expect(progress.weeklyGoalXp).toBe(0);
   });
+
+  it('자동 감지된 신기록은 종목 수와 무관하게 운동 1회당 50 XP만 준다', () => {
+    const state = stateWithWorkouts(1);
+    state.workoutLogs[0] = {
+      ...state.workoutLogs[0],
+      personalBestExerciseIds: ['leg-press', 'run'],
+    };
+
+    expect(calculateExperienceProgress(state).personalBestXp).toBe(50);
+  });
+
+  it('새 형식 로그는 수동 personal-best 느낌만으로 XP를 주지 않는다', () => {
+    const state = stateWithWorkouts(1);
+    state.workoutLogs[0] = {
+      ...state.workoutLogs[0],
+      feeling: 'personal-best',
+      personalBestExerciseIds: [],
+    };
+
+    expect(calculateExperienceProgress(state).personalBestXp).toBe(0);
+  });
+
+  it('기존 저장 데이터의 personal-best 느낌 XP는 그대로 보존한다', () => {
+    const state = stateWithWorkouts(1);
+    state.workoutLogs[0] = {
+      ...state.workoutLogs[0],
+      feeling: 'personal-best',
+    };
+    delete state.workoutLogs[0].personalBestExerciseIds;
+
+    expect(calculateExperienceProgress(state).personalBestXp).toBe(50);
+  });
 });
