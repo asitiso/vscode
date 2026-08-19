@@ -1,5 +1,6 @@
 name: Temporary Weekly Polish Verify
 
+# Task 4 timer/completion idempotency verification trigger.
 on:
   push:
     branches:
