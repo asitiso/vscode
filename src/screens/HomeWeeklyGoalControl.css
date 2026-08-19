@@ -25,33 +25,7 @@
 }
 
 .weekly-goal-popover {
-  position: absolute;
-  top: calc(100% + 9px);
-  right: 0;
-  z-index: 75;
-  width: min(76vw, 286px);
-  box-sizing: border-box;
-  padding: 14px;
-  border: 2px solid rgba(255, 145, 72, 0.45);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.98);
-  color: var(--ink);
-  box-shadow: 0 14px 34px rgba(24, 43, 55, 0.24);
-  animation: weekly-goal-popover-in 0.18s ease-out;
-}
-
-.weekly-goal-popover::before {
-  content: '';
-  position: absolute;
-  top: -7px;
-  right: 27px;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid rgba(255, 145, 72, 0.45);
-  border-left: 2px solid rgba(255, 145, 72, 0.45);
-  background: #fff;
-  transform: rotate(45deg);
-  pointer-events: none;
+  --home-hud-popover-border: rgba(255, 145, 72, 0.45);
 }
 
 .weekly-goal-popover__heading {
@@ -149,20 +123,7 @@
   font-weight: 700;
 }
 
-@keyframes weekly-goal-popover-in {
-  from { opacity: 0; transform: translateY(-5px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@media (max-width: 374px) {
-  .weekly-goal-popover {
-    width: min(82vw, 270px);
-    padding: 12px;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .weekly-goal-popover,
   .weekly-goal-progress > span,
   .hud-badge--weekly {
     animation: none;
