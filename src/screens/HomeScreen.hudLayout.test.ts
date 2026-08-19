@@ -20,7 +20,7 @@ describe('home HUD layout', () => {
     expect(panelBlock).toMatch(/align-items:\s*stretch;/)
   })
 
-  it('uses horizontal flex capsules while preserving the enlarged icon and text sizes', () => {
+  it('uses slimmer horizontal capsules while preserving the enlarged icon and text sizes', () => {
     const badgeBlock = readClassBlock('hud-badge')
     const textBlock = readClassBlock('hud-badge__text')
     const iconBlock = readClassBlock('hud-badge__icon')
@@ -29,7 +29,7 @@ describe('home HUD layout', () => {
 
     expect(badgeBlock).toMatch(/display:\s*flex;/)
     expect(badgeBlock).toMatch(/flex:\s*1\s+1\s+0;/)
-    expect(badgeBlock).toMatch(/min-height:\s*clamp\(54px,\s*14vw,\s*60px\);/)
+    expect(badgeBlock).toMatch(/min-height:\s*clamp\(46px,\s*12vw,\s*50px\);/)
     expect(badgeBlock).toMatch(/border-radius:\s*999px;/)
     expect(textBlock).toMatch(/display:\s*flex;/)
     expect(textBlock).toMatch(/flex-direction:\s*column;/)
