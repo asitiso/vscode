@@ -6,6 +6,7 @@ import { getLocalDateKey } from '../game/cardSets';
 import { WorkoutDayDetailSheet } from './WorkoutDayDetailSheet';
 import { WorkoutHistoryList } from './WorkoutHistoryList';
 import './WorkoutReportPanel.css';
+import './PersonalBestInsights.css';
 
 type ReportRange = 'weekly' | 'monthly';
 const WEEKDAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
