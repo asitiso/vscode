@@ -24,6 +24,16 @@ function formatClock(seconds: number): string {
   return [hours, minutes, secs].map((value) => String(value).padStart(2, '0')).join(':');
 }
 
+function formatCompactDuration(seconds: number): string {
+  const safeSeconds = Math.max(0, Math.floor(seconds));
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const secs = safeSeconds % 60;
+  if (hours > 0) return `${hours}시간 ${minutes}분`;
+  if (minutes > 0) return `${minutes}분 ${secs}초`;
+  return `${secs}초`;
+}
+
 function formatExerciseMetrics(durationMinutes: number, sets: number, reps: number): string {
   const values: string[] = [];
   if (durationMinutes > 0) values.push(`${durationMinutes}분`);
@@ -89,7 +99,7 @@ export function WorkoutDayDetailSheet({ report, onClose, onSelectExercise }: {
                 <article key={item.id}>
                   <div className="workout-day-sheet__session-top">
                     <strong>{index + 1}번째 운동</strong>
-                    <b>{formatClock(item.durationSeconds)}</b>
+                    <b>{formatCompactDuration(item.durationSeconds)}</b>
                   </div>
                   <span className="workout-day-sheet__session-exercises">{item.exerciseNames.join(' · ') || '운동 기록'}</span>
                   <small>{formatSessionMetrics(item.totalSets, item.totalReps, item.packCount)}</small>
