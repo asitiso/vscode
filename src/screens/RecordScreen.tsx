@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import './RecordScreen.css';
 import { EXERCISES, EXERCISE_CATEGORY_LABELS } from '../data/exercises';
+import { buildWorkoutCompletionSummary, type WorkoutCompletionSummary } from '../game/workoutCompletionSummary';
 import { useGame } from '../store/GameContext';
 import { useWorkoutSessionTimer } from '../hooks/useWorkoutSessionTimer';
 import { CustomExerciseEditor } from './CustomExerciseEditor';
 import { RecordSessionTimerPanel } from './RecordSessionTimerPanel';
+import { WorkoutCompletionFeedback } from './WorkoutCompletionFeedback';
 import type { CustomExercise, ExerciseCategory, ExerciseLogType, FeelingTag, WorkoutSetEntry } from '../types';
 import type { ScreenId } from '../App';
 
@@ -27,6 +29,7 @@ export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNav
   const [memo, setMemo] = useState('');
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CustomExercise | null>(null);
+  const [completionSummary, setCompletionSummary] = useState<WorkoutCompletionSummary | null>(null);
   const allExercises = useMemo<SelectableExercise[]>(() => [...EXERCISES, ...state.customExercises], [state.customExercises]);
 
   const resolve = (id: string, snapshot?: WorkoutSetEntry): SelectableExercise | null =>
@@ -80,12 +83,20 @@ export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNav
   }
   const selected = Object.values(entries);
   const complete = async () => {
-    if (!selected.length || !feeling) return;
+    if (!selected.length || !feeling || completionSummary) return;
     let durationSeconds = workoutTimer.lastCompletedSeconds;
     if (workoutTimer.status === 'running') durationSeconds = await workoutTimer.stop();
+
+    const summary = buildWorkoutCompletionSummary({
+      durationSeconds,
+      feeling,
+      sessionsThisWeek: game.weeklyProgress.sessionsThisWeek,
+      weeklyGoalTarget: state.user.weeklyGoal.targetSessionsPerWeek,
+    });
+
     game.completeWorkout(selected, feeling, memo.trim() || undefined, durationSeconds > 0 ? durationSeconds : undefined);
     workoutTimer.discardCompleted();
-    onDone();
+    setCompletionSummary(summary);
   };
   const cancel = async () => {
     if (workoutTimer.status === 'running') await workoutTimer.stop();
@@ -119,6 +130,8 @@ export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNav
     {selected.length > 0 && <section className="record-card"><div className="record-card__heading"><div><span className="record-card__kicker">운동 수치</span><h2>운동 기록</h2></div><span className="record-card__count">{selected.length}종목</span></div><div className="set-card-list">{selected.map((entry) => { const exercise = resolve(entry.exerciseId, entry); if (!exercise) return null; return <div className="set-card" key={entry.exerciseId}><div className="set-card__name">{exercise.name}</div>{exercise.logType === 'duration' ? <div className="set-card__fields set-card__fields--single"><label>시간(분)<input type="number" inputMode="numeric" min="0" value={entry.durationMinutes ?? 0} onChange={(e) => patch(entry.exerciseId, { durationMinutes: Number(e.target.value) })} /></label></div> : <div className="set-card__fields"><label>무게(kg)<input type="number" inputMode="decimal" min="0" value={entry.weightKg ?? 0} onChange={(e) => patch(entry.exerciseId, { weightKg: Number(e.target.value) })} /></label><label>횟수<input type="number" inputMode="numeric" min="0" value={entry.reps ?? 0} onChange={(e) => patch(entry.exerciseId, { reps: Number(e.target.value) })} /></label><label>세트<input type="number" inputMode="numeric" min="0" value={entry.sets ?? 0} onChange={(e) => patch(entry.exerciseId, { sets: Number(e.target.value) })} /></label></div>}</div>; })}</div></section>}
     <section className="record-card"><div className="record-card__heading"><div><span className="record-card__kicker">컨디션 체크</span><h2>오늘의 느낌</h2></div><span className={`record-card__status ${feeling ? 'record-card__status--complete' : ''}`}>{feeling ? '선택 완료' : '필수'}</span></div><div className="feeling-grid">{FEELINGS.map((f) => <button key={f.id} type="button" className={`feeling-btn ${feeling === f.id ? 'feeling-btn--active' : ''}`} onClick={() => setFeeling(f.id)}><span className="feeling-btn__emoji">{f.emoji}</span><span>{f.label}</span></button>)}</div></section>
     <section className="record-card record-card--memo"><div className="record-card__heading"><div><span className="record-card__kicker">선택 입력</span><h2>오늘의 메모</h2></div><span className="record-card__optional">선택</span></div><textarea className="memo-input" placeholder="오늘 운동에서 기억하고 싶은 점을 짧게 적어보세요." value={memo} onChange={(e) => setMemo(e.target.value)} rows={3} /></section>
-    <div className="record-screen__actions"><button type="button" className="secondary-btn" onClick={() => void cancel()}>취소</button><button type="button" className="primary-btn" disabled={!selected.length || !feeling} onClick={() => void complete()}>기록 완료</button></div>
+    <div className="record-screen__actions"><button type="button" className="secondary-btn" onClick={() => void cancel()}>취소</button><button type="button" className="primary-btn" disabled={!selected.length || !feeling || Boolean(completionSummary)} onClick={() => void complete()}>기록 완료</button></div>
+
+    {completionSummary && <WorkoutCompletionFeedback summary={completionSummary} onDone={onDone} />}
   </div>;
 }
