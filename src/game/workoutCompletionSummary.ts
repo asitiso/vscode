@@ -1,4 +1,5 @@
 import type { FeelingTag } from '../types';
+import type { PersonalBestResult } from './personalBest';
 
 const XP_PER_WORKOUT = 100;
 const XP_PER_PERSONAL_BEST = 50;
@@ -7,6 +8,7 @@ const XP_PER_WEEKLY_GOAL = 150;
 export interface WorkoutCompletionSummary {
   durationSeconds: number;
   xpGain: number;
+  personalBests: PersonalBestResult[];
   weeklySessions: number;
   weeklyGoalTarget: number;
   weeklyRemaining: number;
@@ -18,12 +20,14 @@ export interface WorkoutCompletionSummary {
 export function buildWorkoutCompletionSummary({
   durationSeconds,
   feeling,
+  personalBests,
   sessionsThisWeek,
   weeklyGoalTarget,
   countsTowardWeeklyGoal,
 }: {
   durationSeconds: number;
   feeling: FeelingTag;
+  personalBests: PersonalBestResult[];
   sessionsThisWeek: number;
   weeklyGoalTarget: number;
   countsTowardWeeklyGoal: boolean;
@@ -41,6 +45,7 @@ export function buildWorkoutCompletionSummary({
   return {
     durationSeconds: Math.max(0, Math.floor(durationSeconds)),
     xpGain: XP_PER_WORKOUT + personalBestBonus + weeklyGoalBonus,
+    personalBests,
     weeklySessions,
     weeklyGoalTarget: safeTarget,
     weeklyRemaining: Math.max(0, safeTarget - weeklySessions),
