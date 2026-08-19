@@ -19,7 +19,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - id: install
+        continue-on-error: true
+        run: npm ci
       - id: focused
         continue-on-error: true
         run: npx vitest run src/game/workoutCompletionPack.test.ts src/screens/WorkoutCompletionFeedback.test.tsx
@@ -35,6 +37,7 @@ jobs:
         with:
           script: |
             const checks = [
+              ['pack-flow-install', '${{ steps.install.outcome }}'],
               ['pack-flow-focused', '${{ steps.focused.outcome }}'],
               ['pack-flow-full-tests', '${{ steps.fulltests.outcome }}'],
               ['pack-flow-build', '${{ steps.build.outcome }}'],
@@ -53,6 +56,7 @@ jobs:
       - name: Fail when verification failed
         if: always()
         run: |
+          test "${{ steps.install.outcome }}" = "success"
           test "${{ steps.focused.outcome }}" = "success"
           test "${{ steps.fulltests.outcome }}" = "success"
           test "${{ steps.build.outcome }}" = "success"
