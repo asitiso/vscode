@@ -21,10 +21,13 @@ export function WorkoutCompletionFeedback({
   onDone: () => void;
 }) {
   const weeklyMessage = summary.weeklyGoalCompletedNow
-    ? '이번 주 목표 달성! 보너스 XP까지 획득했어요.'
+    ? '이번 주 목표 달성! 보너스 XP와 특별팩을 획득했어요.'
     : summary.weeklyRemaining > 0
       ? `이번 주 목표까지 ${summary.weeklyRemaining}회 남았어요`
       : '이번 주 목표를 이미 달성했어요.';
+  const primaryAction = summary.weeklyRewardPackCount > 0
+    ? '🎁 주간 목표팩 지금 열기'
+    : '🎁 카드팩 지금 열기';
 
   return (
     <div className="workout-completion" role="presentation">
@@ -50,6 +53,13 @@ export function WorkoutCompletionFeedback({
           <div><span aria-hidden="true">🎁</span><strong>카드팩 +{summary.packCount}</strong><small>운동 보상</small></div>
         </div>
 
+        {summary.weeklyRewardPackCount > 0 && (
+          <div className="workout-completion__weekly-reward">
+            <span aria-hidden="true">🔥</span>
+            <div><small>WEEKLY REWARD</small><strong>주간 목표 달성팩 +1</strong></div>
+          </div>
+        )}
+
         <p className={summary.weeklyGoalCompletedNow ? 'workout-completion__message workout-completion__message--complete' : 'workout-completion__message'}>
           {weeklyMessage}
         </p>
@@ -60,7 +70,7 @@ export function WorkoutCompletionFeedback({
             disabled={!packId}
             onClick={() => { if (packId) onOpenPack(packId); }}
           >
-            {packId ? '🎁 카드팩 지금 열기' : '카드팩 준비 중'}
+            {packId ? primaryAction : '카드팩 준비 중'}
           </button>
           <button type="button" className="workout-completion__later" onClick={onDone}>나중에 열기</button>
         </div>
