@@ -1,3 +1,0 @@
-{
-  "buildCommand": "npx vitest run src/game/workoutHistorySummary.test.ts && npm run build"
-}
