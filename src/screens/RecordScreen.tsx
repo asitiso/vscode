@@ -4,6 +4,7 @@ import { EXERCISES, EXERCISE_CATEGORY_LABELS } from '../data/exercises';
 import { useGame } from '../store/GameContext';
 import { useWorkoutSessionTimer } from '../hooks/useWorkoutSessionTimer';
 import { CustomExerciseEditor } from './CustomExerciseEditor';
+import { RecordSessionTimerPanel } from './RecordSessionTimerPanel';
 import type { CustomExercise, ExerciseCategory, ExerciseLogType, FeelingTag, WorkoutSetEntry } from '../types';
 import type { ScreenId } from '../App';
 
@@ -15,13 +16,6 @@ const FEELINGS: { id: FeelingTag; label: string; emoji: string }[] = [
   { id: 'good-condition', label: '컨디션이 좋았음', emoji: '✨' }, { id: 'bad-condition', label: '컨디션이 좋지 않았음', emoji: '🌧️' },
   { id: 'completed-anyway', label: '그래도 운동 완료', emoji: '💪' },
 ];
-
-function formatTimer(seconds: number) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  return [h, m, s].map((n) => String(n).padStart(2, '0')).join(':');
-}
 
 export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNavigate: (screen: ScreenId) => void }) {
   const game = useGame();
@@ -87,27 +81,28 @@ export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNav
   const selected = Object.values(entries);
   const complete = async () => {
     if (!selected.length || !feeling) return;
-    if (workoutTimer.status === 'running') await workoutTimer.stop();
-    game.completeWorkout(selected, feeling, memo.trim() || undefined);
+    let durationSeconds = workoutTimer.lastCompletedSeconds;
+    if (workoutTimer.status === 'running') durationSeconds = await workoutTimer.stop();
+    game.completeWorkout(selected, feeling, memo.trim() || undefined, durationSeconds > 0 ? durationSeconds : undefined);
+    workoutTimer.discardCompleted();
     onDone();
   };
   const cancel = async () => {
     if (workoutTimer.status === 'running') await workoutTimer.stop();
+    workoutTimer.discardCompleted();
     onNavigate('home');
   };
 
   return <div className="record-screen">
     <header className="record-screen__header"><span className="record-screen__eyebrow">TODAY WORKOUT</span><h1 className="record-screen__title">오늘 운동 기록</h1><p className="record-screen__desc">운동을 선택하고 오늘의 기록을 남겨보세요.</p></header>
 
-    <section className={`record-session-timer ${workoutTimer.status === 'running' ? 'record-session-timer--active' : ''}`}>
-      {workoutTimer.status === 'running' ? <>
-        <div><span className="record-session-timer__label">운동 중 🔥</span><strong>{formatTimer(workoutTimer.elapsedSeconds)}</strong><small>그룹에는 운동시간과 현재 운동 중 상태만 공유됩니다.</small></div>
-        <button type="button" onClick={() => void workoutTimer.stop()}>종료</button>
-      </> : <>
-        <div><span className="record-session-timer__label">운동 세션 타이머</span><strong>운동을 시작할 준비가 됐나요?</strong><small>로그인하지 않아도 타이머는 사용할 수 있어요.</small></div>
-        <button type="button" onClick={() => void workoutTimer.start()}>▶ 운동 시작</button>
-      </>}
-    </section>
+    <RecordSessionTimerPanel
+      status={workoutTimer.status}
+      elapsedSeconds={workoutTimer.elapsedSeconds}
+      lastCompletedSeconds={workoutTimer.lastCompletedSeconds}
+      onStart={workoutTimer.start}
+      onStop={workoutTimer.stop}
+    />
 
     <section className="record-card record-card--exercise">
       <div className="record-card__heading"><div><span className="record-card__kicker">운동 선택</span><h2>오늘의 운동</h2></div><span className="record-card__count">{selected.length}개 선택</span></div>
