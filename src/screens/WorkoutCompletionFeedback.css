@@ -74,20 +74,39 @@
 .workout-completion__message { margin: 15px 0 0; color: #716a79; font-size: .75rem; line-height: 1.45; }
 .workout-completion__message--complete { color: #24965a; font-weight: 800; }
 
-.workout-completion__done {
+.workout-completion__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.workout-completion__open,
+.workout-completion__later {
   width: 100%;
   min-height: 48px;
-  margin-top: 16px;
-  border: 0;
-  border-bottom: 3px solid #d85d16;
   border-radius: 16px;
-  background: linear-gradient(180deg, #ffc34f 0%, #ff8a3d 58%, #f2691a 100%);
-  color: #fff;
   font-family: var(--font-display);
-  font-size: 1rem;
   cursor: pointer;
 }
-.workout-completion__done:active { transform: translateY(2px); border-bottom-width: 1px; }
+
+.workout-completion__open {
+  border: 0;
+  border-bottom: 3px solid #d85d16;
+  background: linear-gradient(180deg, #ffc34f 0%, #ff8a3d 58%, #f2691a 100%);
+  color: #fff;
+  font-size: 1rem;
+}
+.workout-completion__open:disabled { opacity: .55; cursor: default; }
+.workout-completion__open:not(:disabled):active { transform: translateY(2px); border-bottom-width: 1px; }
+
+.workout-completion__later {
+  border: 1px solid #ddd5ee;
+  background: rgba(255, 255, 255, .86);
+  color: #665a78;
+  font-size: .9rem;
+}
+.workout-completion__later:active { transform: translateY(1px); }
 
 @keyframes workout-completion-in {
   from { opacity: 0; transform: translateY(12px) scale(.96); }
