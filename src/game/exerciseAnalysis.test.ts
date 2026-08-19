@@ -36,6 +36,23 @@ describe('buildExerciseHistory', () => {
     ], 'leg-press');
     expect(records.map((record) => record.logId)).toEqual(['good', 'bad']);
   });
+
+  it('marks only the exercise ids stored as automatic personal bests', () => {
+    const first = log('a', '2026-08-04', [{ exerciseId: 'leg-press', weightKg: 40, sets: 3, reps: 10 }]);
+    const second = log('b', '2026-08-05', [{ exerciseId: 'leg-press', weightKg: 50, sets: 3, reps: 8 }]);
+    second.personalBestExerciseIds = ['leg-press'];
+
+    const records = buildExerciseHistory([first, second], 'leg-press');
+
+    expect(records.map((record) => record.isPersonalBest)).toEqual([true, false]);
+  });
+
+  it('keeps legacy manual personal-best logs visible as old personal records', () => {
+    const legacy = log('legacy', '2026-08-05', [{ exerciseId: 'leg-press', weightKg: 50, sets: 3, reps: 8 }]);
+    legacy.feeling = 'personal-best';
+
+    expect(buildExerciseHistory([legacy], 'leg-press')[0].isPersonalBest).toBe(true);
+  });
 });
 
 describe('buildExerciseAnalysis', () => {
