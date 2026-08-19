@@ -1,5 +1,5 @@
 .home-screen__set-progress {
-  top: 29%;
+  top: 19%;
   left: 6%;
   right: 6%;
   z-index: 45;
@@ -19,7 +19,7 @@
 .home-screen__set-main strong { font-family: var(--font-display); }
 .home-screen__set-main b { color: #7045ef; }
 .home-screen__set-detail { overflow: hidden; color: var(--ink-soft); font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
-.home-screen__cta { top: 42.5%; }
+.home-screen__cta { top: 32.5%; }
 .home-screen__character { top: 53%; }
 
 .collection-set-filter { display: flex; gap: 8px; margin: 12px 0; overflow-x: auto; padding-bottom: 4px; }
@@ -41,6 +41,6 @@
 .card-grid__item--locked .placeholder-art { filter: grayscale(1) brightness(.45); opacity: .55; }
 
 @media (max-height: 720px) {
-  .home-screen__set-progress { top: 28%; padding-block: 8px; }
-  .home-screen__cta { top: 42%; }
+  .home-screen__set-progress { top: 18%; padding-block: 8px; }
+  .home-screen__cta { top: 31.5%; }
 }
