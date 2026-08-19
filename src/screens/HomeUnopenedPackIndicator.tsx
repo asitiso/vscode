@@ -1,4 +1,5 @@
 import type { PackSource } from '../types';
+import './HomeUnopenedPackIndicator.css';
 
 function badgeForSource(source: PackSource | undefined): string {
   if (source === 'weekly-goal') return 'WEEK';
