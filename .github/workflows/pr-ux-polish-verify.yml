@@ -1,9 +1,9 @@
 name: PR UX Polish Verify
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/pr-ux-polish-20260819
+      - feature/add-equipment-cards-v2
 
 jobs:
   verify:
