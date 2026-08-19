@@ -2,7 +2,7 @@ interface HomeWorkoutTimerButtonProps {
   status: 'idle' | 'running';
   elapsedSeconds: number;
   onStart: () => void | Promise<void>;
-  onStop: () => void | Promise<void>;
+  onStop: () => void | Promise<unknown>;
 }
 
 function formatElapsed(seconds: number) {
