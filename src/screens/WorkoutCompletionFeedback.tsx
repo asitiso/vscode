@@ -1,3 +1,4 @@
+import type { PersonalBestMetric } from '../game/personalBest';
 import type { WorkoutCompletionSummary } from '../game/workoutCompletionSummary';
 import './WorkoutCompletionFeedback.css';
 
@@ -7,6 +8,12 @@ function formatDuration(seconds: number) {
   const minutes = Math.floor((safeSeconds % 3600) / 60);
   const secs = safeSeconds % 60;
   return [hours, minutes, secs].map((value) => String(value).padStart(2, '0')).join(':');
+}
+
+function formatPersonalBestValue(metric: PersonalBestMetric, value: number): string {
+  if (metric === 'weight') return `${value}kg`;
+  if (metric === 'duration') return `${value}분`;
+  return `${value}회`;
 }
 
 export function WorkoutCompletionFeedback({
@@ -28,6 +35,7 @@ export function WorkoutCompletionFeedback({
   const primaryAction = summary.weeklyRewardPackCount > 0
     ? '🎁 주간 목표팩 지금 열기'
     : '🎁 카드팩 지금 열기';
+  const personalBest = summary.personalBests[0];
 
   return (
     <div className="workout-completion" role="presentation">
@@ -44,6 +52,18 @@ export function WorkoutCompletionFeedback({
           <div className="workout-completion__duration">
             <span aria-hidden="true">⏱</span>
             <strong>{formatDuration(summary.durationSeconds)}</strong>
+          </div>
+        )}
+
+        {personalBest && (
+          <div className="workout-completion__personal-best">
+            <span className="workout-completion__personal-best-icon" aria-hidden="true">🏆</span>
+            <div>
+              <small>NEW RECORD</small>
+              <strong>{personalBest.exerciseName} {formatPersonalBestValue(personalBest.metric, personalBest.value)}</strong>
+              <span>이전 최고 {formatPersonalBestValue(personalBest.metric, personalBest.previousValue)}</span>
+              {summary.personalBests.length > 1 && <em>외 {summary.personalBests.length - 1}개 기록도 경신!</em>}
+            </div>
           </div>
         )}
 
