@@ -56,6 +56,7 @@ export interface WorkoutLog {
   entries: WorkoutSetEntry[];
   feeling: FeelingTag;
   memo?: string;
+  durationSeconds?: number;
   grantedPackIds: string[];
   createdAt: string;
 }
