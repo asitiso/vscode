@@ -40,7 +40,7 @@ export function HomeWeeklyGoalControl({
       {open && (
         <section
           id="home-weekly-goal-popover"
-          className="weekly-goal-popover"
+          className="home-hud-popover home-hud-popover--right weekly-goal-popover"
           role="dialog"
           aria-labelledby="home-weekly-goal-title"
         >
