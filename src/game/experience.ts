@@ -1,4 +1,5 @@
 import type { AppState, WorkoutLog } from '../types';
+import { countSessionsByWeek } from './weeklyGoal';
 
 const XP_PER_WORKOUT = 100;
 const XP_PER_OPENED_PACK = 30;
@@ -19,24 +20,11 @@ export interface ExperienceProgress {
   weeklyGoalXp: number;
 }
 
-function getMondayWeekKey(dateString: string): string {
-  const date = new Date(`${dateString.slice(0, 10)}T00:00:00Z`);
-  const day = date.getUTCDay();
-  const daysFromMonday = day === 0 ? 6 : day - 1;
-  date.setUTCDate(date.getUTCDate() - daysFromMonday);
-  return date.toISOString().slice(0, 10);
-}
-
 function countCompletedGoalWeeks(logs: WorkoutLog[], targetSessionsPerWeek: number): number {
   if (targetSessionsPerWeek <= 0) return 0;
-
-  const sessionsByWeek = new Map<string, number>();
-  logs.forEach((log) => {
-    const weekKey = getMondayWeekKey(log.date);
-    sessionsByWeek.set(weekKey, (sessionsByWeek.get(weekKey) ?? 0) + 1);
-  });
-
-  return [...sessionsByWeek.values()].filter((sessions) => sessions >= targetSessionsPerWeek).length;
+  return [...countSessionsByWeek(logs).values()]
+    .filter((sessions) => sessions >= targetSessionsPerWeek)
+    .length;
 }
 
 function getLevelStartXp(level: number): number {
