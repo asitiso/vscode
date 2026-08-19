@@ -71,4 +71,16 @@ describe('useWorkoutSessionTimer', () => {
     expect(result.current.lastCompletedSeconds).toBe(0);
     expect(localStorage.getItem('workout_session_completed_v1')).toBeNull();
   });
+
+  it('does not restore a completed session from a previous local day', () => {
+    localStorage.setItem('workout_session_completed_v1', JSON.stringify({
+      elapsedSeconds: 1800,
+      endedAt: new Date('2026-08-17T23:30:00+09:00').getTime(),
+    }));
+
+    const { result } = renderHook(() => useWorkoutSessionTimer());
+
+    expect(result.current.lastCompletedSeconds).toBe(0);
+    expect(localStorage.getItem('workout_session_completed_v1')).toBeNull();
+  });
 });
