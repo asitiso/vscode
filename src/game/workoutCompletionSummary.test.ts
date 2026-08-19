@@ -1,17 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import { buildWorkoutCompletionSummary } from './workoutCompletionSummary';
 
+const detectedBest = {
+  exerciseId: 'leg-press',
+  exerciseName: '레그 프레스',
+  metric: 'weight' as const,
+  previousValue: 60,
+  value: 65,
+};
+
 describe('buildWorkoutCompletionSummary', () => {
   it('awards the base workout XP and advances weekly progress on a new active day', () => {
     expect(buildWorkoutCompletionSummary({
       durationSeconds: 1938,
       feeling: 'moderate',
+      personalBests: [],
       sessionsThisWeek: 0,
       weeklyGoalTarget: 3,
       countsTowardWeeklyGoal: true,
     })).toEqual({
       durationSeconds: 1938,
       xpGain: 100,
+      personalBests: [],
       weeklySessions: 1,
       weeklyGoalTarget: 3,
       weeklyRemaining: 2,
@@ -21,10 +31,24 @@ describe('buildWorkoutCompletionSummary', () => {
     });
   });
 
-  it('adds the personal-best XP bonus', () => {
+  it('carries detected personal best details into the completion summary', () => {
+    const summary = buildWorkoutCompletionSummary({
+      durationSeconds: 900,
+      feeling: 'moderate',
+      personalBests: [detectedBest],
+      sessionsThisWeek: 1,
+      weeklyGoalTarget: 3,
+      countsTowardWeeklyGoal: true,
+    });
+
+    expect(summary.personalBests).toEqual([detectedBest]);
+  });
+
+  it('adds the legacy personal-best feeling XP bonus', () => {
     const summary = buildWorkoutCompletionSummary({
       durationSeconds: 900,
       feeling: 'personal-best',
+      personalBests: [],
       sessionsThisWeek: 1,
       weeklyGoalTarget: 3,
       countsTowardWeeklyGoal: true,
@@ -39,6 +63,7 @@ describe('buildWorkoutCompletionSummary', () => {
     const completed = buildWorkoutCompletionSummary({
       durationSeconds: 1200,
       feeling: 'hard',
+      personalBests: [],
       sessionsThisWeek: 2,
       weeklyGoalTarget: 3,
       countsTowardWeeklyGoal: true,
@@ -46,6 +71,7 @@ describe('buildWorkoutCompletionSummary', () => {
     const alreadyComplete = buildWorkoutCompletionSummary({
       durationSeconds: 1200,
       feeling: 'hard',
+      personalBests: [],
       sessionsThisWeek: 3,
       weeklyGoalTarget: 3,
       countsTowardWeeklyGoal: true,
@@ -66,6 +92,7 @@ describe('buildWorkoutCompletionSummary', () => {
     const summary = buildWorkoutCompletionSummary({
       durationSeconds: 600,
       feeling: 'moderate',
+      personalBests: [],
       sessionsThisWeek: 2,
       weeklyGoalTarget: 3,
       countsTowardWeeklyGoal: false,
