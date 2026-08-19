@@ -97,6 +97,41 @@ describe('useWorkoutSessionTimer', () => {
     expect(restored.result.current.elapsedSeconds).toBe(95);
   });
 
+  it('keeps the same running session across repeated home and record screen remounts', async () => {
+    const startAt = new Date('2026-08-18T09:00:00+09:00').getTime();
+    const home = renderHook(() => useWorkoutSessionTimer());
+    await act(async () => { await home.result.current.start(); });
+    home.unmount();
+
+    vi.setSystemTime(startAt + 40_000);
+    const record = renderHook(() => useWorkoutSessionTimer());
+    expect(record.result.current.status).toBe('running');
+    expect(record.result.current.elapsedSeconds).toBe(40);
+    record.unmount();
+
+    vi.setSystemTime(startAt + 75_000);
+    const homeAgain = renderHook(() => useWorkoutSessionTimer());
+    expect(homeAgain.result.current.status).toBe('running');
+    expect(homeAgain.result.current.elapsedSeconds).toBe(75);
+
+    const stored = JSON.parse(localStorage.getItem('workout_session_timer_v1') ?? '{}') as { startedAt?: number };
+    expect(stored.startedAt).toBe(startAt);
+  });
+
+  it('uses wall-clock time after a background gap instead of resetting or double-counting', async () => {
+    const startAt = new Date('2026-08-18T09:00:00+09:00').getTime();
+    const { result } = renderHook(() => useWorkoutSessionTimer());
+    await act(async () => { await result.current.start(); });
+
+    vi.setSystemTime(startAt + 10 * 60_000);
+    act(() => { vi.advanceTimersByTime(1_000); });
+    expect(result.current.elapsedSeconds).toBe(601);
+
+    let stoppedSeconds = 0;
+    await act(async () => { stoppedSeconds = await result.current.stop(); });
+    expect(stoppedSeconds).toBe(601);
+  });
+
   it('serializes rapid duplicate starts so the original start time is never overwritten', async () => {
     const startAt = new Date('2026-08-18T09:00:00+09:00').getTime();
     const { result } = renderHook(() => useWorkoutSessionTimer());
