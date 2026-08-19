@@ -12,7 +12,8 @@ const summary = {
   weeklyGoalTarget: 3,
   weeklyRemaining: 2,
   weeklyGoalCompletedNow: false,
-  packCount: 1 as const,
+  packCount: 1,
+  weeklyRewardPackCount: 0,
 };
 
 describe('WorkoutCompletionFeedback', () => {
@@ -57,7 +58,7 @@ describe('WorkoutCompletionFeedback', () => {
     expect(onOpenPack).not.toHaveBeenCalled();
   });
 
-  it('celebrates a weekly goal completed by this workout', () => {
+  it('celebrates a weekly goal with bonus XP and a dedicated reward pack', () => {
     render(
       <WorkoutCompletionFeedback
         summary={{
@@ -67,14 +68,17 @@ describe('WorkoutCompletionFeedback', () => {
           weeklyGoalTarget: 3,
           weeklyRemaining: 0,
           weeklyGoalCompletedNow: true,
-          packCount: 1,
+          packCount: 2,
+          weeklyRewardPackCount: 1,
         }}
-        packId="pack-new"
+        packId="weekly-pack-new"
         onOpenPack={vi.fn()}
         onDone={vi.fn()}
       />,
     );
 
-    expect(screen.getByText('이번 주 목표 달성! 보너스 XP까지 획득했어요.')).toBeTruthy();
+    expect(screen.getByText('주간 목표 달성팩 +1')).toBeTruthy();
+    expect(screen.getByText('이번 주 목표 달성! 보너스 XP와 특별팩을 획득했어요.')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /주간 목표팩 지금 열기/ })).toBeTruthy();
   });
 });
