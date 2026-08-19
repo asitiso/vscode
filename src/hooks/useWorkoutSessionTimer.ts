@@ -49,7 +49,10 @@ export function useWorkoutSessionTimer() {
   const [stored, setStored] = useState<StoredTimer | null>(() => readStored());
   const [completed, setCompleted] = useState<StoredCompletedTimer | null>(() => readCompleted());
   const [now, setNow] = useState(Date.now());
+  const storedRef = useRef<StoredTimer | null>(stored);
   const syncingRef = useRef(false);
+  const startPromiseRef = useRef<Promise<void> | null>(null);
+  const stopPromiseRef = useRef<Promise<number> | null>(null);
 
   useEffect(() => {
     if (!stored) return;
@@ -58,6 +61,7 @@ export function useWorkoutSessionTimer() {
   }, [stored]);
 
   const persist = useCallback((value: StoredTimer | null) => {
+    storedRef.current = value;
     setStored(value);
     if (value) localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
     else localStorage.removeItem(STORAGE_KEY);
@@ -78,6 +82,7 @@ export function useWorkoutSessionTimer() {
     syncingRef.current = true;
     try {
       const remote = await startRemoteWorkoutSession();
+      if (storedRef.current !== current) return current;
       const next = { ...current, remoteSessionId: remote.id };
       persist(next);
       return next;
@@ -99,29 +104,51 @@ export function useWorkoutSessionTimer() {
     return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', visibility); };
   }, [stored?.remoteSessionId, user?.id]);
 
-  const start = useCallback(async () => {
-    if (stored) return;
-    persistCompleted(null);
-    const local: StoredTimer = { startedAt: Date.now(), remoteSessionId: null };
-    persist(local);
-    setNow(Date.now());
-    await ensureRemote(local);
-  }, [stored, persist, persistCompleted, ensureRemote]);
+  const start = useCallback((): Promise<void> => {
+    if (storedRef.current) return Promise.resolve();
+    if (startPromiseRef.current) return startPromiseRef.current;
 
-  const stop = useCallback(async (): Promise<number> => {
-    const current = stored ?? readStored();
-    if (!current) return 0;
+    const operation = (async () => {
+      if (storedRef.current) return;
+      persistCompleted(null);
+      const local: StoredTimer = { startedAt: Date.now(), remoteSessionId: null };
+      persist(local);
+      setNow(Date.now());
+      await ensureRemote(local);
+    })();
 
-    const endedAt = Date.now();
-    const stoppedSeconds = Math.max(0, Math.floor((endedAt - current.startedAt) / 1000));
-    persist(null);
-    persistCompleted({ elapsedSeconds: stoppedSeconds, endedAt });
+    startPromiseRef.current = operation;
+    void operation.then(
+      () => { if (startPromiseRef.current === operation) startPromiseRef.current = null; },
+      () => { if (startPromiseRef.current === operation) startPromiseRef.current = null; },
+    );
+    return operation;
+  }, [persist, persistCompleted, ensureRemote]);
 
-    if (current.remoteSessionId && user) {
-      try { await endRemoteWorkoutSession(current.remoteSessionId, dateKey()); } catch { /* local recording must continue */ }
-    }
-    return stoppedSeconds;
-  }, [stored, user, persist, persistCompleted]);
+  const stop = useCallback((): Promise<number> => {
+    if (stopPromiseRef.current) return stopPromiseRef.current;
+    const current = storedRef.current ?? readStored();
+    if (!current) return Promise.resolve(0);
+
+    const operation = (async () => {
+      const endedAt = Date.now();
+      const stoppedSeconds = Math.max(0, Math.floor((endedAt - current.startedAt) / 1000));
+      persist(null);
+      persistCompleted({ elapsedSeconds: stoppedSeconds, endedAt });
+
+      if (current.remoteSessionId && user) {
+        try { await endRemoteWorkoutSession(current.remoteSessionId, dateKey()); } catch { /* local recording must continue */ }
+      }
+      return stoppedSeconds;
+    })();
+
+    stopPromiseRef.current = operation;
+    void operation.then(
+      () => { if (stopPromiseRef.current === operation) stopPromiseRef.current = null; },
+      () => { if (stopPromiseRef.current === operation) stopPromiseRef.current = null; },
+    );
+    return operation;
+  }, [user, persist, persistCompleted]);
 
   const elapsedSeconds = useMemo(
     () => stored ? Math.max(0, Math.floor((now - stored.startedAt) / 1000)) : 0,
