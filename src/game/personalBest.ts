@@ -1,7 +1,17 @@
 import type { WorkoutLog, WorkoutSetEntry } from '../types';
 import { buildExerciseAnalysis } from './exerciseAnalysis';
 
-function currentMetricValue(entry: WorkoutSetEntry): { metric: 'weight' | 'duration' | 'reps'; value: number } {
+export type PersonalBestMetric = 'weight' | 'duration' | 'reps';
+
+export interface PersonalBestResult {
+  exerciseId: string;
+  exerciseName: string;
+  metric: PersonalBestMetric;
+  previousValue: number;
+  value: number;
+}
+
+function currentMetricValue(entry: WorkoutSetEntry): { metric: PersonalBestMetric; value: number } {
   if (entry.exerciseLogType === 'duration' || (entry.durationMinutes ?? 0) > 0) {
     return { metric: 'duration', value: Math.max(0, entry.durationMinutes ?? 0) };
   }
@@ -16,11 +26,11 @@ function currentMetricValue(entry: WorkoutSetEntry): { metric: 'weight' | 'durat
   };
 }
 
-export function detectPersonalBestExerciseIds(
+export function detectWorkoutPersonalBests(
   previousLogs: WorkoutLog[],
   entries: WorkoutSetEntry[],
-): string[] {
-  const personalBestIds = new Set<string>();
+): PersonalBestResult[] {
+  const results = new Map<string, PersonalBestResult>();
 
   for (const entry of entries) {
     const analysis = buildExerciseAnalysis(previousLogs, entry.exerciseId);
@@ -33,10 +43,25 @@ export function detectPersonalBestExerciseIds(
         ? analysis.personalBests.maxDurationMinutes
         : analysis.personalBests.maxReps;
 
-    if (previousBest !== undefined && current.value > previousBest) {
-      personalBestIds.add(entry.exerciseId);
-    }
+    if (previousBest === undefined || current.value <= previousBest) continue;
+
+    const next: PersonalBestResult = {
+      exerciseId: entry.exerciseId,
+      exerciseName: entry.exerciseName ?? analysis.exerciseName,
+      metric: current.metric,
+      previousValue: previousBest,
+      value: current.value,
+    };
+    const existing = results.get(entry.exerciseId);
+    if (!existing || next.value > existing.value) results.set(entry.exerciseId, next);
   }
 
-  return [...personalBestIds];
+  return [...results.values()];
+}
+
+export function detectPersonalBestExerciseIds(
+  previousLogs: WorkoutLog[],
+  entries: WorkoutSetEntry[],
+): string[] {
+  return detectWorkoutPersonalBests(previousLogs, entries).map((result) => result.exerciseId);
 }
