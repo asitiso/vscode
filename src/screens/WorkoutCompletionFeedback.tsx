@@ -11,9 +11,13 @@ function formatDuration(seconds: number) {
 
 export function WorkoutCompletionFeedback({
   summary,
+  packId,
+  onOpenPack,
   onDone,
 }: {
   summary: WorkoutCompletionSummary;
+  packId: string | null;
+  onOpenPack: (packId: string) => void;
   onDone: () => void;
 }) {
   const weeklyMessage = summary.weeklyGoalCompletedNow
@@ -49,7 +53,17 @@ export function WorkoutCompletionFeedback({
         <p className={summary.weeklyGoalCompletedNow ? 'workout-completion__message workout-completion__message--complete' : 'workout-completion__message'}>
           {weeklyMessage}
         </p>
-        <button type="button" className="workout-completion__done" onClick={onDone}>홈으로</button>
+        <div className="workout-completion__actions">
+          <button
+            type="button"
+            className="workout-completion__open"
+            disabled={!packId}
+            onClick={() => { if (packId) onOpenPack(packId); }}
+          >
+            {packId ? '🎁 카드팩 지금 열기' : '카드팩 준비 중'}
+          </button>
+          <button type="button" className="workout-completion__later" onClick={onDone}>나중에 열기</button>
+        </div>
       </section>
     </div>
   );
