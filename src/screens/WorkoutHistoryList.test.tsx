@@ -13,6 +13,7 @@ const logs: WorkoutLog[] = [
     createdAt: '2026-08-19T01:00:00.000Z',
     durationSeconds: 2_538,
     feeling: 'moderate',
+    personalBestExerciseIds: ['squat', 'run'],
     grantedPackIds: ['pack-1'],
     entries: [
       { exerciseId: 'squat', exerciseName: '스쿼트', sets: 3, reps: 10 },
@@ -21,7 +22,7 @@ const logs: WorkoutLog[] = [
   },
 ];
 
-it('운동 기록 카드에 시간과 종목 요약을 표시하고 날짜 상세를 연다', async () => {
+it('운동 기록 카드에 시간과 종목 요약, 신기록 개수를 표시하고 날짜 상세를 연다', async () => {
   const onSelectDay = vi.fn();
   render(<WorkoutHistoryList workoutLogs={logs} onSelectDay={onSelectDay} />);
 
@@ -29,6 +30,7 @@ it('운동 기록 카드에 시간과 종목 요약을 표시하고 날짜 상�
   expect(screen.getByText(/42분 18초/)).toBeInTheDocument();
   expect(screen.getByText('스쿼트 · 러닝')).toBeInTheDocument();
   expect(screen.getByText('3세트 · 30회 · 카드팩 1개')).toBeInTheDocument();
+  expect(screen.getByText('🏆 신기록 2개')).toBeInTheDocument();
 
   await userEvent.click(screen.getByRole('button', { name: /8월 19일 운동 기록 자세히 보기/ }));
   expect(onSelectDay).toHaveBeenCalledWith(expect.objectContaining({ date: '2026-08-19' }));
