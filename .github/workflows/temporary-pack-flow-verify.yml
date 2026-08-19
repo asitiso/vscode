@@ -27,7 +27,7 @@ jobs:
           npx vitest run src/game/workoutCompletionPack.test.ts src/screens/WorkoutCompletionFeedback.test.tsx > focused.log 2>&1
           code=$?
           summary=$(grep -E "AssertionError|TestingLibraryElementError|Unable to find|Found multiple|expected|Error:" focused.log | head -n 1)
-          if [ -z "$summary" ]; then summary=$(tail -n 4 focused.log | tr '\n' ' '); fi
+          if [ -z "$summary" ]; then summary=$(tail -n 6 focused.log | tr '\n' ' '); fi
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "summary_b64=$(printf '%s' "$summary" | base64 -w0)" >> "$GITHUB_OUTPUT"
           exit 0
@@ -46,15 +46,16 @@ jobs:
         with:
           script: |
             const focusedSummary = process.env.FOCUSED_SUMMARY_B64
-              ? Buffer.from(process.env.FOCUSED_SUMMARY_B64, 'base64').toString('utf8').slice(0, 115)
-              : 'no focused output';
+              ? Buffer.from(process.env.FOCUSED_SUMMARY_B64, 'base64').toString('utf8').replace(/\s+/g, ' ').slice(0, 62)
+              : 'no-output';
+            const focusedState = process.env.FOCUSED_CODE === '0' ? 'success' : 'failure';
             const checks = [
-              ['pack-flow-install', '${{ steps.install.outcome }}', 'install'],
-              ['pack-flow-focused', process.env.FOCUSED_CODE === '0' ? 'success' : 'failure', focusedSummary],
-              ['pack-flow-full-tests', '${{ steps.fulltests.outcome }}', 'full tests'],
-              ['pack-flow-build', '${{ steps.build.outcome }}', 'build'],
+              ['pack-flow-install', '${{ steps.install.outcome }}'],
+              [`pack-flow-focused:${focusedSummary}`, focusedState],
+              ['pack-flow-full-tests', '${{ steps.fulltests.outcome }}'],
+              ['pack-flow-build', '${{ steps.build.outcome }}'],
             ];
-            for (const [name, outcome, description] of checks) {
+            for (const [name, outcome] of checks) {
               const state = outcome === 'success' ? 'success' : 'failure';
               await github.rest.repos.createCommitStatus({
                 owner: context.repo.owner,
@@ -62,7 +63,7 @@ jobs:
                 sha: context.sha,
                 state,
                 context: name,
-                description: `${name}: ${description}`.slice(0, 140),
+                description: `${name}: ${outcome}`.slice(0, 140),
               });
             }
       - name: Fail when verification failed
