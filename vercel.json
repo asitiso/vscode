@@ -1,3 +1,0 @@
-{
-  "buildCommand": "npx vitest run src/screens/HomeWeeklyGoalControl.test.tsx src/screens/HomeScreen.hudLayout.test.ts"
-}
