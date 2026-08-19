@@ -202,7 +202,7 @@ export function gameReducer(state: AppState, action: Action): AppState {
     case 'SET_USER_NAME':
       return { ...state, user: { ...state.user, name: action.name } };
     case 'SET_WEEKLY_GOAL':
-      return { ...state, user: { ...state.user, weeklyGoal: { targetSessionsPerWeek: action.target } };
+      return { ...state, user: { ...state.user, weeklyGoal: { targetSessionsPerWeek: action.target } } };
     case 'SET_SELECTED_CHARACTER':
       return { ...state, user: { ...state.user, selectedCharacterId: action.characterId } };
     case 'REPLACE_STATE':
