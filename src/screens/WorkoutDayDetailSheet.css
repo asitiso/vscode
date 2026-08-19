@@ -57,15 +57,19 @@
 .workout-day-sheet__header h2 { margin: 4px 0 0; color: var(--ink); font-family: var(--font-display); font-size: 1.25rem; overflow-wrap: anywhere; }
 .workout-day-sheet__header button { flex: 0 0 44px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #edf2f2; color: var(--ink); font-size: 1.5rem; cursor: pointer; }
 
+.workout-day-sheet__duration-hero{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 10px;padding:13px 14px;border:1px solid rgba(112,69,239,.16);border-radius:17px;background:linear-gradient(135deg,#fff,#f7f3ff);box-shadow:0 6px 16px rgba(47,34,83,.07)}
+.workout-day-sheet__duration-hero span{color:#6e5f84;font-size:.7rem;font-weight:900}.workout-day-sheet__duration-hero strong{color:#6840df;font-family:var(--font-display);font-size:1rem;font-variant-numeric:tabular-nums;letter-spacing:.03em}
 .workout-day-sheet__summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
 .workout-day-sheet__summary div { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 3px; padding: 12px 4px; border-radius: 15px; background: #fff; box-shadow: 0 5px 14px rgba(29, 51, 60, .08); }
 .workout-day-sheet__summary strong { max-width: 100%; color: var(--orange-deep); font-family: var(--font-display); font-size: clamp(.85rem, 4vw, 1.05rem); overflow-wrap: anywhere; }
 .workout-day-sheet__summary span { color: var(--ink-soft); font-size: .62rem; text-align: center; }
-.workout-day-sheet__exercises, .workout-day-sheet__notes { display: flex; flex-direction: column; gap: 9px; margin-top: 18px; }
-.workout-day-sheet__exercises article, .workout-day-sheet__notes > div { padding: 14px 15px; border: 1px solid #e8eeee; border-radius: 16px; background: #fff; }
+.workout-day-sheet__section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 2px}.workout-day-sheet__section-title strong{color:var(--ink);font-family:var(--font-display);font-size:.82rem}.workout-day-sheet__section-title span{color:var(--ink-soft);font-size:.66rem;font-weight:800}
+.workout-day-sheet__sessions,.workout-day-sheet__exercises, .workout-day-sheet__notes { display: flex; flex-direction: column; gap: 9px; margin-top: 18px; }
+.workout-day-sheet__sessions article,.workout-day-sheet__exercises article, .workout-day-sheet__notes > div:not(.workout-day-sheet__section-title) { padding: 14px 15px; border: 1px solid #e8eeee; border-radius: 16px; background: #fff; }
+.workout-day-sheet__session-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.workout-day-sheet__session-top strong{color:var(--ink);font-family:var(--font-display);font-size:.86rem}.workout-day-sheet__session-top b{color:#7045ef;font-size:.78rem;font-variant-numeric:tabular-nums}.workout-day-sheet__session-exercises{display:block;margin-top:6px;color:#4c445d;font-size:.76rem;font-weight:800;overflow-wrap:anywhere}.workout-day-sheet__sessions small{display:block;margin-top:5px;color:var(--ink-soft);font-size:.69rem;line-height:1.4}
 .workout-day-sheet__exercises article > button { width: 100%; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0; border: 0; background: transparent; text-align: left; color: inherit; }
 .workout-day-sheet__exercises article > button:disabled { opacity: 1; }
-.workout-day-sheet__exercises article div, .workout-day-sheet__notes > div { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
+.workout-day-sheet__exercises article div, .workout-day-sheet__notes > div:not(.workout-day-sheet__section-title) { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
 .workout-day-sheet__exercises strong, .workout-day-sheet__notes strong { color: var(--ink); font-family: var(--font-display); font-size: .9rem; overflow-wrap: anywhere; }
 .workout-day-sheet__exercises span, .workout-day-sheet__notes span, .workout-day-sheet__notes p { margin: 0; color: var(--ink-soft); font-size: .78rem; line-height: 1.45; overflow-wrap: anywhere; }
 .workout-day-sheet__empty { margin: 24px 0 8px; padding: 24px; border-radius: 18px; background: #fff; color: var(--ink-soft); text-align: center; }
@@ -74,6 +78,7 @@
   .workout-day-sheet__panel { padding-inline: 12px; }
   .workout-day-sheet__summary { gap: 5px; }
   .workout-day-sheet__summary div { padding-inline: 2px; }
+  .workout-day-sheet__duration-hero{padding-inline:11px}
 }
 
 @media (max-height: 650px) {
