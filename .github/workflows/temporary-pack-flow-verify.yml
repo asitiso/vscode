@@ -26,7 +26,11 @@ jobs:
           set +e
           npx vitest run src/game/workoutCompletionPack.test.ts src/screens/WorkoutCompletionFeedback.test.tsx > focused.log 2>&1
           code=$?
-          summary=$(grep -E "AssertionError|TestingLibraryElementError|Unable to find|Found multiple|expected|Error:" focused.log | head -n 1)
+          if [ "$code" = "0" ]; then
+            summary=$(grep -E "Test Files|Tests " focused.log | tail -n 2 | tr '\n' ' ')
+          else
+            summary=$(grep -E "AssertionError|TestingLibraryElementError|Unable to find|Found multiple|expected|Error:" focused.log | head -n 1)
+          fi
           if [ -z "$summary" ]; then summary=$(tail -n 6 focused.log | tr '\n' ' '); fi
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "summary_b64=$(printf '%s' "$summary" | base64 -w0)" >> "$GITHUB_OUTPUT"
@@ -36,7 +40,11 @@ jobs:
           set +e
           npm test > full.log 2>&1
           code=$?
-          summary=$(grep -E "AssertionError|TestingLibraryElementError|Unable to find|Found multiple|expected|Error:" full.log | head -n 1)
+          if [ "$code" = "0" ]; then
+            summary=$(grep -E "Test Files|Tests " full.log | tail -n 2 | tr '\n' ' ')
+          else
+            summary=$(grep -E "AssertionError|TestingLibraryElementError|Unable to find|Found multiple|expected|Error:" full.log | head -n 1)
+          fi
           if [ -z "$summary" ]; then summary=$(tail -n 8 full.log | tr '\n' ' '); fi
           echo "code=$code" >> "$GITHUB_OUTPUT"
           echo "summary_b64=$(printf '%s' "$summary" | base64 -w0)" >> "$GITHUB_OUTPUT"
@@ -55,7 +63,7 @@ jobs:
         with:
           script: |
             const decode = (value) => value
-              ? Buffer.from(value, 'base64').toString('utf8').replace(/\s+/g, ' ').slice(0, 62)
+              ? Buffer.from(value, 'base64').toString('utf8').replace(/\u001b\[[0-9;]*m/g, '').replace(/\s+/g, ' ').slice(0, 70)
               : 'no-output';
             const focusedSummary = decode(process.env.FOCUSED_SUMMARY_B64);
             const fullSummary = decode(process.env.FULL_SUMMARY_B64);
