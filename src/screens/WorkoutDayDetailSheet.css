@@ -72,6 +72,9 @@
 .workout-day-sheet__exercises article div, .workout-day-sheet__notes > div:not(.workout-day-sheet__section-title) { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
 .workout-day-sheet__exercises strong, .workout-day-sheet__notes strong { color: var(--ink); font-family: var(--font-display); font-size: .9rem; overflow-wrap: anywhere; }
 .workout-day-sheet__exercises span, .workout-day-sheet__notes span, .workout-day-sheet__notes p { margin: 0; color: var(--ink-soft); font-size: .78rem; line-height: 1.45; overflow-wrap: anywhere; }
+.workout-day-sheet__record-badge { display:inline-flex;align-items:center;gap:4px;align-self:flex-start;padding:4px 7px;border-radius:999px;background:#f1eaff;color:#6840df;font-size:.62rem;font-weight:900;line-height:1; }
+.workout-day-sheet__record-badge span { color:inherit;font-size:.68rem;line-height:1; }
+.workout-day-sheet__record-badge b { color:inherit;font-size:inherit;letter-spacing:.03em; }
 .workout-day-sheet__empty { margin: 24px 0 8px; padding: 24px; border-radius: 18px; background: #fff; color: var(--ink-soft); text-align: center; }
 
 @media (max-width: 350px) {
