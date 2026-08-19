@@ -8,11 +8,17 @@ import {
   getWeekStart,
 } from './workoutReport';
 
-const log = (date: string, entries: WorkoutLog['entries'], id = date): WorkoutLog => ({
+const log = (
+  date: string,
+  entries: WorkoutLog['entries'],
+  id = date,
+  personalBestExerciseIds?: string[],
+): WorkoutLog => ({
   id: `log-${id}`,
   date,
   entries,
   feeling: 'moderate',
+  personalBestExerciseIds,
   grantedPackIds: [],
   createdAt: `${date}T09:00:00.000Z`,
 });
@@ -53,6 +59,24 @@ describe('buildWeeklyReport', () => {
       activeDays: 1,
     });
   });
+
+  it('자동 신기록 종목 수를 합산하고 레거시 수동 신기록은 1개로 집계한다', () => {
+    const automatic = log(
+      '2026-08-03',
+      [{ exerciseId: 'leg-press' }, { exerciseId: 'lat-pulldown' }],
+      'auto',
+      ['leg-press', 'lat-pulldown'],
+    );
+    const legacy = log('2026-08-04', [{ exerciseId: 'treadmill' }], 'legacy');
+    legacy.personalBestExerciseIds = undefined;
+    legacy.feeling = 'personal-best';
+
+    const report = buildWeeklyReport([automatic, legacy], '2026-08-03');
+
+    expect(report.totals.personalBests).toBe(3);
+    expect(report.days.find((day) => day.date === '2026-08-03')?.totals.personalBests).toBe(2);
+    expect(report.days.find((day) => day.date === '2026-08-04')?.totals.personalBests).toBe(1);
+  });
 });
 
 describe('buildDailyReport', () => {
@@ -74,6 +98,7 @@ describe('buildMonthlyReport', () => {
       durationMinutes: 0,
       sets: 0,
       reps: 0,
+      personalBests: 0,
     });
   });
 });
@@ -81,9 +106,14 @@ describe('buildMonthlyReport', () => {
 describe('getPreviousPeriodDelta', () => {
   it('현재 값에서 이전 값을 뺀 절대 증감을 반환한다', () => {
     const current = buildWeeklyReport([
-      log('2026-08-03', [{ exerciseId: 'treadmill', durationMinutes: 30 }]),
+      log('2026-08-03', [{ exerciseId: 'treadmill', durationMinutes: 30 }], 'current', ['treadmill']),
+      log('2026-08-04', [{ exerciseId: 'leg-press' }], 'current-2', ['leg-press']),
     ], '2026-08-03');
-    const previous = buildWeeklyReport([], '2026-07-27');
-    expect(getPreviousPeriodDelta(current, previous).durationMinutes).toBe(30);
+    const previous = buildWeeklyReport([
+      log('2026-07-27', [{ exerciseId: 'treadmill', durationMinutes: 10 }], 'previous', ['treadmill']),
+    ], '2026-07-27');
+    const delta = getPreviousPeriodDelta(current, previous);
+    expect(delta.durationMinutes).toBe(20);
+    expect(delta.personalBests).toBe(1);
   });
 });
