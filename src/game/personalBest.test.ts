@@ -38,3 +38,80 @@ describe('detectWorkoutPersonalBests', () => {
     }]);
   });
 });
+
+describe('buildPersonalBestPreview', () => {
+  const preview = () => (personalBest as unknown as {
+    buildPersonalBestPreview?: (
+      logs: WorkoutLog[],
+      entry: WorkoutLog['entries'][number],
+    ) => unknown;
+  }).buildPersonalBestPreview;
+
+  it('compares the entered weight with the previous best weight', () => {
+    const buildPreview = preview();
+    expect(typeof buildPreview).toBe('function');
+    if (!buildPreview) return;
+
+    expect(buildPreview([priorLog], {
+      exerciseId: 'leg-press',
+      exerciseName: '레그 프레스',
+      weightKg: 65,
+      reps: 8,
+      sets: 3,
+    })).toEqual({
+      metric: 'weight',
+      currentValue: 65,
+      previousValue: 60,
+      isNewRecord: true,
+    });
+  });
+
+  it('uses duration for time-based exercise records', () => {
+    const buildPreview = preview();
+    expect(typeof buildPreview).toBe('function');
+    if (!buildPreview) return;
+
+    const durationLog: WorkoutLog = {
+      ...priorLog,
+      id: 'old-run',
+      entries: [{ exerciseId: 'run', exerciseName: '러닝', exerciseLogType: 'duration', durationMinutes: 30 }],
+    };
+
+    expect(buildPreview([durationLog], {
+      exerciseId: 'run',
+      exerciseName: '러닝',
+      exerciseLogType: 'duration',
+      durationMinutes: 40,
+    })).toEqual({
+      metric: 'duration',
+      currentValue: 40,
+      previousValue: 30,
+      isNewRecord: true,
+    });
+  });
+
+  it('uses total repetitions for bodyweight records', () => {
+    const buildPreview = preview();
+    expect(typeof buildPreview).toBe('function');
+    if (!buildPreview) return;
+
+    const bodyweightLog: WorkoutLog = {
+      ...priorLog,
+      id: 'old-push-up',
+      entries: [{ exerciseId: 'push-up', exerciseName: '푸시업', weightKg: 0, reps: 10, sets: 3 }],
+    };
+
+    expect(buildPreview([bodyweightLog], {
+      exerciseId: 'push-up',
+      exerciseName: '푸시업',
+      weightKg: 0,
+      reps: 12,
+      sets: 3,
+    })).toEqual({
+      metric: 'reps',
+      currentValue: 36,
+      previousValue: 30,
+      isNewRecord: true,
+    });
+  });
+});
