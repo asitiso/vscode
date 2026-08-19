@@ -17,6 +17,7 @@ describe('buildWorkoutCompletionSummary', () => {
       weeklyRemaining: 2,
       weeklyGoalCompletedNow: false,
       packCount: 1,
+      weeklyRewardPackCount: 0,
     });
   });
 
@@ -31,9 +32,10 @@ describe('buildWorkoutCompletionSummary', () => {
 
     expect(summary.xpGain).toBe(150);
     expect(summary.weeklySessions).toBe(2);
+    expect(summary.packCount).toBe(1);
   });
 
-  it('adds the weekly-goal XP bonus only when this workout completes the goal', () => {
+  it('adds the weekly-goal XP bonus and weekly reward pack only when this workout completes the goal', () => {
     const completed = buildWorkoutCompletionSummary({
       durationSeconds: 1200,
       feeling: 'hard',
@@ -52,8 +54,12 @@ describe('buildWorkoutCompletionSummary', () => {
     expect(completed.xpGain).toBe(250);
     expect(completed.weeklyGoalCompletedNow).toBe(true);
     expect(completed.weeklyRemaining).toBe(0);
+    expect(completed.packCount).toBe(2);
+    expect(completed.weeklyRewardPackCount).toBe(1);
     expect(alreadyComplete.xpGain).toBe(100);
     expect(alreadyComplete.weeklyGoalCompletedNow).toBe(false);
+    expect(alreadyComplete.packCount).toBe(1);
+    expect(alreadyComplete.weeklyRewardPackCount).toBe(0);
   });
 
   it('does not advance weekly progress or award weekly bonus for another workout on the same day', () => {
@@ -69,5 +75,7 @@ describe('buildWorkoutCompletionSummary', () => {
     expect(summary.weeklyRemaining).toBe(1);
     expect(summary.weeklyGoalCompletedNow).toBe(false);
     expect(summary.xpGain).toBe(100);
+    expect(summary.packCount).toBe(1);
+    expect(summary.weeklyRewardPackCount).toBe(0);
   });
 });
