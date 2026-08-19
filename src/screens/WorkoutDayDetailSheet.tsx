@@ -111,14 +111,21 @@ export function WorkoutDayDetailSheet({ report, onClose, onSelectExercise }: {
           {report.exercises.length > 0 ? (
             <div className="workout-day-sheet__exercises">
               <div className="workout-day-sheet__section-title"><strong>종목별 기록</strong><span>{report.exercises.length}종</span></div>
-              {report.exercises.map((exercise) => (
-                <article key={exercise.exerciseId}>
-                  <button type="button" onClick={() => { onClose(); onSelectExercise?.(exercise.exerciseId); }} disabled={!onSelectExercise}>
-                    <div><strong>{exercise.name}</strong><span>{formatExerciseMetrics(exercise.durationMinutes, exercise.sets, exercise.reps)}</span></div>
-                    {onSelectExercise && <span aria-hidden="true">분석 ›</span>}
-                  </button>
-                </article>
-              ))}
+              {report.exercises.map((exercise) => {
+                const isPersonalBest = report.logs.some((log) => log.personalBestExerciseIds?.includes(exercise.exerciseId));
+                return (
+                  <article key={exercise.exerciseId}>
+                    <button type="button" onClick={() => { onClose(); onSelectExercise?.(exercise.exerciseId); }} disabled={!onSelectExercise}>
+                      <div>
+                        <strong>{exercise.name}</strong>
+                        {isPersonalBest && <small className="workout-day-sheet__record-badge"><span aria-hidden="true">🏆</span><b>NEW RECORD</b></small>}
+                        <span>{formatExerciseMetrics(exercise.durationMinutes, exercise.sets, exercise.reps)}</span>
+                      </div>
+                      {onSelectExercise && <span aria-hidden="true">분석 ›</span>}
+                    </button>
+                  </article>
+                );
+              })}
             </div>
           ) : <p className="workout-day-sheet__empty">이 날짜에는 운동 기록이 없어요.</p>}
 
