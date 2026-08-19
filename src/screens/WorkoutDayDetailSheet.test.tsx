@@ -44,7 +44,7 @@ it('선택한 날짜의 운동과 수치를 표시하고 닫을 수 있다', asy
   expect(onClose).toHaveBeenCalledOnce();
 });
 
-it('그날의 실제 운동시간과 세션별 운동 요약을 표시한다', () => {
+it('그날의 실제 운동시간과 세션별 운동 요약, 종목별 신기록을 표시한다', () => {
   render(
     <WorkoutDayDetailSheet
       report={{
@@ -57,6 +57,7 @@ it('그날의 실제 운동시간과 세션별 운동 요약을 표시한다', (
             durationSeconds: 2_538,
             feeling: 'moderate',
             memo: '좋았음',
+            personalBestExerciseIds: ['squat'],
             grantedPackIds: ['pack-1'],
             entries: [
               { exerciseId: 'squat', exerciseName: '스쿼트', sets: 3, reps: 10 },
@@ -86,4 +87,5 @@ it('그날의 실제 운동시간과 세션별 운동 요약을 표시한다', (
   expect(screen.getByText('1번째 운동')).toBeInTheDocument();
   expect(screen.getByText('스쿼트 · 러닝')).toBeInTheDocument();
   expect(screen.getByText('3세트 · 30회 · 카드팩 1개')).toBeInTheDocument();
+  expect(screen.getByText('NEW RECORD')).toBeInTheDocument();
 });
