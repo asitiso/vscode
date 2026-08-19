@@ -11,7 +11,8 @@ export interface WorkoutCompletionSummary {
   weeklyGoalTarget: number;
   weeklyRemaining: number;
   weeklyGoalCompletedNow: boolean;
-  packCount: 1;
+  packCount: number;
+  weeklyRewardPackCount: 0 | 1;
 }
 
 export function buildWorkoutCompletionSummary({
@@ -35,6 +36,7 @@ export function buildWorkoutCompletionSummary({
     && weeklySessions >= safeTarget;
   const personalBestBonus = feeling === 'personal-best' ? XP_PER_PERSONAL_BEST : 0;
   const weeklyGoalBonus = weeklyGoalCompletedNow ? XP_PER_WEEKLY_GOAL : 0;
+  const weeklyRewardPackCount: 0 | 1 = weeklyGoalCompletedNow ? 1 : 0;
 
   return {
     durationSeconds: Math.max(0, Math.floor(durationSeconds)),
@@ -43,6 +45,7 @@ export function buildWorkoutCompletionSummary({
     weeklyGoalTarget: safeTarget,
     weeklyRemaining: Math.max(0, safeTarget - weeklySessions),
     weeklyGoalCompletedNow,
-    packCount: 1,
+    packCount: 1 + weeklyRewardPackCount,
+    weeklyRewardPackCount,
   };
 }
