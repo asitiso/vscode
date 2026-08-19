@@ -39,7 +39,7 @@ import { createAccountSaveQueue, decideAccountReconciliation } from './accountSy
 import { useGroupAuth } from '../group/GroupAuthContext';
 import { categoriesFromEntries, drawCard } from '../game/cardDraw';
 import { selectPackForCategories } from '../game/packSelector';
-import { computeWeeklyProgress } from '../game/weeklyGoal';
+import { computeWeeklyProgress, countSessionsByWeek, getWeekKey } from '../game/weeklyGoal';
 import { getMilestoneBadge, getMilestoneCosmetic, isLevelMilestone } from '../game/levelMilestones';
 import { PACKS_BY_ID } from '../data/packs';
 import {
@@ -80,6 +80,7 @@ export function gameReducer(state: AppState, action: Action): AppState {
     case 'COMPLETE_WORKOUT': {
       const now = new Date();
       const today = getLocalDateKey(now);
+      const weekKey = getWeekKey(today);
       const categories = categoriesFromEntries(action.entries);
       const grantedPack: GrantedPack = {
         id: uid('pack'),
@@ -87,6 +88,29 @@ export function gameReducer(state: AppState, action: Action): AppState {
         grantedAt: now.toISOString(),
         source: 'workout',
       };
+
+      const sessionsBefore = countSessionsByWeek(state.workoutLogs).get(weekKey) ?? 0;
+      const countsAsNewActiveDay = !state.workoutLogs.some((item) => item.date === today);
+      const sessionsAfter = sessionsBefore + (countsAsNewActiveDay ? 1 : 0);
+      const weeklyTarget = Math.max(1, state.user.weeklyGoal.targetSessionsPerWeek);
+      const weeklyAlreadyRewarded = state.grantedPacks.some((pack) => (
+        pack.source === 'weekly-goal' && pack.sourceWeekKey === weekKey
+      ));
+      const completedWeeklyGoalNow = countsAsNewActiveDay
+        && sessionsBefore < weeklyTarget
+        && sessionsAfter >= weeklyTarget
+        && !weeklyAlreadyRewarded;
+      const weeklyRewardPack: GrantedPack | null = completedWeeklyGoalNow ? {
+        id: `weekly-goal-${weekKey}`,
+        packDefId: 'pack-weekly-goal',
+        grantedAt: now.toISOString(),
+        source: 'weekly-goal',
+        sourceWeekKey: weekKey,
+      } : null;
+      const grantedPackIds = weeklyRewardPack
+        ? [grantedPack.id, weeklyRewardPack.id]
+        : [grantedPack.id];
+
       const log: WorkoutLog = {
         id: uid('log'),
         date: today,
@@ -94,14 +118,16 @@ export function gameReducer(state: AppState, action: Action): AppState {
         feeling: action.feeling,
         memo: action.memo,
         durationSeconds: action.durationSeconds,
-        grantedPackIds: [grantedPack.id],
+        grantedPackIds,
         createdAt: now.toISOString(),
       };
 
       return {
         ...state,
         workoutLogs: [...state.workoutLogs, log],
-        grantedPacks: [...state.grantedPacks, grantedPack],
+        grantedPacks: weeklyRewardPack
+          ? [...state.grantedPacks, grantedPack, weeklyRewardPack]
+          : [...state.grantedPacks, grantedPack],
       };
     }
 
