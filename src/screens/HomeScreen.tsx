@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './HomeScreen.css';
+import './HomeHudPopover.css';
 import './HomeLevelXp.css';
 import { useGame } from '../store/GameContext';
 import { useWorkoutSessionTimer } from '../hooks/useWorkoutSessionTimer';
@@ -122,7 +123,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             {highestBadge && <span className="hud-level-milestone-badge">{highestBadge.label}</span>}
           </button>
           {showXp && (
-            <section id="home-level-xp-popover" className="level-xp-popover" role="dialog" aria-labelledby="home-level-xp-title">
+            <section id="home-level-xp-popover" className="home-hud-popover home-hud-popover--left level-xp-popover" role="dialog" aria-labelledby="home-level-xp-title">
               <div className="level-xp-popover__heading">
                 <span className="level-xp-popover__star">⭐</span>
                 <div><strong id="home-level-xp-title">Lv.{experience.level}</strong><span>다음 레벨 진행도</span></div>
