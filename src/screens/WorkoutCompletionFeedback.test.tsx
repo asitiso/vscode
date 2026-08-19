@@ -5,20 +5,25 @@ import { WorkoutCompletionFeedback } from './WorkoutCompletionFeedback';
 
 afterEach(() => cleanup());
 
+const summary = {
+  durationSeconds: 1938,
+  xpGain: 100,
+  weeklySessions: 1,
+  weeklyGoalTarget: 3,
+  weeklyRemaining: 2,
+  weeklyGoalCompletedNow: false,
+  packCount: 1 as const,
+};
+
 describe('WorkoutCompletionFeedback', () => {
-  it('shows duration, XP, weekly progress and card pack before returning home', () => {
+  it('opens the newly earned pack from the primary action', () => {
+    const onOpenPack = vi.fn();
     const onDone = vi.fn();
     render(
       <WorkoutCompletionFeedback
-        summary={{
-          durationSeconds: 1938,
-          xpGain: 100,
-          weeklySessions: 1,
-          weeklyGoalTarget: 3,
-          weeklyRemaining: 2,
-          weeklyGoalCompletedNow: false,
-          packCount: 1,
-        }}
+        summary={summary}
+        packId="pack-new"
+        onOpenPack={onOpenPack}
         onDone={onDone}
       />,
     );
@@ -29,10 +34,27 @@ describe('WorkoutCompletionFeedback', () => {
     expect(screen.getByText('1 / 3회')).toBeTruthy();
     expect(screen.getByText('카드팩 +1')).toBeTruthy();
     expect(screen.getByText('이번 주 목표까지 2회 남았어요')).toBeTruthy();
-    expect(onDone).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole('button', { name: '홈으로' }));
+    fireEvent.click(screen.getByRole('button', { name: '카드팩 지금 열기' }));
+    expect(onOpenPack).toHaveBeenCalledWith('pack-new');
+    expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it('keeps the pack unopened and returns home when choosing later', () => {
+    const onOpenPack = vi.fn();
+    const onDone = vi.fn();
+    render(
+      <WorkoutCompletionFeedback
+        summary={summary}
+        packId="pack-new"
+        onOpenPack={onOpenPack}
+        onDone={onDone}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '나중에 열기' }));
     expect(onDone).toHaveBeenCalledTimes(1);
+    expect(onOpenPack).not.toHaveBeenCalled();
   });
 
   it('celebrates a weekly goal completed by this workout', () => {
@@ -47,6 +69,8 @@ describe('WorkoutCompletionFeedback', () => {
           weeklyGoalCompletedNow: true,
           packCount: 1,
         }}
+        packId="pack-new"
+        onOpenPack={vi.fn()}
         onDone={vi.fn()}
       />,
     );
