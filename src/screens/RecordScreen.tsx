@@ -104,6 +104,7 @@ export function RecordScreen({
       feeling,
       sessionsThisWeek: game.weeklyProgress.sessionsThisWeek,
       weeklyGoalTarget: state.user.weeklyGoal.targetSessionsPerWeek,
+      countsTowardWeeklyGoal: !game.todayLogged,
     });
 
     packsBeforeCompletionRef.current = new Set(state.grantedPacks.map((pack) => pack.id));
