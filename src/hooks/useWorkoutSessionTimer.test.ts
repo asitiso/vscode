@@ -83,4 +83,64 @@ describe('useWorkoutSessionTimer', () => {
     expect(result.current.lastCompletedSeconds).toBe(0);
     expect(localStorage.getItem('workout_session_completed_v1')).toBeNull();
   });
+
+  it('keeps elapsed wall-clock time across a refresh/remount', async () => {
+    const startAt = new Date('2026-08-18T09:00:00+09:00').getTime();
+    const first = renderHook(() => useWorkoutSessionTimer());
+    await act(async () => { await first.result.current.start(); });
+    first.unmount();
+
+    vi.setSystemTime(startAt + 95_000);
+    const restored = renderHook(() => useWorkoutSessionTimer());
+
+    expect(restored.result.current.status).toBe('running');
+    expect(restored.result.current.elapsedSeconds).toBe(95);
+  });
+
+  it('serializes rapid duplicate starts so the original start time is never overwritten', async () => {
+    const startAt = new Date('2026-08-18T09:00:00+09:00').getTime();
+    const { result } = renderHook(() => useWorkoutSessionTimer());
+
+    await act(async () => {
+      const first = result.current.start();
+      vi.setSystemTime(startAt + 5_000);
+      const second = result.current.start();
+      await Promise.all([first, second]);
+    });
+
+    const stored = JSON.parse(localStorage.getItem('workout_session_timer_v1') ?? '{}') as { startedAt?: number };
+    expect(stored.startedAt).toBe(startAt);
+  });
+
+  it('serializes rapid duplicate stops so both callers receive the same elapsed time', async () => {
+    const startAt = new Date('2026-08-18T09:00:00+09:00').getTime();
+    const { result } = renderHook(() => useWorkoutSessionTimer());
+    await act(async () => { await result.current.start(); });
+    vi.setSystemTime(startAt + 10_000);
+
+    let firstSeconds = -1;
+    let secondSeconds = -1;
+    await act(async () => {
+      const first = result.current.stop();
+      vi.setSystemTime(startAt + 15_000);
+      const second = result.current.stop();
+      [firstSeconds, secondSeconds] = await Promise.all([first, second]);
+    });
+
+    expect(firstSeconds).toBe(10);
+    expect(secondSeconds).toBe(10);
+    expect(result.current.lastCompletedSeconds).toBe(10);
+  });
+
+  it('keeps a session duration correct when the workout crosses local midnight', async () => {
+    vi.setSystemTime(new Date('2026-08-18T23:59:50+09:00'));
+    const { result } = renderHook(() => useWorkoutSessionTimer());
+    await act(async () => { await result.current.start(); });
+    vi.setSystemTime(new Date('2026-08-19T00:00:10+09:00'));
+
+    let stoppedSeconds = 0;
+    await act(async () => { stoppedSeconds = await result.current.stop(); });
+
+    expect(stoppedSeconds).toBe(20);
+  });
 });
