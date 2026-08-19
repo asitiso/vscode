@@ -56,8 +56,8 @@ export function WorkoutCompletionFeedback({
         )}
 
         {personalBest && (
-          <div className="workout-completion__personal-best">
-            <span className="workout-completion__personal-best-icon" aria-hidden="true">🏆</span>
+          <div className="workout-completion__weekly-reward">
+            <span aria-hidden="true">🏆</span>
             <div>
               <small>NEW RECORD</small>
               <strong>{personalBest.exerciseName} {formatPersonalBestValue(personalBest.metric, personalBest.value)}</strong>
