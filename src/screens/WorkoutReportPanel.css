@@ -5,6 +5,52 @@
   padding-bottom: 8px;
 }
 
+.report-rolling-summary {
+  padding: 15px;
+  border: 1px solid rgba(112, 69, 239, 0.14);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f8f5ff, #fff);
+  box-shadow: 0 6px 16px rgba(47, 34, 83, 0.07);
+}
+
+.report-rolling-summary__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.report-rolling-summary__grid > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px rgba(47, 34, 83, 0.06);
+}
+
+.report-rolling-summary__grid span {
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.report-rolling-summary__grid strong {
+  overflow: hidden;
+  color: #6840df;
+  font-family: var(--font-display);
+  font-size: clamp(0.94rem, 4vw, 1.08rem);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.report-rolling-summary__grid small {
+  color: #8b8495;
+  font-size: 0.62rem;
+}
+
 .report-range-tabs {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -298,4 +344,6 @@
   .report-week-list { gap: 3px; }
   .report-week-list button { padding-inline: 1px; }
   .report-metric-grid { gap: 7px; }
+  .report-rolling-summary__grid { gap: 6px; }
+  .report-rolling-summary__grid > div { padding-inline: 9px; }
 }
