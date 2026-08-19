@@ -6,9 +6,21 @@ const css = readFileSync(
   fileURLToPath(new URL('./HomeScreen.css', import.meta.url)),
   'utf8',
 )
+const homeSource = readFileSync(
+  fileURLToPath(new URL('./HomeScreen.tsx', import.meta.url)),
+  'utf8',
+)
+const setProgressCss = readFileSync(
+  fileURLToPath(new URL('./CardSetProgress.css', import.meta.url)),
+  'utf8',
+)
 
 function readClassBlock(className: string) {
   return css.match(new RegExp(`(?:^|\\n)\\.${className}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1] ?? ''
+}
+
+function readSetProgressClassBlock(className: string) {
+  return setProgressCss.match(new RegExp(`(?:^|\\n)\\.${className}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1] ?? ''
 }
 
 describe('home HUD layout', () => {
@@ -47,6 +59,19 @@ describe('home HUD layout', () => {
 
     expect(ctaTimeBlock).toMatch(/background:\s*rgba\(255,\s*255,\s*255,\s*0\.2\);/)
     expect(ctaTimeBlock).toMatch(/font-variant-numeric:\s*tabular-nums;/)
+  })
+
+  it('moves weekly progress into the streak HUD and removes the large weekly info panel', () => {
+    expect(homeSource).toContain('<HomeWeeklyGoalControl')
+    expect(homeSource).not.toContain('home-screen__info-panel')
+  })
+
+  it('pulls the card set progress and workout CTA upward after removing the weekly panel', () => {
+    const setBlock = readSetProgressClassBlock('home-screen__set-progress')
+    const ctaBlock = readSetProgressClassBlock('home-screen__cta')
+
+    expect(setBlock).toMatch(/top:\s*19%;/)
+    expect(ctaBlock).toMatch(/top:\s*32\.5%;/)
   })
 
   it('does not keep the old floating circular workout timer position', () => {
