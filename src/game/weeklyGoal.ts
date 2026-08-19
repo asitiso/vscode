@@ -1,22 +1,34 @@
 import type { WorkoutLog } from '../types';
 
-/** 월요일 시작 기준 ISO 주차 키 (예: "2026-W32") */
-export function getWeekKey(dateStr: string): string {
-  const date = new Date(dateStr + 'T00:00:00');
-  const day = (date.getDay() + 6) % 7; // 월=0 ... 일=6
-  const monday = new Date(date);
-  monday.setDate(date.getDate() - day);
+const DAY_MS = 86_400_000;
 
-  const jan4 = new Date(monday.getFullYear(), 0, 4);
-  const jan4Day = (jan4.getDay() + 6) % 7;
-  const week1Monday = new Date(jan4);
-  week1Monday.setDate(jan4.getDate() - jan4Day);
-
-  const weekNum = Math.round((monday.getTime() - week1Monday.getTime()) / (7 * 86400000)) + 1;
-  return `${monday.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+function localDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
-/** 로그를 주차별 "운동한 날짜 수"로 집계한다 (하루 여러 번 기록해도 1일로 계산) */
+function shiftLocalDateKey(dateKey: string, days: number): string {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const date = new Date(year, month - 1, day, 12, 0, 0);
+  date.setDate(date.getDate() + days);
+  return localDateKey(date);
+}
+
+/** 월요일 시작 ISO 주차 키 (예: "2026-W32"). */
+export function getWeekKey(dateStr: string): string {
+  const date = new Date(`${dateStr.slice(0, 10)}T00:00:00Z`);
+  const day = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - day);
+
+  const weekYear = date.getUTCFullYear();
+  const yearStart = new Date(Date.UTC(weekYear, 0, 1));
+  const weekNum = Math.ceil((((date.getTime() - yearStart.getTime()) / DAY_MS) + 1) / 7);
+  return `${weekYear}-W${String(weekNum).padStart(2, '0')}`;
+}
+
+/** 로그를 주차별 "운동한 날짜 수"로 집계한다 (하루 여러 번 기록해도 1일로 계산). */
 export function countSessionsByWeek(logs: WorkoutLog[]): Map<string, number> {
   const daysByWeek = new Map<string, Set<string>>();
   for (const log of logs) {
@@ -24,44 +36,42 @@ export function countSessionsByWeek(logs: WorkoutLog[]): Map<string, number> {
     if (!daysByWeek.has(week)) daysByWeek.set(week, new Set());
     daysByWeek.get(week)!.add(log.date);
   }
+
   const result = new Map<string, number>();
   for (const [week, days] of daysByWeek) result.set(week, days.size);
   return result;
 }
 
 /**
- * 이번 주 진행 상황과, 목표를 달성한 "완료된" 주가 몇 주 연속 이어지고 있는지 계산한다.
- * 이번 주는 아직 진행 중이므로 실패로 세지 않는다 (CLAUDE.md 3-4절: 실패감 최소화).
+ * 이번 주 진행 상황과 연속 달성 주차를 계산한다.
+ * 이번 주가 목표를 달성했다면 streak에 즉시 포함한다.
+ * 아직 진행 중이면 지난 주부터 계산해, 진행 중인 이번 주 때문에 streak가 끊기지 않게 한다.
  */
 export function computeWeeklyProgress(
   logs: WorkoutLog[],
   targetSessionsPerWeek: number,
   today = new Date(),
 ): { sessionsThisWeek: number; remainingThisWeek: number; streak: number } {
+  const safeTarget = Math.max(1, Math.floor(targetSessionsPerWeek));
   const sessionsByWeek = countSessionsByWeek(logs);
-  const todayStr = today.toISOString().slice(0, 10);
-  const currentWeek = getWeekKey(todayStr);
+  const todayKey = localDateKey(today);
+  const currentWeek = getWeekKey(todayKey);
   const sessionsThisWeek = sessionsByWeek.get(currentWeek) ?? 0;
 
-  // 지난 주부터 거꾸로 훑으며 목표 달성 여부를 확인한다.
   let streak = 0;
-  const cursor = new Date(today);
-  cursor.setDate(cursor.getDate() - 7);
-  for (let i = 0; i < 104; i++) {
-    // 최대 2년치만 확인 (무한루프 방지)
-    const week = getWeekKey(cursor.toISOString().slice(0, 10));
+  let cursorKey = sessionsThisWeek >= safeTarget ? todayKey : shiftLocalDateKey(todayKey, -7);
+
+  for (let i = 0; i < 104; i += 1) {
+    const week = getWeekKey(cursorKey);
     const sessions = sessionsByWeek.get(week) ?? 0;
-    if (sessions >= targetSessionsPerWeek) {
-      streak++;
-      cursor.setDate(cursor.getDate() - 7);
-    } else {
-      break;
-    }
+    if (sessions < safeTarget) break;
+    streak += 1;
+    cursorKey = shiftLocalDateKey(cursorKey, -7);
   }
 
   return {
     sessionsThisWeek,
-    remainingThisWeek: Math.max(0, targetSessionsPerWeek - sessionsThisWeek),
+    remainingThisWeek: Math.max(0, safeTarget - sessionsThisWeek),
     streak,
   };
 }
