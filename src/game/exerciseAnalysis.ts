@@ -17,6 +17,7 @@ export interface ExercisePerformanceRecord {
   repsPerSet: number;
   totalReps: number;
   feeling: FeelingTag;
+  isPersonalBest: boolean;
   note?: string;
 }
 
@@ -88,6 +89,9 @@ export function buildExerciseHistory(workoutLogs: WorkoutLog[], exerciseId: stri
         repsPerSet: entry.reps ?? 0,
         totalReps: (entry.reps ?? 0) * Math.max(1, entry.sets ?? 1),
         feeling: log.feeling,
+        isPersonalBest: log.personalBestExerciseIds === undefined
+          ? log.feeling === 'personal-best'
+          : log.personalBestExerciseIds.includes(exerciseId),
         note: log.memo,
       })))
     .sort(compareRecords);
