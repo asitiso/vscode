@@ -9,6 +9,7 @@ import { HomeCharacterInteraction } from './HomeCharacterInteraction';
 import { HomeWorkoutTimerButton } from './HomeWorkoutTimerButton';
 import { HomeWorkoutCta } from './HomeWorkoutCta';
 import { HomeWeeklyGoalControl } from './HomeWeeklyGoalControl';
+import { HomeUnopenedPackIndicator } from './HomeUnopenedPackIndicator';
 import { LevelMilestoneModal } from './LevelMilestoneModal';
 import { getHomeGroupShortcutCopy } from './homeGroupShortcut';
 import { PACKS_BY_ID } from '../data/packs';
@@ -195,11 +196,14 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       </div>
 
       {nextPack && (
-        <button type="button" className="home-screen__layer home-screen__pack" onClick={() => onNavigate('pack-opening', { packId: nextPack.id })}>
+        <button
+          type="button"
+          className="home-screen__layer home-screen__pack"
+          onClick={() => onNavigate('pack-opening', { packId: nextPack.id })}
+          aria-label={`미개봉 카드팩 ${unopenedPacks.length}개, 다음 보상 열기`}
+        >
           <span className="home-screen__pack-glow" />
-          <span className="home-screen__pack-badge">
-            {nextPack.source === 'set-completion' ? 'SET' : nextPack.source === 'level-milestone' ? 'LV' : 'NEW'}
-          </span>
+          <HomeUnopenedPackIndicator count={unopenedPacks.length} source={nextPack.source} />
           <PlaceholderArt assetName={PACKS_BY_ID[nextPack.packDefId]?.packAsset ?? 'pack-basic'} emoji="🎁" label={PACKS_BY_ID[nextPack.packDefId]?.name} />
         </button>
       )}
