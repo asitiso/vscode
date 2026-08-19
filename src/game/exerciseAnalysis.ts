@@ -48,6 +48,10 @@ export interface ExerciseAnalysis {
   latestDate: string;
   totals: ExerciseAnalysisTotals;
   personalBests: ExercisePersonalBest;
+  personalBestSummary: {
+    count: number;
+    latestDate?: string;
+  };
   history: ExercisePerformanceRecord[];
   recentRecords: ExercisePerformanceRecord[];
   trend: { metric: ExerciseTrendMetric; points: ExerciseTrendPoint[] };
@@ -120,6 +124,7 @@ export function buildExerciseAnalysis(workoutLogs: WorkoutLog[], exerciseId: str
   const positiveWeights = history.map((record) => record.weightKg).filter((value) => value > 0);
   const positiveDurations = history.map((record) => record.durationMinutes).filter((value) => value > 0);
   const positiveReps = history.map((record) => record.totalReps).filter((value) => value > 0);
+  const personalBestRecords = history.filter((record) => record.isPersonalBest);
 
   return {
     exerciseId,
@@ -137,6 +142,10 @@ export function buildExerciseAnalysis(workoutLogs: WorkoutLog[], exerciseId: str
       maxWeightKg: positiveWeights.length ? Math.max(...positiveWeights) : undefined,
       maxDurationMinutes: positiveDurations.length ? Math.max(...positiveDurations) : undefined,
       maxReps: positiveReps.length ? Math.max(...positiveReps) : undefined,
+    },
+    personalBestSummary: {
+      count: personalBestRecords.length,
+      latestDate: personalBestRecords[0]?.date,
     },
     history,
     recentRecords: history.slice(0, 4),
