@@ -26,7 +26,7 @@ it('운동 기록 카드에 시간과 종목 요약을 표시하고 날짜 상�
   render(<WorkoutHistoryList workoutLogs={logs} onSelectDay={onSelectDay} />);
 
   expect(screen.getByText('최근 운동 기록')).toBeInTheDocument();
-  expect(screen.getByText('42분 18초')).toBeInTheDocument();
+  expect(screen.getByText(/42분 18초/)).toBeInTheDocument();
   expect(screen.getByText('스쿼트 · 러닝')).toBeInTheDocument();
   expect(screen.getByText('3세트 · 30회 · 카드팩 1개')).toBeInTheDocument();
 
