@@ -20,7 +20,7 @@ function readClassBlock(className: string) {
 }
 
 function readSetProgressClassBlock(className: string) {
-  return setProgressCss.match(new RegExp(`(?:^|\\n)\\.${className}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1] ?? ''
+  return setProgressCss.match(new RegExp(`(?:^|\\n)\\.${className}\\s*\\{([^}]*)\\}`))?.[1] ?? ''
 }
 
 describe('home HUD layout', () => {
