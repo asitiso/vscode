@@ -1,0 +1,3 @@
+{
+  "buildCommand": "npx vitest run src/screens/HomeScreen.hudLayout.test.ts"
+}
