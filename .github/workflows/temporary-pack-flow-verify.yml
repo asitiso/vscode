@@ -22,8 +22,15 @@ jobs:
         continue-on-error: true
         run: npm install
       - id: focused
-        continue-on-error: true
-        run: npx vitest run src/game/workoutCompletionPack.test.ts src/screens/WorkoutCompletionFeedback.test.tsx
+        run: |
+          set +e
+          npx vitest run src/game/workoutCompletionPack.test.ts src/screens/WorkoutCompletionFeedback.test.tsx > focused.log 2>&1
+          code=$?
+          summary=$(grep -E "AssertionError|TestingLibraryElementError|Unable to find|Found multiple|expected|Error:" focused.log | head -n 1)
+          if [ -z "$summary" ]; then summary=$(tail -n 4 focused.log | tr '\n' ' '); fi
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "summary_b64=$(printf '%s' "$summary" | base64 -w0)" >> "$GITHUB_OUTPUT"
+          exit 0
       - id: fulltests
         continue-on-error: true
         run: npm test
@@ -33,15 +40,21 @@ jobs:
       - name: Publish verification statuses
         if: always()
         uses: actions/github-script@v7
+        env:
+          FOCUSED_CODE: ${{ steps.focused.outputs.code }}
+          FOCUSED_SUMMARY_B64: ${{ steps.focused.outputs.summary_b64 }}
         with:
           script: |
+            const focusedSummary = process.env.FOCUSED_SUMMARY_B64
+              ? Buffer.from(process.env.FOCUSED_SUMMARY_B64, 'base64').toString('utf8').slice(0, 115)
+              : 'no focused output';
             const checks = [
-              ['pack-flow-install', '${{ steps.install.outcome }}'],
-              ['pack-flow-focused', '${{ steps.focused.outcome }}'],
-              ['pack-flow-full-tests', '${{ steps.fulltests.outcome }}'],
-              ['pack-flow-build', '${{ steps.build.outcome }}'],
+              ['pack-flow-install', '${{ steps.install.outcome }}', 'install'],
+              ['pack-flow-focused', process.env.FOCUSED_CODE === '0' ? 'success' : 'failure', focusedSummary],
+              ['pack-flow-full-tests', '${{ steps.fulltests.outcome }}', 'full tests'],
+              ['pack-flow-build', '${{ steps.build.outcome }}', 'build'],
             ];
-            for (const [name, outcome] of checks) {
+            for (const [name, outcome, description] of checks) {
               const state = outcome === 'success' ? 'success' : 'failure';
               await github.rest.repos.createCommitStatus({
                 owner: context.repo.owner,
@@ -49,13 +62,13 @@ jobs:
                 sha: context.sha,
                 state,
                 context: name,
-                description: `${name}: ${outcome}`,
+                description: `${name}: ${description}`.slice(0, 140),
               });
             }
       - name: Fail when verification failed
         if: always()
         run: |
           test "${{ steps.install.outcome }}" = "success"
-          test "${{ steps.focused.outcome }}" = "success"
+          test "${{ steps.focused.outputs.code }}" = "0"
           test "${{ steps.fulltests.outcome }}" = "success"
           test "${{ steps.build.outcome }}" = "success"
