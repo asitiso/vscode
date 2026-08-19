@@ -1,0 +1,46 @@
+.report-pr-day {
+  display: inline-grid;
+  place-items: center;
+  min-width: 16px;
+  min-height: 16px;
+  font-size: 0.65rem;
+  line-height: 1;
+}
+
+.exercise-personal-best-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid #ffe0a0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff7df, #fff);
+  box-shadow: 0 4px 12px rgba(77, 54, 18, 0.06);
+}
+
+.exercise-personal-best-summary > strong {
+  color: var(--orange-deep);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+}
+
+.exercise-personal-best-summary > span:last-child {
+  margin-left: auto;
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+}
+
+.card-grid__record-badge {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 3px 9px rgba(54, 40, 12, 0.16);
+  font-size: 0.78rem;
+  line-height: 1;
+}
