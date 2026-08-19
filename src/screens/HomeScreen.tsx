@@ -7,6 +7,7 @@ import { PlaceholderArt } from '../components/PlaceholderArt';
 import { HomeCharacterInteraction } from './HomeCharacterInteraction';
 import { HomeWorkoutTimerButton } from './HomeWorkoutTimerButton';
 import { HomeWorkoutCta } from './HomeWorkoutCta';
+import { HomeWeeklyGoalControl } from './HomeWeeklyGoalControl';
 import { LevelMilestoneModal } from './LevelMilestoneModal';
 import { getHomeGroupShortcutCopy } from './homeGroupShortcut';
 import { PACKS_BY_ID } from '../data/packs';
@@ -31,12 +32,13 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
   } = useGame();
   const workoutTimer = useWorkoutSessionTimer();
   const [showXp, setShowXp] = useState(false);
+  const [showWeeklyGoal, setShowWeeklyGoal] = useState(false);
   const [activeMilestone, setActiveMilestone] = useState<number | null>(null);
   const [dismissedMilestone, setDismissedMilestone] = useState<number | null>(null);
   const levelControlRef = useRef<HTMLDivElement>(null);
+  const weeklyGoalControlRef = useRef<HTMLDivElement>(null);
   const nextPack = unopenedPacks[0];
   const goalTarget = state.user.weeklyGoal.targetSessionsPerWeek;
-  const goalProgressPct = Math.min(100, Math.round((weeklyProgress.sessionsThisWeek / goalTarget) * 100));
   const experience = calculateExperienceProgress(state);
   const pendingMilestone = getPendingLevelMilestone(experience.level, state.claimedLevelMilestones);
   const highestBadge = getHighestEarnedMilestoneBadge(state.claimedLevelMilestones);
@@ -73,6 +75,22 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
     };
   }, [showXp]);
 
+  useEffect(() => {
+    if (!showWeeklyGoal) return;
+    function handlePointerDown(event: PointerEvent) {
+      if (!weeklyGoalControlRef.current?.contains(event.target as Node)) setShowWeeklyGoal(false);
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setShowWeeklyGoal(false);
+    }
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showWeeklyGoal]);
+
   const closeMilestone = () => {
     setDismissedMilestone(activeMilestone);
     setActiveMilestone(null);
@@ -91,7 +109,10 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             className="hud-badge hud-badge--level hud-badge--button"
             aria-expanded={showXp}
             aria-controls="home-level-xp-popover"
-            onClick={() => setShowXp((current) => !current)}
+            onClick={() => {
+              setShowWeeklyGoal(false);
+              setShowXp((current) => !current);
+            }}
           >
             <span className="hud-badge__icon">⭐</span>
             <span className="hud-badge__text">
@@ -133,17 +154,18 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           onStart={workoutTimer.start}
           onStop={workoutTimer.stop}
         />
-        <div className="hud-badge hud-badge--streak">
-          <span className="hud-badge__icon">🔥</span>
-          <div className="hud-badge__text"><span className="hud-badge__title">{weeklyProgress.streak}주 연속</span><span className="hud-badge__subtitle">주간 목표 달성</span></div>
-        </div>
-      </div>
-
-      <div className="home-screen__layer home-screen__info-panel">
-        <div className="info-row"><span>이번 주 운동</span><span className="info-row__value">{weeklyProgress.sessionsThisWeek} / {goalTarget}회</span></div>
-        <div className="progress-track"><div className="progress-track__fill" style={{ width: `${goalProgressPct}%` }} /></div>
-        <div className={weeklyProgress.remainingThisWeek > 0 ? 'info-row info-row--muted' : 'info-row info-row--success'}>
-          {weeklyProgress.remainingThisWeek > 0 ? `다음 보상까지 ${weeklyProgress.remainingThisWeek}회 남음` : '이번 주 목표 달성! 🎉'}
+        <div className="hud-weekly-control" ref={weeklyGoalControlRef}>
+          <HomeWeeklyGoalControl
+            open={showWeeklyGoal}
+            sessionsThisWeek={weeklyProgress.sessionsThisWeek}
+            goalTarget={goalTarget}
+            remainingThisWeek={weeklyProgress.remainingThisWeek}
+            streak={weeklyProgress.streak}
+            onToggle={() => {
+              setShowXp(false);
+              setShowWeeklyGoal((current) => !current);
+            }}
+          />
         </div>
       </div>
 
