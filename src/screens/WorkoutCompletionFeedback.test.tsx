@@ -35,7 +35,7 @@ describe('WorkoutCompletionFeedback', () => {
     expect(screen.getByText('카드팩 +1')).toBeTruthy();
     expect(screen.getByText('이번 주 목표까지 2회 남았어요')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: '카드팩 지금 열기' }));
+    fireEvent.click(screen.getByRole('button', { name: /카드팩 지금 열기/ }));
     expect(onOpenPack).toHaveBeenCalledWith('pack-new');
     expect(onDone).not.toHaveBeenCalled();
   });
