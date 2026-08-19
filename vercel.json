@@ -1,3 +1,8 @@
 {
-  "buildCommand": "npx vitest run src/hooks/useWorkoutSessionTimer.test.ts"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": {
+      "feature/add-equipment-cards-v2": false
+    }
+  }
 }
