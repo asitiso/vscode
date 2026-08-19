@@ -41,7 +41,11 @@ export function calculateLevelFromXp(totalXp: number): number {
 export function calculateExperienceProgress(state: AppState): ExperienceProgress {
   const workoutXp = state.workoutLogs.length * XP_PER_WORKOUT;
   const openedPackXp = state.grantedPacks.filter((pack) => Boolean(pack.openedAt)).length * XP_PER_OPENED_PACK;
-  const personalBestXp = state.workoutLogs.filter((log) => log.feeling === 'personal-best').length * XP_PER_PERSONAL_BEST;
+  const personalBestXp = state.workoutLogs.filter((log) => (
+    log.personalBestExerciseIds === undefined
+      ? log.feeling === 'personal-best'
+      : log.personalBestExerciseIds.length > 0
+  )).length * XP_PER_PERSONAL_BEST;
   const completedGoalWeeks = countCompletedGoalWeeks(
     state.workoutLogs,
     state.user.weeklyGoal.targetSessionsPerWeek,
