@@ -38,6 +38,10 @@ describe('home HUD layout', () => {
     expect(subtitleBlock).toMatch(/font-size:\s*clamp\(0\.6rem,\s*2\.45vw,\s*0\.68rem\);/)
   })
 
+  it('uses a home-scoped running background so the timer stays visible over the global HUD skin', () => {
+    expect(css).toMatch(/\.home-screen\s+\.hud-badge--workout-running\s*\{[\s\S]*?background:\s*linear-gradient/)
+  })
+
   it('does not keep the old floating circular workout timer position', () => {
     expect(css).not.toContain('left: 7%')
     expect(css).not.toContain('top: 48%')
