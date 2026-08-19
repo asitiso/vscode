@@ -29,6 +29,11 @@ function formatMetrics(totalSets: number, totalReps: number, packCount: number):
   return parts.length ? parts.join(' · ') : '운동 기록 완료';
 }
 
+function personalBestCount(log: WorkoutLog): number {
+  if (log.personalBestExerciseIds !== undefined) return log.personalBestExerciseIds.length;
+  return log.feeling === 'personal-best' ? 1 : 0;
+}
+
 export function WorkoutHistoryList({
   workoutLogs,
   onSelectDay,
@@ -54,6 +59,7 @@ export function WorkoutHistoryList({
         <div className="workout-history-list__items">
           {visible.map((log) => {
             const item = buildWorkoutLogHistoryItem(log);
+            const recordCount = personalBestCount(log);
             return (
               <button
                 key={item.id}
@@ -69,6 +75,11 @@ export function WorkoutHistoryList({
                 <span className="workout-history-card__exercises">{item.exerciseNames.join(' · ') || '운동 기록'}</span>
                 <span className="workout-history-card__bottom">
                   <small>{formatMetrics(item.totalSets, item.totalReps, item.packCount)}</small>
+                  {recordCount > 0 && (
+                    <span className="workout-history-card__record">
+                      {recordCount > 1 ? `🏆 신기록 ${recordCount}개` : '🏆 NEW RECORD'}
+                    </span>
+                  )}
                   <i aria-hidden="true">›</i>
                 </span>
               </button>
