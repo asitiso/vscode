@@ -66,12 +66,18 @@ describe('home HUD layout', () => {
     expect(homeSource).not.toContain('home-screen__info-panel')
   })
 
-  it('pulls the card set progress and workout CTA upward after removing the weekly panel', () => {
-    const setBlock = readSetProgressClassBlock('home-screen__set-progress')
-    const ctaBlock = readSetProgressClassBlock('home-screen__cta')
+  it('keeps the center stack balanced after removing the weekly panel', () => {
+    expect(setProgressCss).toMatch(/\.home-screen\s+\.home-screen__set-progress\s*\{\s*top:\s*19%;\s*\}/)
+    expect(setProgressCss).toMatch(/\.home-screen\s+\.home-screen__cta\s*\{\s*top:\s*32\.5%;\s*\}/)
+    expect(setProgressCss).toMatch(/\.home-screen\s+\.home-screen__character\s*\{\s*top:\s*49%;\s*\}/)
+  })
 
-    expect(setBlock).toMatch(/top:\s*19%;/)
-    expect(ctaBlock).toMatch(/top:\s*32\.5%;/)
+  it('compresses the same center stack on short screens without changing its order', () => {
+    const compact = setProgressCss.match(/@media\s*\(max-height:\s*720px\)\s*\{([\s\S]*)\}\s*$/)?.[1] ?? ''
+
+    expect(compact).toMatch(/\.home-screen\s+\.home-screen__set-progress\s*\{\s*top:\s*18%;\s*\}/)
+    expect(compact).toMatch(/\.home-screen\s+\.home-screen__cta\s*\{\s*top:\s*31\.5%;\s*\}/)
+    expect(compact).toMatch(/\.home-screen\s+\.home-screen__character\s*\{\s*top:\s*48%;\s*\}/)
   })
 
   it('does not keep the old floating circular workout timer position', () => {
