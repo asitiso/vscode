@@ -40,8 +40,9 @@ it('리포트 상단에 최근 7일과 4주 운동시간을 보여주고 최근 
 it('주간과 월간 리포트에 신기록 통계와 신기록 날짜 트로피를 보여준다', () => {
   render(<WorkoutReportPanel workoutLogs={logs} />);
 
-  expect(screen.getByText('신기록')).toBeInTheDocument();
-  expect(document.querySelectorAll('.report-metric-card')).toHaveLength(7);
+  const metricCards = [...document.querySelectorAll('.report-metric-card')];
+  expect(metricCards).toHaveLength(7);
+  expect(metricCards.some((card) => card.textContent?.includes('신기록1개'))).toBe(true);
   expect(screen.getByLabelText('2026-08-19 신기록 1개')).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole('tab', { name: '월간' }));
