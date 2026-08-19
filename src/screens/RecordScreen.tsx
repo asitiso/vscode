@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import './RecordScreen.css';
 import { EXERCISES, EXERCISE_CATEGORY_LABELS } from '../data/exercises';
 import { buildWorkoutCompletionSummary, type WorkoutCompletionSummary } from '../game/workoutCompletionSummary';
+import { findNewWorkoutPackId } from '../game/workoutCompletionPack';
 import { useGame } from '../store/GameContext';
 import { useWorkoutSessionTimer } from '../hooks/useWorkoutSessionTimer';
 import { CustomExerciseEditor } from './CustomExerciseEditor';
@@ -19,7 +20,13 @@ const FEELINGS: { id: FeelingTag; label: string; emoji: string }[] = [
   { id: 'completed-anyway', label: '그래도 운동 완료', emoji: '💪' },
 ];
 
-export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNavigate: (screen: ScreenId) => void }) {
+export function RecordScreen({
+  onDone,
+  onNavigate,
+}: {
+  onDone: () => void;
+  onNavigate: (screen: ScreenId, params?: { packId?: string }) => void;
+}) {
   const game = useGame();
   const { state } = game;
   const workoutTimer = useWorkoutSessionTimer();
@@ -30,7 +37,12 @@ export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNav
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<CustomExercise | null>(null);
   const [completionSummary, setCompletionSummary] = useState<WorkoutCompletionSummary | null>(null);
+  const packsBeforeCompletionRef = useRef<Set<string> | null>(null);
   const allExercises = useMemo<SelectableExercise[]>(() => [...EXERCISES, ...state.customExercises], [state.customExercises]);
+  const completionPackId = useMemo(() => {
+    if (!completionSummary || !packsBeforeCompletionRef.current) return null;
+    return findNewWorkoutPackId(state.grantedPacks, packsBeforeCompletionRef.current);
+  }, [completionSummary, state.grantedPacks]);
 
   const resolve = (id: string, snapshot?: WorkoutSetEntry): SelectableExercise | null =>
     allExercises.find((e) => e.id === id) ?? (snapshot?.exerciseName && snapshot.exerciseLogType
@@ -94,6 +106,7 @@ export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNav
       weeklyGoalTarget: state.user.weeklyGoal.targetSessionsPerWeek,
     });
 
+    packsBeforeCompletionRef.current = new Set(state.grantedPacks.map((pack) => pack.id));
     game.completeWorkout(selected, feeling, memo.trim() || undefined, durationSeconds > 0 ? durationSeconds : undefined);
     workoutTimer.discardCompleted();
     setCompletionSummary(summary);
@@ -102,6 +115,14 @@ export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNav
     if (workoutTimer.status === 'running') await workoutTimer.stop();
     workoutTimer.discardCompleted();
     onNavigate('home');
+  };
+  const openCompletionPack = (packId: string) => {
+    packsBeforeCompletionRef.current = null;
+    onNavigate('pack-opening', { packId });
+  };
+  const finishCompletion = () => {
+    packsBeforeCompletionRef.current = null;
+    onDone();
   };
 
   return <div className="record-screen">
@@ -132,6 +153,13 @@ export function RecordScreen({ onDone, onNavigate }: { onDone: () => void; onNav
     <section className="record-card record-card--memo"><div className="record-card__heading"><div><span className="record-card__kicker">선택 입력</span><h2>오늘의 메모</h2></div><span className="record-card__optional">선택</span></div><textarea className="memo-input" placeholder="오늘 운동에서 기억하고 싶은 점을 짧게 적어보세요." value={memo} onChange={(e) => setMemo(e.target.value)} rows={3} /></section>
     <div className="record-screen__actions"><button type="button" className="secondary-btn" onClick={() => void cancel()}>취소</button><button type="button" className="primary-btn" disabled={!selected.length || !feeling || Boolean(completionSummary)} onClick={() => void complete()}>기록 완료</button></div>
 
-    {completionSummary && <WorkoutCompletionFeedback summary={completionSummary} onDone={onDone} />}
+    {completionSummary && (
+      <WorkoutCompletionFeedback
+        summary={completionSummary}
+        packId={completionPackId}
+        onOpenPack={openCompletionPack}
+        onDone={finishCompletion}
+      />
+    )}
   </div>;
 }
