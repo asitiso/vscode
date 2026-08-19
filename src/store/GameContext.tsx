@@ -59,7 +59,7 @@ export interface AccountSaveConflict {
 }
 
 export type Action =
-  | { type: 'COMPLETE_WORKOUT'; entries: WorkoutSetEntry[]; feeling: FeelingTag; memo?: string }
+  | { type: 'COMPLETE_WORKOUT'; entries: WorkoutSetEntry[]; feeling: FeelingTag; memo?: string; durationSeconds?: number }
   | { type: 'OPEN_PACK'; packId: string }
   | { type: 'CLAIM_LEVEL_MILESTONE'; level: number; currentLevel: number }
   | { type: 'CREATE_CUSTOM_EXERCISE'; exercise: CustomExercise }
@@ -93,6 +93,7 @@ export function gameReducer(state: AppState, action: Action): AppState {
         entries: action.entries,
         feeling: action.feeling,
         memo: action.memo,
+        durationSeconds: action.durationSeconds,
         grantedPackIds: [grantedPack.id],
         createdAt: now.toISOString(),
       };
@@ -201,7 +202,7 @@ export function gameReducer(state: AppState, action: Action): AppState {
     case 'SET_USER_NAME':
       return { ...state, user: { ...state.user, name: action.name } };
     case 'SET_WEEKLY_GOAL':
-      return { ...state, user: { ...state.user, weeklyGoal: { targetSessionsPerWeek: action.target } } };
+      return { ...state, user: { ...state.user, weeklyGoal: { targetSessionsPerWeek: action.target } };
     case 'SET_SELECTED_CHARACTER':
       return { ...state, user: { ...state.user, selectedCharacterId: action.characterId } };
     case 'REPLACE_STATE':
@@ -213,7 +214,7 @@ export function gameReducer(state: AppState, action: Action): AppState {
 
 interface GameContextValue {
   state: AppState;
-  completeWorkout: (entries: WorkoutSetEntry[], feeling: FeelingTag, memo?: string) => void;
+  completeWorkout: (entries: WorkoutSetEntry[], feeling: FeelingTag, memo?: string, durationSeconds?: number) => void;
   openPack: (packId: string) => void;
   claimLevelMilestone: (level: number, currentLevel: number) => void;
   createCustomExercise: (input: CustomExerciseInput) => CustomExercise;
@@ -620,9 +621,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const value: GameContextValue = {
     state,
-    completeWorkout: (entries, feeling, memo) => {
+    completeWorkout: (entries, feeling, memo, durationSeconds) => {
       pendingImportantSaveRef.current = Boolean(userIdRef.current);
-      dispatch({ type: 'COMPLETE_WORKOUT', entries, feeling, memo });
+      dispatch({ type: 'COMPLETE_WORKOUT', entries, feeling, memo, durationSeconds });
     },
     openPack: (packId) => {
       const pack = stateRef.current.grantedPacks.find((item) => item.id === packId);
