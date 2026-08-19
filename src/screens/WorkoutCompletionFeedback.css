@@ -71,6 +71,23 @@
 .workout-completion__rewards strong { max-width: 100%; overflow: hidden; color: #32264f; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
 .workout-completion__rewards small { color: #8b8395; font-size: .58rem; }
 
+.workout-completion__weekly-reward {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #ffd48b;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #fff6d9, #fffaf0);
+  text-align: left;
+  box-shadow: 0 5px 12px rgba(207, 133, 34, .09);
+}
+.workout-completion__weekly-reward > span { font-size: 1.35rem; }
+.workout-completion__weekly-reward > div { display: flex; min-width: 0; flex-direction: column; gap: 1px; }
+.workout-completion__weekly-reward small { color: #c6791f; font-size: .55rem; font-weight: 900; letter-spacing: .08em; }
+.workout-completion__weekly-reward strong { color: #5b3d1f; font-size: .78rem; }
+
 .workout-completion__message { margin: 15px 0 0; color: #716a79; font-size: .75rem; line-height: 1.45; }
 .workout-completion__message--complete { color: #24965a; font-weight: 800; }
 
