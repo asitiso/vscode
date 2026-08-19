@@ -19,10 +19,6 @@ function readClassBlock(className: string) {
   return css.match(new RegExp(`(?:^|\\n)\\.${className}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1] ?? ''
 }
 
-function readSetProgressClassBlock(className: string) {
-  return setProgressCss.match(new RegExp(`(?:^|\\n)\\.${className}\\s*\\{([^}]*)\\}`))?.[1] ?? ''
-}
-
 describe('home HUD layout', () => {
   it('keeps all four HUD capsules on one flex row without wrapping', () => {
     const panelBlock = readClassBlock('home-screen__top-panel')
