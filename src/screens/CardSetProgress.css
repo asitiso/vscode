@@ -20,11 +20,12 @@
 .home-screen__set-main b { color: #7045ef; }
 .home-screen__set-detail { overflow: hidden; color: var(--ink-soft); font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
 .home-screen__cta { top: 32.5%; }
-.home-screen__character { top: 53%; }
+.home-screen__character { top: 49%; }
 
-/* Keep the home layout stable even if HomeScreen.css is emitted later in the CSS bundle. */
+/* Keep the center stack stable even if HomeScreen.css is emitted later in the CSS bundle. */
 .home-screen .home-screen__set-progress { top: 19%; }
 .home-screen .home-screen__cta { top: 32.5%; }
+.home-screen .home-screen__character { top: 49%; }
 
 .collection-set-filter { display: flex; gap: 8px; margin: 12px 0; overflow-x: auto; padding-bottom: 4px; }
 .collection-set-filter .chip { flex: 0 0 auto; }
@@ -47,6 +48,8 @@
 @media (max-height: 720px) {
   .home-screen__set-progress { top: 18%; padding-block: 8px; }
   .home-screen__cta { top: 31.5%; }
+  .home-screen__character { top: 48%; }
   .home-screen .home-screen__set-progress { top: 18%; }
   .home-screen .home-screen__cta { top: 31.5%; }
+  .home-screen .home-screen__character { top: 48%; }
 }
