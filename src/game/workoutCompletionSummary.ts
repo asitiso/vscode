@@ -19,16 +19,20 @@ export function buildWorkoutCompletionSummary({
   feeling,
   sessionsThisWeek,
   weeklyGoalTarget,
+  countsTowardWeeklyGoal,
 }: {
   durationSeconds: number;
   feeling: FeelingTag;
   sessionsThisWeek: number;
   weeklyGoalTarget: number;
+  countsTowardWeeklyGoal: boolean;
 }): WorkoutCompletionSummary {
   const safeTarget = Math.max(1, weeklyGoalTarget);
   const currentSessions = Math.max(0, sessionsThisWeek);
-  const weeklySessions = currentSessions + 1;
-  const weeklyGoalCompletedNow = currentSessions < safeTarget && weeklySessions >= safeTarget;
+  const weeklySessions = currentSessions + (countsTowardWeeklyGoal ? 1 : 0);
+  const weeklyGoalCompletedNow = countsTowardWeeklyGoal
+    && currentSessions < safeTarget
+    && weeklySessions >= safeTarget;
   const personalBestBonus = feeling === 'personal-best' ? XP_PER_PERSONAL_BEST : 0;
   const weeklyGoalBonus = weeklyGoalCompletedNow ? XP_PER_WEEKLY_GOAL : 0;
 
