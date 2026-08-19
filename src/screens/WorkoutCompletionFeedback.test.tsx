@@ -13,7 +13,7 @@ const summary = {
   weeklyRemaining: 2,
   weeklyGoalCompletedNow: false,
   packCount: 1,
-  weeklyRewardPackCount: 0,
+  weeklyRewardPackCount: 0 as const,
 };
 
 describe('WorkoutCompletionFeedback', () => {
