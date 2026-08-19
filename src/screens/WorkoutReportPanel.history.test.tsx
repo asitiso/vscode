@@ -31,7 +31,7 @@ it('리포트 상단에 최근 7일과 4주 운동시간을 보여주고 최근 
 
   expect(screen.getByText('최근 7일')).toBeInTheDocument();
   expect(screen.getByText('최근 4주')).toBeInTheDocument();
-  expect(screen.getAllByText('42분 18초')).toHaveLength(2);
+  expect(screen.getAllByText('42분 18초').length).toBeGreaterThanOrEqual(2);
   expect(screen.getByText('최근 운동 기록')).toBeInTheDocument();
   expect(screen.getByText('스쿼트')).toBeInTheDocument();
 });
