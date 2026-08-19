@@ -1,0 +1,3 @@
+{
+  "buildCommand": "npx vitest run src/hooks/useWorkoutSessionTimer.test.ts"
+}
