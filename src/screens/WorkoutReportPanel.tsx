@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import type { WorkoutLog } from '../types';
 import { buildMonthlyReport, buildWeeklyReport, getPreviousPeriodDelta, getWeekStart, shiftDateKey, type DailyWorkoutReport, type PeriodWorkoutReport, type ReportMetricTotals } from '../game/workoutReport';
+import { buildRollingWorkoutSummary } from '../game/workoutHistorySummary';
 import { getLocalDateKey } from '../game/cardSets';
 import { WorkoutDayDetailSheet } from './WorkoutDayDetailSheet';
+import { WorkoutHistoryList } from './WorkoutHistoryList';
 import './WorkoutReportPanel.css';
 
 type ReportRange = 'weekly' | 'monthly';
@@ -15,6 +17,15 @@ function formatPeriod(range: ReportRange, report: PeriodWorkoutReport): string {
   const date = parseDateKey(report.startDate); return `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
 }
 function formatDelta(value: number, unit: string): string { return value === 0 ? '이전 기간과 같음' : `이전 기간보다 ${value > 0 ? '+' : ''}${value}${unit}`; }
+function formatRollingDuration(seconds: number): string {
+  const safeSeconds = Math.max(0, Math.floor(seconds));
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const secs = safeSeconds % 60;
+  if (hours > 0) return `${hours}시간 ${minutes}분`;
+  if (minutes > 0) return `${minutes}분 ${secs}초`;
+  return `${secs}초`;
+}
 function MetricCard({ label, value, unit, delta }: { label: string; value: number; unit: string; delta: number }) {
   return <div className="report-metric-card"><span>{label}</span><strong>{value.toLocaleString()}<small>{unit}</small></strong><em className={delta > 0 ? 'is-up' : delta < 0 ? 'is-down' : ''}>{formatDelta(delta, unit)}</em></div>;
 }
@@ -35,6 +46,8 @@ export function WorkoutReportPanel({ workoutLogs, onSelectExercise }: { workoutL
   const [weekStart, setWeekStart] = useState(() => getWeekStart(today));
   const [monthDate, setMonthDate] = useState(() => { const date = parseDateKey(today); return new Date(date.getFullYear(), date.getMonth(), 1); });
   const [selectedDay, setSelectedDay] = useState<DailyWorkoutReport | null>(null);
+  const recent7Days = useMemo(() => buildRollingWorkoutSummary(workoutLogs, today, 7), [workoutLogs, today]);
+  const recent4Weeks = useMemo(() => buildRollingWorkoutSummary(workoutLogs, today, 28), [workoutLogs, today]);
   const currentReport = useMemo(() => range === 'weekly' ? buildWeeklyReport(workoutLogs, weekStart) : buildMonthlyReport(workoutLogs, monthDate.getFullYear(), monthDate.getMonth() + 1), [range, workoutLogs, weekStart, monthDate]);
   const previousReport = useMemo(() => range === 'weekly' ? buildWeeklyReport(workoutLogs, shiftDateKey(weekStart, -7)) : buildMonthlyReport(workoutLogs, new Date(monthDate.getFullYear(), monthDate.getMonth() - 1, 1).getFullYear(), new Date(monthDate.getFullYear(), monthDate.getMonth() - 1, 1).getMonth() + 1), [range, workoutLogs, weekStart, monthDate]);
   const delta: ReportMetricTotals = getPreviousPeriodDelta(currentReport, previousReport);
@@ -47,11 +60,20 @@ export function WorkoutReportPanel({ workoutLogs, onSelectExercise }: { workoutL
   const topExercise = currentReport.topExercises[0];
 
   return <div className="workout-report-panel">
+    <section className="report-rolling-summary">
+      <div className="report-section__heading"><strong>최근 운동시간</strong><span>세션 타이머 기준</span></div>
+      <div className="report-rolling-summary__grid">
+        <div><span>최근 7일</span><strong>{formatRollingDuration(recent7Days.totalSeconds)}</strong><small>{recent7Days.activeDays}일 · {recent7Days.logCount}회</small></div>
+        <div><span>최근 4주</span><strong>{formatRollingDuration(recent4Weeks.totalSeconds)}</strong><small>{recent4Weeks.activeDays}일 · {recent4Weeks.logCount}회</small></div>
+      </div>
+    </section>
+
     <div className="report-range-tabs" role="tablist" aria-label="리포트 기간"><button type="button" role="tab" aria-selected={range === 'weekly'} className={range === 'weekly' ? 'is-active' : ''} onClick={() => setRange('weekly')}>주간</button><button type="button" role="tab" aria-selected={range === 'monthly'} className={range === 'monthly' ? 'is-active' : ''} onClick={() => setRange('monthly')}>월간</button></div>
     <div className="report-period-nav"><button type="button" aria-label="이전 기간" disabled={!canGoPrevious} onClick={() => movePeriod(-1)}>‹</button><div><span>{range === 'weekly' ? 'WEEKLY REPORT' : 'MONTHLY REPORT'}</span><strong>{formatPeriod(range, currentReport)}</strong></div><button type="button" aria-label="다음 기간" disabled={!canGoNext} onClick={() => movePeriod(1)}>›</button></div>
     <div className="report-metric-grid"><MetricCard label="운동일" value={currentReport.totals.activeDays} unit="일" delta={delta.activeDays} /><MetricCard label="기록 횟수" value={currentReport.totals.logCount} unit="회" delta={delta.logCount} /><MetricCard label="운동 종목" value={currentReport.totals.exerciseCount} unit="종" delta={delta.exerciseCount} /><MetricCard label="운동 시간" value={currentReport.totals.durationMinutes} unit="분" delta={delta.durationMinutes} /><MetricCard label="총 세트" value={currentReport.totals.sets} unit="세트" delta={delta.sets} /><MetricCard label="총 반복" value={currentReport.totals.reps} unit="회" delta={delta.reps} /></div>
     <section className="report-top-exercise"><span>가장 많이 한 운동</span>{topExercise ? <><button type="button" className="report-exercise-link" onClick={() => onSelectExercise?.(topExercise.exerciseId)} disabled={!onSelectExercise}><strong>{topExercise.name}</strong></button><p>{topExercise.activeDays}일 동안 운동했어요</p></> : <><strong>아직 기록이 없어요</strong><p>운동을 기록하면 여기에 표시돼요.</p></>}</section>
     {range === 'weekly' ? <WeeklyDays report={currentReport} onSelect={setSelectedDay} /> : <MonthlyCalendar report={currentReport} onSelect={setSelectedDay} />}
+    <WorkoutHistoryList workoutLogs={workoutLogs} onSelectDay={setSelectedDay} />
     <CategoryBars report={currentReport} />
     <WorkoutDayDetailSheet report={selectedDay} onClose={() => setSelectedDay(null)} onSelectExercise={onSelectExercise} />
   </div>;
