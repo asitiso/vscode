@@ -160,6 +160,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
 
       <HomeWorkoutCta
         status={workoutTimer.status}
+        elapsedSeconds={workoutTimer.elapsedSeconds}
         onStart={workoutTimer.start}
         onStop={workoutTimer.stop}
         onNavigate={() => onNavigate('record')}
