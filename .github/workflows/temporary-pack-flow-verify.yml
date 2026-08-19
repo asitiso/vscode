@@ -18,10 +18,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
       - id: install
         continue-on-error: true
-        run: npm ci
+        run: npm install
       - id: focused
         continue-on-error: true
         run: npx vitest run src/game/workoutCompletionPack.test.ts src/screens/WorkoutCompletionFeedback.test.tsx
