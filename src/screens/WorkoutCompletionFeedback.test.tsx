@@ -8,6 +8,7 @@ afterEach(() => cleanup());
 const summary = {
   durationSeconds: 1938,
   xpGain: 100,
+  personalBests: [],
   weeklySessions: 1,
   weeklyGoalTarget: 3,
   weeklyRemaining: 2,
@@ -58,12 +59,37 @@ describe('WorkoutCompletionFeedback', () => {
     expect(onOpenPack).not.toHaveBeenCalled();
   });
 
+  it('shows a prominent NEW RECORD block for an automatically detected personal best', () => {
+    render(
+      <WorkoutCompletionFeedback
+        summary={{
+          ...summary,
+          personalBests: [{
+            exerciseId: 'leg-press',
+            exerciseName: '레그 프레스',
+            metric: 'weight',
+            previousValue: 60,
+            value: 65,
+          }],
+        }}
+        packId="pack-new"
+        onOpenPack={vi.fn()}
+        onDone={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('NEW RECORD')).toBeTruthy();
+    expect(screen.getByText('레그 프레스 65kg')).toBeTruthy();
+    expect(screen.getByText('이전 최고 60kg')).toBeTruthy();
+  });
+
   it('celebrates a weekly goal with bonus XP and a dedicated reward pack', () => {
     render(
       <WorkoutCompletionFeedback
         summary={{
           durationSeconds: 1200,
           xpGain: 250,
+          personalBests: [],
           weeklySessions: 3,
           weeklyGoalTarget: 3,
           weeklyRemaining: 0,
