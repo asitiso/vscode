@@ -62,6 +62,7 @@ export function WorkoutCompletionFeedback({
               <small>NEW RECORD</small>
               <strong>{personalBest.exerciseName} {formatPersonalBestValue(personalBest.metric, personalBest.value)}</strong>
               <span>이전 최고 {formatPersonalBestValue(personalBest.metric, personalBest.previousValue)}</span>
+              {summary.personalBestBonusXp > 0 && <em>신기록 보너스 +{summary.personalBestBonusXp} XP</em>}
               {summary.personalBests.length > 1 && <em>외 {summary.personalBests.length - 1}개 기록도 경신!</em>}
             </div>
           </div>
