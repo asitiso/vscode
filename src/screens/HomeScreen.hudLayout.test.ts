@@ -42,6 +42,13 @@ describe('home HUD layout', () => {
     expect(css).toMatch(/\.home-screen\s+\.hud-badge--workout-running\s*\{[\s\S]*?background:\s*linear-gradient/)
   })
 
+  it('keeps the central running timer legible with a dedicated elapsed-time pill', () => {
+    const ctaTimeBlock = readClassBlock('home-screen__cta-time')
+
+    expect(ctaTimeBlock).toMatch(/background:\s*rgba\(255,\s*255,\s*255,\s*0\.2\);/)
+    expect(ctaTimeBlock).toMatch(/font-variant-numeric:\s*tabular-nums;/)
+  })
+
   it('does not keep the old floating circular workout timer position', () => {
     expect(css).not.toContain('left: 7%')
     expect(css).not.toContain('top: 48%')
