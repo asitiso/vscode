@@ -41,6 +41,7 @@ import { categoriesFromEntries, drawCard } from '../game/cardDraw';
 import { selectPackForCategories } from '../game/packSelector';
 import { computeWeeklyProgress, countSessionsByWeek, getWeekKey } from '../game/weeklyGoal';
 import { getMilestoneBadge, getMilestoneCosmetic, isLevelMilestone } from '../game/levelMilestones';
+import { detectPersonalBestExerciseIds } from '../game/personalBest';
 import { PACKS_BY_ID } from '../data/packs';
 import {
   getAllCardSetProgress,
@@ -110,6 +111,7 @@ export function gameReducer(state: AppState, action: Action): AppState {
       const grantedPackIds = weeklyRewardPack
         ? [grantedPack.id, weeklyRewardPack.id]
         : [grantedPack.id];
+      const personalBestExerciseIds = detectPersonalBestExerciseIds(state.workoutLogs, action.entries);
 
       const log: WorkoutLog = {
         id: uid('log'),
@@ -118,6 +120,7 @@ export function gameReducer(state: AppState, action: Action): AppState {
         feeling: action.feeling,
         memo: action.memo,
         durationSeconds: action.durationSeconds,
+        personalBestExerciseIds,
         grantedPackIds,
         createdAt: now.toISOString(),
       };
