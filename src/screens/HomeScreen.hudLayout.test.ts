@@ -12,26 +12,29 @@ function readClassBlock(className: string) {
 }
 
 describe('home HUD layout', () => {
-  it('keeps level, group, workout, and streak badges in four equal columns on one row', () => {
+  it('keeps all four HUD capsules on one flex row without wrapping', () => {
     const panelBlock = readClassBlock('home-screen__top-panel')
 
-    expect(panelBlock).toMatch(/grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\);/)
-    expect(panelBlock).toMatch(/grid-template-rows:\s*minmax\(0,\s*1fr\);/)
-    expect(panelBlock).toMatch(/grid-auto-flow:\s*column;/)
+    expect(panelBlock).toMatch(/display:\s*flex;/)
+    expect(panelBlock).toMatch(/flex-wrap:\s*nowrap;/)
+    expect(panelBlock).toMatch(/align-items:\s*stretch;/)
   })
 
-  it('uses compact near-square capsules with a large icon/title row and full-width subtitle row', () => {
+  it('uses horizontal flex capsules while preserving the enlarged icon and text sizes', () => {
     const badgeBlock = readClassBlock('hud-badge')
+    const textBlock = readClassBlock('hud-badge__text')
     const iconBlock = readClassBlock('hud-badge__icon')
     const titleBlock = readClassBlock('hud-badge__title')
     const subtitleBlock = readClassBlock('hud-badge__subtitle')
 
-    expect(badgeBlock).toMatch(/display:\s*grid;/)
-    expect(badgeBlock).toMatch(/min-height:\s*clamp\(66px,\s*18vw,\s*72px\);/)
-    expect(badgeBlock).toMatch(/grid-template-columns:\s*auto\s+minmax\(0,\s*1fr\);/)
+    expect(badgeBlock).toMatch(/display:\s*flex;/)
+    expect(badgeBlock).toMatch(/flex:\s*1\s+1\s+0;/)
+    expect(badgeBlock).toMatch(/min-height:\s*clamp\(54px,\s*14vw,\s*60px\);/)
+    expect(badgeBlock).toMatch(/border-radius:\s*999px;/)
+    expect(textBlock).toMatch(/display:\s*flex;/)
+    expect(textBlock).toMatch(/flex-direction:\s*column;/)
     expect(iconBlock).toMatch(/width:\s*clamp\(29px,\s*8vw,\s*32px\);/)
     expect(titleBlock).toMatch(/font-size:\s*clamp\(0\.78rem,\s*3\.25vw,\s*0\.88rem\);/)
-    expect(subtitleBlock).toMatch(/grid-column:\s*1\s*\/\s*-1;/)
     expect(subtitleBlock).toMatch(/font-size:\s*clamp\(0\.6rem,\s*2\.45vw,\s*0\.68rem\);/)
   })
 
