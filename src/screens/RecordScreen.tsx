@@ -8,6 +8,7 @@ import { useWorkoutSessionTimer } from '../hooks/useWorkoutSessionTimer';
 import { CustomExerciseEditor } from './CustomExerciseEditor';
 import { RecordSessionTimerPanel } from './RecordSessionTimerPanel';
 import { WorkoutCompletionFeedback } from './WorkoutCompletionFeedback';
+import { createRecordCompletionGuard } from './recordCompletionGuard';
 import type { CustomExercise, ExerciseCategory, ExerciseLogType, FeelingTag, WorkoutSetEntry } from '../types';
 import type { ScreenId } from '../App';
 
@@ -38,6 +39,7 @@ export function RecordScreen({
   const [editing, setEditing] = useState<CustomExercise | null>(null);
   const [completionSummary, setCompletionSummary] = useState<WorkoutCompletionSummary | null>(null);
   const packsBeforeCompletionRef = useRef<Set<string> | null>(null);
+  const completionGuardRef = useRef(createRecordCompletionGuard());
   const allExercises = useMemo<SelectableExercise[]>(() => [...EXERCISES, ...state.customExercises], [state.customExercises]);
   const completionPackId = useMemo(() => {
     if (!completionSummary || !packsBeforeCompletionRef.current) return null;
@@ -94,7 +96,7 @@ export function RecordScreen({
     if (editing?.id === item.id) closeEditor();
   }
   const selected = Object.values(entries);
-  const complete = async () => {
+  const complete = () => completionGuardRef.current.run(async () => {
     if (!selected.length || !feeling || completionSummary) return;
     let durationSeconds = workoutTimer.lastCompletedSeconds;
     if (workoutTimer.status === 'running') durationSeconds = await workoutTimer.stop();
@@ -111,7 +113,7 @@ export function RecordScreen({
     game.completeWorkout(selected, feeling, memo.trim() || undefined, durationSeconds > 0 ? durationSeconds : undefined);
     workoutTimer.discardCompleted();
     setCompletionSummary(summary);
-  };
+  });
   const cancel = async () => {
     if (workoutTimer.status === 'running') await workoutTimer.stop();
     workoutTimer.discardCompleted();
