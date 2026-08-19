@@ -120,7 +120,7 @@ export interface PackDefinition {
   favoredCategories: ExerciseCategory[];
 }
 
-export type PackSource = 'workout' | 'set-completion' | 'level-milestone';
+export type PackSource = 'workout' | 'weekly-goal' | 'set-completion' | 'level-milestone';
 
 export interface GrantedPack {
   id: string;
@@ -129,6 +129,7 @@ export interface GrantedPack {
   openedAt?: string;
   resultCardId?: string;
   source?: PackSource;
+  sourceWeekKey?: string;
   sourceSetId?: string;
   sourceMilestoneLevel?: number;
 }
