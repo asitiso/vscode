@@ -32,8 +32,15 @@ jobs:
           echo "summary_b64=$(printf '%s' "$summary" | base64 -w0)" >> "$GITHUB_OUTPUT"
           exit 0
       - id: fulltests
-        continue-on-error: true
-        run: npm test
+        run: |
+          set +e
+          npm test > full.log 2>&1
+          code=$?
+          summary=$(grep -E "AssertionError|TestingLibraryElementError|Unable to find|Found multiple|expected|Error:" full.log | head -n 1)
+          if [ -z "$summary" ]; then summary=$(tail -n 8 full.log | tr '\n' ' '); fi
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "summary_b64=$(printf '%s' "$summary" | base64 -w0)" >> "$GITHUB_OUTPUT"
+          exit 0
       - id: build
         continue-on-error: true
         run: npm run build
@@ -43,16 +50,19 @@ jobs:
         env:
           FOCUSED_CODE: ${{ steps.focused.outputs.code }}
           FOCUSED_SUMMARY_B64: ${{ steps.focused.outputs.summary_b64 }}
+          FULL_CODE: ${{ steps.fulltests.outputs.code }}
+          FULL_SUMMARY_B64: ${{ steps.fulltests.outputs.summary_b64 }}
         with:
           script: |
-            const focusedSummary = process.env.FOCUSED_SUMMARY_B64
-              ? Buffer.from(process.env.FOCUSED_SUMMARY_B64, 'base64').toString('utf8').replace(/\s+/g, ' ').slice(0, 62)
+            const decode = (value) => value
+              ? Buffer.from(value, 'base64').toString('utf8').replace(/\s+/g, ' ').slice(0, 62)
               : 'no-output';
-            const focusedState = process.env.FOCUSED_CODE === '0' ? 'success' : 'failure';
+            const focusedSummary = decode(process.env.FOCUSED_SUMMARY_B64);
+            const fullSummary = decode(process.env.FULL_SUMMARY_B64);
             const checks = [
               ['pack-flow-install', '${{ steps.install.outcome }}'],
-              [`pack-flow-focused:${focusedSummary}`, focusedState],
-              ['pack-flow-full-tests', '${{ steps.fulltests.outcome }}'],
+              [`pack-flow-focused:${focusedSummary}`, process.env.FOCUSED_CODE === '0' ? 'success' : 'failure'],
+              [`pack-flow-full:${fullSummary}`, process.env.FULL_CODE === '0' ? 'success' : 'failure'],
               ['pack-flow-build', '${{ steps.build.outcome }}'],
             ];
             for (const [name, outcome] of checks) {
@@ -71,5 +81,5 @@ jobs:
         run: |
           test "${{ steps.install.outcome }}" = "success"
           test "${{ steps.focused.outputs.code }}" = "0"
-          test "${{ steps.fulltests.outcome }}" = "success"
+          test "${{ steps.fulltests.outputs.code }}" = "0"
           test "${{ steps.build.outcome }}" = "success"
