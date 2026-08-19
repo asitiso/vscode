@@ -50,4 +50,19 @@ describe('experience level', () => {
     expect(progress.currentLevelXp).toBe(0);
     expect(progress.requiredXp).toBe(1000);
   });
+
+  it('같은 날 여러 운동을 기록해도 주간 목표 XP는 하루 한 번만 계산한다', () => {
+    const state = stateWithWorkouts(3);
+    state.user.weeklyGoal.targetSessionsPerWeek = 3;
+    state.workoutLogs = state.workoutLogs.map((item, index) => ({
+      ...item,
+      id: `same-day-${index}`,
+      date: '2026-08-17',
+    }));
+
+    const progress = calculateExperienceProgress(state);
+
+    expect(progress.workoutXp).toBe(300);
+    expect(progress.weeklyGoalXp).toBe(0);
+  });
 });
