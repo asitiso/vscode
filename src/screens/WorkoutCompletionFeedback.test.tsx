@@ -9,6 +9,7 @@ const summary = {
   durationSeconds: 1938,
   xpGain: 100,
   personalBests: [],
+  personalBestBonusXp: 0 as const,
   weeklySessions: 1,
   weeklyGoalTarget: 3,
   weeklyRemaining: 2,
@@ -59,11 +60,13 @@ describe('WorkoutCompletionFeedback', () => {
     expect(onOpenPack).not.toHaveBeenCalled();
   });
 
-  it('shows a prominent NEW RECORD block for an automatically detected personal best', () => {
+  it('shows a prominent NEW RECORD block and the 50 XP bonus for an automatic personal best', () => {
     render(
       <WorkoutCompletionFeedback
         summary={{
           ...summary,
+          xpGain: 150,
+          personalBestBonusXp: 50,
           personalBests: [{
             exerciseId: 'leg-press',
             exerciseName: '레그 프레스',
@@ -81,6 +84,7 @@ describe('WorkoutCompletionFeedback', () => {
     expect(screen.getByText('NEW RECORD')).toBeTruthy();
     expect(screen.getByText('레그 프레스 65kg')).toBeTruthy();
     expect(screen.getByText('이전 최고 60kg')).toBeTruthy();
+    expect(screen.getByText('신기록 보너스 +50 XP')).toBeTruthy();
   });
 
   it('celebrates a weekly goal with bonus XP and a dedicated reward pack', () => {
@@ -90,6 +94,7 @@ describe('WorkoutCompletionFeedback', () => {
           durationSeconds: 1200,
           xpGain: 250,
           personalBests: [],
+          personalBestBonusXp: 0,
           weeklySessions: 3,
           weeklyGoalTarget: 3,
           weeklyRemaining: 0,
