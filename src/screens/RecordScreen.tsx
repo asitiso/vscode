@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import './RecordScreen.css';
 import { EXERCISES, EXERCISE_CATEGORY_LABELS } from '../data/exercises';
+import { detectWorkoutPersonalBests } from '../game/personalBest';
 import { buildWorkoutCompletionSummary, type WorkoutCompletionSummary } from '../game/workoutCompletionSummary';
 import { findNewWorkoutPackId } from '../game/workoutCompletionPack';
 import { useGame } from '../store/GameContext';
@@ -101,9 +102,11 @@ export function RecordScreen({
     let durationSeconds = workoutTimer.lastCompletedSeconds;
     if (workoutTimer.status === 'running') durationSeconds = await workoutTimer.stop();
 
+    const personalBests = detectWorkoutPersonalBests(state.workoutLogs, selected);
     const summary = buildWorkoutCompletionSummary({
       durationSeconds,
       feeling,
+      personalBests,
       sessionsThisWeek: game.weeklyProgress.sessionsThisWeek,
       weeklyGoalTarget: state.user.weeklyGoal.targetSessionsPerWeek,
       countsTowardWeeklyGoal: !game.todayLogged,
