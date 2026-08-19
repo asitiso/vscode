@@ -1,8 +1,3 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "git": {
-    "deploymentEnabled": {
-      "feature/add-equipment-cards-v2": false
-    }
-  }
+  "buildCommand": "npm test && npm run build"
 }
