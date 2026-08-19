@@ -1,0 +1,21 @@
+name: PR UX Polish Verify
+
+on:
+  push:
+    branches:
+      - feature/pr-ux-polish-20260819
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --package-lock=false
+      - run: npm test
+      - run: npx tsc -b
+      - run: npx vite build
+      - run: npm run lint
