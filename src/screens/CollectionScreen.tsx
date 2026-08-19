@@ -3,7 +3,8 @@ import './CollectionScreen.css';
 import { CARDS } from '../data/cards';
 import { useGame } from '../store/GameContext';
 import { CARD_SETS } from '../game/cardSets';
-import type { CardRarity } from '../types';
+import { buildExerciseAnalysis } from '../game/exerciseAnalysis';
+import type { CardRarity, WorkoutLog } from '../types';
 import { CollectionCard } from './CollectionCard';
 import { CollectionCardDetailModal } from './CollectionCardDetailModal';
 
@@ -16,6 +17,15 @@ const RARITY_LABEL: Record<CardRarity, string> = {
 const RARITY_FILTERS: (CardRarity | 'all')[] = ['all', 'common', 'rare', 'super-rare', 'legendary'];
 
 type SetFilter = 'all' | (typeof CARD_SETS)[number]['id'];
+
+function buildPersonalBestLabel(workoutLogs: WorkoutLog[], exerciseId: string): string | undefined {
+  const analysis = buildExerciseAnalysis(workoutLogs, exerciseId);
+  if (!analysis) return undefined;
+  if (analysis.personalBests.maxWeightKg !== undefined) return `최고 중량 ${analysis.personalBests.maxWeightKg}kg`;
+  if (analysis.personalBests.maxDurationMinutes !== undefined) return `최장 시간 ${analysis.personalBests.maxDurationMinutes}분`;
+  if (analysis.personalBests.maxReps !== undefined) return `최다 반복 ${analysis.personalBests.maxReps}회`;
+  return undefined;
+}
 
 export function CollectionScreen() {
   const { state, cardSetProgress, dailyCardSet } = useGame();
@@ -39,6 +49,10 @@ export function CollectionScreen() {
 
   const selectedCard = selectedCardId ? CARDS.find((card) => card.id === selectedCardId) : undefined;
   const selectedOwned = selectedCard ? state.ownedCards[selectedCard.id] : undefined;
+  const selectedPersonalBestLabel = useMemo(
+    () => selectedCard ? buildPersonalBestLabel(state.workoutLogs, selectedCard.exerciseId) : undefined,
+    [selectedCard, state.workoutLogs],
+  );
   const ownedCount = Object.keys(state.ownedCards).length;
   const completion = Math.round((ownedCount / CARDS.length) * 100);
 
@@ -106,7 +120,12 @@ export function CollectionScreen() {
       </div>
 
       {selectedCard && (
-        <CollectionCardDetailModal card={selectedCard} owned={selectedOwned} onClose={closeCard} />
+        <CollectionCardDetailModal
+          card={selectedCard}
+          owned={selectedOwned}
+          personalBestLabel={selectedPersonalBestLabel}
+          onClose={closeCard}
+        />
       )}
     </div>
   );
