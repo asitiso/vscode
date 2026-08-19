@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import './RecordScreen.css';
 import { EXERCISES, EXERCISE_CATEGORY_LABELS } from '../data/exercises';
-import { detectWorkoutPersonalBests } from '../game/personalBest';
+import { buildPersonalBestPreview, detectWorkoutPersonalBests, type PersonalBestMetric } from '../game/personalBest';
 import { buildWorkoutCompletionSummary, type WorkoutCompletionSummary } from '../game/workoutCompletionSummary';
 import { findNewWorkoutPackId } from '../game/workoutCompletionPack';
 import { useGame } from '../store/GameContext';
@@ -17,10 +17,16 @@ const CATEGORIES = Array.from(new Set(EXERCISES.map((e) => e.category))) as Exer
 type SelectableExercise = { id: string; name: string; category: ExerciseCategory; logType: ExerciseLogType };
 const FEELINGS: { id: FeelingTag; label: string; emoji: string }[] = [
   { id: 'easy', label: '가볍게 완료', emoji: '🙂' }, { id: 'moderate', label: '적당히 힘들었음', emoji: '😅' },
-  { id: 'hard', label: '정말 힘들었음', emoji: '🥵' }, { id: 'personal-best', label: '기록을 경신함', emoji: '🏆' },
+  { id: 'hard', label: '정말 힘들었음', emoji: '🥵' },
   { id: 'good-condition', label: '컨디션이 좋았음', emoji: '✨' }, { id: 'bad-condition', label: '컨디션이 좋지 않았음', emoji: '🌧️' },
   { id: 'completed-anyway', label: '그래도 운동 완료', emoji: '💪' },
 ];
+
+function formatPersonalBestValue(metric: PersonalBestMetric, value: number): string {
+  if (metric === 'weight') return `${value}kg`;
+  if (metric === 'duration') return `${value}분`;
+  return `${value}회`;
+}
 
 export function RecordScreen({
   onDone,
@@ -154,7 +160,21 @@ export function RecordScreen({
         </div>}
       </div>
     </section>
-    {selected.length > 0 && <section className="record-card"><div className="record-card__heading"><div><span className="record-card__kicker">운동 수치</span><h2>운동 기록</h2></div><span className="record-card__count">{selected.length}종목</span></div><div className="set-card-list">{selected.map((entry) => { const exercise = resolve(entry.exerciseId, entry); if (!exercise) return null; return <div className="set-card" key={entry.exerciseId}><div className="set-card__name">{exercise.name}</div>{exercise.logType === 'duration' ? <div className="set-card__fields set-card__fields--single"><label>시간(분)<input type="number" inputMode="numeric" min="0" value={entry.durationMinutes ?? 0} onChange={(e) => patch(entry.exerciseId, { durationMinutes: Number(e.target.value) })} /></label></div> : <div className="set-card__fields"><label>무게(kg)<input type="number" inputMode="decimal" min="0" value={entry.weightKg ?? 0} onChange={(e) => patch(entry.exerciseId, { weightKg: Number(e.target.value) })} /></label><label>횟수<input type="number" inputMode="numeric" min="0" value={entry.reps ?? 0} onChange={(e) => patch(entry.exerciseId, { reps: Number(e.target.value) })} /></label><label>세트<input type="number" inputMode="numeric" min="0" value={entry.sets ?? 0} onChange={(e) => patch(entry.exerciseId, { sets: Number(e.target.value) })} /></label></div>}</div>; })}</div></section>}
+    {selected.length > 0 && <section className="record-card"><div className="record-card__heading"><div><span className="record-card__kicker">운동 수치</span><h2>운동 기록</h2></div><span className="record-card__count">{selected.length}종목</span></div><div className="set-card-list">{selected.map((entry) => {
+      const exercise = resolve(entry.exerciseId, entry);
+      if (!exercise) return null;
+      const bestPreview = buildPersonalBestPreview(state.workoutLogs, entry);
+      return <div className="set-card" key={entry.exerciseId}>
+        <div className="set-card__name">{exercise.name}</div>
+        {exercise.logType === 'duration'
+          ? <div className="set-card__fields set-card__fields--single"><label>시간(분)<input type="number" inputMode="numeric" min="0" value={entry.durationMinutes ?? 0} onChange={(e) => patch(entry.exerciseId, { durationMinutes: Number(e.target.value) })} /></label></div>
+          : <div className="set-card__fields"><label>무게(kg)<input type="number" inputMode="decimal" min="0" value={entry.weightKg ?? 0} onChange={(e) => patch(entry.exerciseId, { weightKg: Number(e.target.value) })} /></label><label>횟수<input type="number" inputMode="numeric" min="0" value={entry.reps ?? 0} onChange={(e) => patch(entry.exerciseId, { reps: Number(e.target.value) })} /></label><label>세트<input type="number" inputMode="numeric" min="0" value={entry.sets ?? 0} onChange={(e) => patch(entry.exerciseId, { sets: Number(e.target.value) })} /></label></div>}
+        {bestPreview.previousValue !== undefined && <div className={`set-card__best ${bestPreview.isNewRecord ? 'set-card__best--record' : ''}`}>
+          <span>현재 최고 {formatPersonalBestValue(bestPreview.metric, bestPreview.previousValue)}</span>
+          {bestPreview.isNewRecord && <strong>🏆 신기록 가능!</strong>}
+        </div>}
+      </div>;
+    })}</div></section>}
     <section className="record-card"><div className="record-card__heading"><div><span className="record-card__kicker">컨디션 체크</span><h2>오늘의 느낌</h2></div><span className={`record-card__status ${feeling ? 'record-card__status--complete' : ''}`}>{feeling ? '선택 완료' : '필수'}</span></div><div className="feeling-grid">{FEELINGS.map((f) => <button key={f.id} type="button" className={`feeling-btn ${feeling === f.id ? 'feeling-btn--active' : ''}`} onClick={() => setFeeling(f.id)}><span className="feeling-btn__emoji">{f.emoji}</span><span>{f.label}</span></button>)}</div></section>
     <section className="record-card record-card--memo"><div className="record-card__heading"><div><span className="record-card__kicker">선택 입력</span><h2>오늘의 메모</h2></div><span className="record-card__optional">선택</span></div><textarea className="memo-input" placeholder="오늘 운동에서 기억하고 싶은 점을 짧게 적어보세요." value={memo} onChange={(e) => setMemo(e.target.value)} rows={3} /></section>
     <div className="record-screen__actions"><button type="button" className="secondary-btn" onClick={() => void cancel()}>취소</button><button type="button" className="primary-btn" disabled={!selected.length || !feeling || Boolean(completionSummary)} onClick={() => void complete()}>기록 완료</button></div>
