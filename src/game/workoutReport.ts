@@ -8,6 +8,7 @@ export interface ReportMetricTotals {
   durationMinutes: number;
   sets: number;
   reps: number;
+  personalBests: number;
 }
 
 export interface ExerciseReportItem {
@@ -51,7 +52,13 @@ const EMPTY_TOTALS: ReportMetricTotals = {
   durationMinutes: 0,
   sets: 0,
   reps: 0,
+  personalBests: 0,
 };
+
+function personalBestCount(log: WorkoutLog): number {
+  if (log.personalBestExerciseIds !== undefined) return log.personalBestExerciseIds.length;
+  return log.feeling === 'personal-best' ? 1 : 0;
+}
 
 function parseDateKey(dateKey: string): Date {
   const [year, month, day] = dateKey.split('-').map(Number);
@@ -155,6 +162,7 @@ export function buildDailyReport(workoutLogs: WorkoutLog[], dateKey: string): Da
       durationMinutes: exercises.reduce((sum, item) => sum + item.durationMinutes, 0),
       sets: exercises.reduce((sum, item) => sum + item.sets, 0),
       reps: exercises.reduce((sum, item) => sum + item.reps, 0),
+      personalBests: logs.reduce((sum, log) => sum + personalBestCount(log), 0),
     },
     categories: buildCategories(logs),
   };
@@ -211,6 +219,7 @@ function buildPeriodReport(workoutLogs: WorkoutLog[], startDate: string, endDate
         durationMinutes: topExercises.reduce((sum, item) => sum + item.durationMinutes, 0),
         sets: topExercises.reduce((sum, item) => sum + item.sets, 0),
         reps: topExercises.reduce((sum, item) => sum + item.reps, 0),
+        personalBests: periodLogs.reduce((sum, log) => sum + personalBestCount(log), 0),
       };
 
   return {
@@ -244,5 +253,6 @@ export function getPreviousPeriodDelta(
     durationMinutes: current.totals.durationMinutes - previous.totals.durationMinutes,
     sets: current.totals.sets - previous.totals.sets,
     reps: current.totals.reps - previous.totals.reps,
+    personalBests: current.totals.personalBests - previous.totals.personalBests,
   };
 }

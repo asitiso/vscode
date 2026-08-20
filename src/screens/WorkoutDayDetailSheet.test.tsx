@@ -30,6 +30,7 @@ it('선택한 날짜의 운동과 수치를 표시하고 닫을 수 있다', asy
           durationMinutes: 0,
           sets: 3,
           reps: 30,
+          personalBests: 0,
         },
         categories: [],
       }}
@@ -76,6 +77,7 @@ it('그날의 실제 운동시간과 세션별 운동 요약, 종목별 신기�
           durationMinutes: 15,
           sets: 3,
           reps: 30,
+          personalBests: 1,
         },
         categories: [],
       }}

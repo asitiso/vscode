@@ -67,6 +67,18 @@ describe('buildExerciseAnalysis', () => {
     expect(analysis?.personalBests.maxReps).toBe(48);
   });
 
+  it('summarizes how many personal bests were recorded and the latest personal best date', () => {
+    const first = log('a', '2026-08-03', [{ exerciseId: 'leg-press', weightKg: 40, sets: 3, reps: 10 }]);
+    const second = log('b', '2026-08-04', [{ exerciseId: 'leg-press', weightKg: 50, sets: 3, reps: 8 }]);
+    const third = log('c', '2026-08-05', [{ exerciseId: 'leg-press', weightKg: 55, sets: 3, reps: 8 }]);
+    second.personalBestExerciseIds = ['leg-press'];
+    third.personalBestExerciseIds = ['leg-press'];
+
+    const analysis = buildExerciseAnalysis([first, second, third], 'leg-press');
+
+    expect(analysis?.personalBestSummary).toEqual({ count: 2, latestDate: '2026-08-05' });
+  });
+
   it('returns null when there is no matching record', () => {
     expect(buildExerciseAnalysis([], 'missing')).toBeNull();
   });

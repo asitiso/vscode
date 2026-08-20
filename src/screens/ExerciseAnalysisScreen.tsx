@@ -6,6 +6,7 @@ import { ExerciseHistoryList } from './ExerciseHistoryList';
 import { ExerciseTrendChart } from './ExerciseTrendChart';
 import { WorkoutDayDetailSheet } from './WorkoutDayDetailSheet';
 import './ExerciseAnalysisScreen.css';
+import './PersonalBestInsights.css';
 
 const FEELING_LABELS: Record<FeelingTag, string> = {
   easy: '가볍게', moderate: '적당히', hard: '힘들게', 'personal-best': '개인 기록',
@@ -37,6 +38,7 @@ export function ExerciseAnalysisScreen({ exerciseId, workoutLogs, onBack }: { ex
   return <div className="exercise-analysis-screen">
     <header className="exercise-analysis__header"><button type="button" className="exercise-analysis__back" onClick={onBack}>← 운동 리포트</button><span>EXERCISE ANALYSIS</span><h1>{analysis.exerciseName}</h1><p>최근 운동일 {analysis.latestDate}</p></header>
     {bests.length > 0 && <section className="exercise-best-grid">{bests.map((best) => <div key={best.label}><span>{best.label}</span><strong>{best.value}<small>{best.unit}</small></strong></div>)}</section>}
+    {analysis.personalBestSummary.count > 0 && <section className="exercise-personal-best-summary"><span aria-hidden="true">🏆</span><strong>신기록 {analysis.personalBestSummary.count}회</strong>{analysis.personalBestSummary.latestDate && <span>최근 신기록 {analysis.personalBestSummary.latestDate}</span>}</section>}
     <section className="exercise-analysis__section"><div className="exercise-section-heading"><strong>누적 통계</strong><span>전체 기록 기준</span></div><div className="exercise-total-grid"><div><strong>{analysis.totals.activeDays}</strong><span>운동일</span></div><div><strong>{analysis.totals.recordCount}</strong><span>기록 횟수</span></div><div><strong>{analysis.totals.sets}</strong><span>총 세트</span></div><div><strong>{analysis.totals.reps}</strong><span>총 반복</span></div><div><strong>{analysis.totals.durationMinutes}</strong><span>총 시간(분)</span></div></div></section>
     <ExerciseTrendChart metric={analysis.trend.metric} points={analysis.trend.points} />
     <section className="exercise-analysis__section"><div className="exercise-section-heading"><strong>최근 기록</strong><span>최근 4회</span></div><div className="exercise-recent-list">{analysis.recentRecords.map((record) => <article key={record.id}><div><strong>{record.date}</strong><span>{record.isPersonalBest ? <><span aria-hidden="true">🏆</span> NEW RECORD</> : FEELING_LABELS[record.feeling]}</span></div><p>{recordMetrics(record)}</p>{record.note && <small>{record.note}</small>}</article>)}</div>{!showAll && <button className="exercise-analysis__all" type="button" onClick={() => setShowAll(true)}>전체 기록 보기</button>}</section>

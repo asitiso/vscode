@@ -4,10 +4,11 @@ import { pickDisplayIllustration, type CardDefinition, type OwnedCard } from '..
 interface CollectionCardProps {
   card: CardDefinition;
   owned?: OwnedCard;
+  hasPersonalBest?: boolean;
   onSelect: (cardId: string) => void;
 }
 
-export function CollectionCard({ card, owned, onSelect }: CollectionCardProps) {
+export function CollectionCard({ card, owned, hasPersonalBest = false, onSelect }: CollectionCardProps) {
   const accessibleName = owned ? `${card.name} 카드 자세히 보기` : '미발견 카드 자세히 보기';
   const illustration = owned ? pickDisplayIllustration(card, owned.starLevel) : 'locked-card-silhouette';
 
@@ -21,6 +22,7 @@ export function CollectionCard({ card, owned, onSelect }: CollectionCardProps) {
       <span className="card-grid__art" aria-hidden={!owned}>
         <PlaceholderArt assetName={illustration} emoji={owned ? '🃏' : '❔'} label={owned ? card.name : undefined} className="card-grid__artwork" />
         {owned && <span className="card-grid__rarity">{card.rarity === 'common' ? '일반' : card.rarity === 'rare' ? '레어' : card.rarity === 'super-rare' ? '슈퍼 레어' : '레전드'}</span>}
+        {owned && hasPersonalBest && <span className="card-grid__record-badge" aria-label={`${card.name} 신기록 보유`}>🏆</span>}
         {!owned && <span className="card-grid__lock" aria-hidden="true">🔒</span>}
       </span>
       <span className="card-grid__footer">

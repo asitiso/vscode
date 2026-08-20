@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import './CollectionScreen.css';
+import './PersonalBestInsights.css';
 import { CARDS } from '../data/cards';
 import { useGame } from '../store/GameContext';
 import { CARD_SETS } from '../game/cardSets';
@@ -27,24 +28,41 @@ function buildPersonalBestLabel(workoutLogs: WorkoutLog[], exerciseId: string): 
   return undefined;
 }
 
+function buildPersonalBestExerciseIds(workoutLogs: WorkoutLog[]): Set<string> {
+  const exerciseIds = new Set<string>();
+  for (const log of workoutLogs) {
+    if (log.personalBestExerciseIds !== undefined) {
+      for (const exerciseId of log.personalBestExerciseIds) exerciseIds.add(exerciseId);
+      continue;
+    }
+    if (log.feeling === 'personal-best') {
+      for (const entry of log.entries) exerciseIds.add(entry.exerciseId);
+    }
+  }
+  return exerciseIds;
+}
+
 export function CollectionScreen() {
   const { state, cardSetProgress, dailyCardSet } = useGame();
   const [rarityFilter, setRarityFilter] = useState<CardRarity | 'all'>('all');
   const [setFilter, setSetFilter] = useState<SetFilter>('all');
+  const [personalBestOnly, setPersonalBestOnly] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedButtonRef = useRef<HTMLElement | null>(null);
   const selectedSet = setFilter === 'all' ? undefined : CARD_SETS.find((set) => set.id === setFilter);
   const selectedProgress = selectedSet
     ? cardSetProgress.find((progress) => progress.set.id === selectedSet.id)
     : undefined;
+  const personalBestExerciseIds = useMemo(() => buildPersonalBestExerciseIds(state.workoutLogs), [state.workoutLogs]);
 
   const filteredCards = useMemo(
     () => CARDS.filter((card) => {
       const rarityMatches = rarityFilter === 'all' || card.rarity === rarityFilter;
       const setMatches = !selectedSet || selectedSet.cardIds.includes(card.id);
-      return rarityMatches && setMatches;
+      const personalBestMatches = !personalBestOnly || personalBestExerciseIds.has(card.exerciseId);
+      return rarityMatches && setMatches && personalBestMatches;
     }),
-    [rarityFilter, selectedSet],
+    [rarityFilter, selectedSet, personalBestOnly, personalBestExerciseIds],
   );
 
   const selectedCard = selectedCardId ? CARDS.find((card) => card.id === selectedCardId) : undefined;
@@ -106,6 +124,7 @@ export function CollectionScreen() {
       )}
 
       <div className="chip-row">
+        <button type="button" aria-label="신기록" className={`chip ${personalBestOnly ? 'chip--active' : ''}`} onClick={() => setPersonalBestOnly((current) => !current)}><span aria-hidden="true">🏆</span> 신기록</button>
         {RARITY_FILTERS.map((rarity) => (
           <button key={rarity} type="button" className={`chip ${rarityFilter === rarity ? 'chip--active' : ''}`} onClick={() => setRarityFilter(rarity)}>
             {rarity === 'all' ? '전체 등급' : RARITY_LABEL[rarity]}
@@ -115,7 +134,7 @@ export function CollectionScreen() {
 
       <div className="card-grid">
         {filteredCards.map((card) => (
-          <CollectionCard key={card.id} card={card} owned={state.ownedCards[card.id]} onSelect={openCard} />
+          <CollectionCard key={card.id} card={card} owned={state.ownedCards[card.id]} hasPersonalBest={personalBestExerciseIds.has(card.exerciseId)} onSelect={openCard} />
         ))}
       </div>
 
