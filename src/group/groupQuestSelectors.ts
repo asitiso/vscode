@@ -42,7 +42,7 @@ function normalizedGoal(value: number): number {
   return Number.isFinite(value) ? Math.max(0, value) : 0;
 }
 
-function contributionScore(member: GroupMemberSummary): number {
+export function calculateGroupContributionScore(member: GroupMemberSummary): number {
   const seconds = normalizedSeconds(member.weeklySeconds);
   if (seconds <= 0) return 0;
   const goal = normalizedGoal(member.weeklyGoalPercent);
@@ -73,7 +73,7 @@ export function buildGroupQuestView(members: GroupMemberSummary[]): GroupQuestVi
   const goal = progress(goalCurrent, goalTarget, hasMembers);
 
   const ranked = normalized
-    .map(({ member, seconds, goal: goalPercent }) => ({ member, seconds, goalPercent, score: contributionScore(member) }))
+    .map(({ member, seconds, goal: goalPercent }) => ({ member, seconds, goalPercent, score: calculateGroupContributionScore(member) }))
     .filter((item) => item.score > 0)
     .sort((left, right) =>
       right.score - left.score ||
