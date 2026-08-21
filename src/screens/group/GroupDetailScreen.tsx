@@ -3,6 +3,7 @@ import { leaveGroup, loadGroupDetail, removeGroupMember } from '../../group/grou
 import type { GroupDetail, GroupMemberSummary } from '../../group/groupTypes';
 import { formatWorkoutSeconds } from '../../group/groupSelectors';
 import { GroupMemberDetailModal } from './GroupMemberDetailModal';
+import { GroupInviteActions } from './GroupInviteActions';
 import { GroupCoopQuestPanel } from './GroupCoopQuestPanel';
 import { GroupTeamStreakPanel } from './GroupTeamStreakPanel';
 import { GroupWeeklyAwardsPanel } from './GroupWeeklyAwardsPanel';
@@ -41,7 +42,11 @@ export function GroupDetailScreen({ groupId, onBack }: { groupId: string; onBack
     <button className="group-back" type="button" onClick={onBack}>‹ 내 그룹</button>
     <section className="group-detail-hero">
       <div><span>WORKOUT GROUP</span><h2>{detail.name}</h2><p>{detail.memberCount}명 · 🔥 지금 {activeCount}명 운동 중 · 이번 주 총 {formatWorkoutSeconds(detail.weeklySeconds)}</p></div>
-      {detail.inviteCode && <div className="group-invite-code"><span>초대코드</span><strong>{detail.inviteCode}</strong></div>}
+      {detail.inviteCode && <div className="group-invite-code">
+        <span>초대코드</span>
+        <strong>{detail.inviteCode}</strong>
+        <GroupInviteActions groupName={detail.name} inviteCode={detail.inviteCode} />
+      </div>}
     </section>
     {message && <p className="group-error">{message}</p>}
     <GroupCoopQuestPanel members={detail.members} />
