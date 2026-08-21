@@ -3,6 +3,7 @@ import { leaveGroup, loadGroupDetail, removeGroupMember } from '../../group/grou
 import type { GroupDetail, GroupMemberSummary } from '../../group/groupTypes';
 import { formatWorkoutSeconds } from '../../group/groupSelectors';
 import { GroupMemberDetailModal } from './GroupMemberDetailModal';
+import { GroupCoopQuestPanel } from './GroupCoopQuestPanel';
 import { GroupMotivationPanel } from './GroupMotivationPanel';
 import { useGroupAuth } from '../../group/GroupAuthContext';
 
@@ -41,6 +42,7 @@ export function GroupDetailScreen({ groupId, onBack }: { groupId: string; onBack
       {detail.inviteCode && <div className="group-invite-code"><span>초대코드</span><strong>{detail.inviteCode}</strong></div>}
     </section>
     {message && <p className="group-error">{message}</p>}
+    <GroupCoopQuestPanel members={detail.members} />
     <GroupMotivationPanel
       members={detail.members}
       currentUserId={user?.id}
