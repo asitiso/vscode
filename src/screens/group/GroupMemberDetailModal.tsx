@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { loadGroupDailyCheerSummary, sendGroupDailyCheer } from '../../group/groupApi';
 import { formatWorkoutSeconds } from '../../group/groupSelectors';
 import type { GroupCheerSummary, GroupCheerType, GroupMemberSummary } from '../../group/groupTypes';
+import './GroupMemberCheer.css';
 
 const CHEER_OPTIONS: Array<{ type: GroupCheerType; label: string }> = [
   { type: 'fire', label: '🔥 불붙여!' },
