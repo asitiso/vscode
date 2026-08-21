@@ -44,7 +44,11 @@ describe('GroupListScreen invite paste', () => {
     fireEvent.click(screen.getByRole('button', { name: '코드로 참가' }));
 
     const input = screen.getByPlaceholderText('6자리 초대코드');
-    fireEvent.change(input, { target: { value: '운동 그룹 "RUN CREW"에 함께해요!\n초대코드: xy9z12' } });
+    fireEvent.paste(input, {
+      clipboardData: {
+        getData: () => '운동 그룹 "RUN CREW"에 함께해요!\n초대코드: xy9z12',
+      },
+    });
 
     expect(input).toHaveValue('XY9Z12');
   });
