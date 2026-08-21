@@ -45,7 +45,13 @@ export function GroupDetailScreen({ groupId, onBack }: { groupId: string; onBack
     </section>
     {message && <p className="group-error">{message}</p>}
     <GroupCoopQuestPanel members={detail.members} />
-    <GroupTeamStreakPanel memberCount={detail.memberCount} dailyParticipation={detail.dailyParticipation} />
+    <GroupTeamStreakPanel
+      memberCount={detail.memberCount}
+      dailyParticipation={detail.dailyParticipation}
+      members={detail.members}
+      currentUserId={user?.id}
+      onSelectMember={setSelected}
+    />
     <GroupWeeklyAwardsPanel members={detail.members} />
     <GroupMotivationPanel
       members={detail.members}
