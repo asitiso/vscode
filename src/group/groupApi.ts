@@ -1,5 +1,13 @@
 import { getSupabaseClient } from '../lib/supabaseClient';
-import type { GroupApiErrorCode, GroupDetail, GroupMemberSummary, GroupProfile, GroupSummary } from './groupTypes';
+import type {
+  GroupApiErrorCode,
+  GroupCheerSummary,
+  GroupCheerType,
+  GroupDetail,
+  GroupMemberSummary,
+  GroupProfile,
+  GroupSummary,
+} from './groupTypes';
 import { rankGroupMembers } from './groupSelectors';
 
 const ACTIVE_HEARTBEAT_MS = 2 * 60 * 1000;
@@ -14,7 +22,8 @@ function mapError(message?: string): GroupApiErrorCode {
   const value = message ?? '';
   const known: GroupApiErrorCode[] = [
     'AUTH_REQUIRED','GROUP_LIMIT_REACHED','GROUP_FULL','INVALID_INVITE_CODE','INVALID_GROUP_NAME','INVALID_NICKNAME',
-    'NOT_GROUP_MEMBER','OWNER_REQUIRED','OWNER_CANNOT_LEAVE','OWNER_CANNOT_REMOVE_SELF','SESSION_NOT_FOUND','SUPABASE_UNAVAILABLE',
+    'INVALID_CHEER_TYPE','SELF_CHEER_NOT_ALLOWED','NOT_GROUP_MEMBER','OWNER_REQUIRED','OWNER_CANNOT_LEAVE',
+    'OWNER_CANNOT_REMOVE_SELF','SESSION_NOT_FOUND','SUPABASE_UNAVAILABLE',
   ];
   return known.find((code) => value.includes(code)) ?? 'UNKNOWN';
 }
@@ -83,6 +92,50 @@ export async function removeGroupMember(groupId: string, memberId: string): Prom
   const client = requireClient();
   const { error } = await client.rpc('remove_group_member', { p_group_id: groupId, p_member_id: memberId });
   throwMapped(error);
+}
+
+function normalizeCheerCount(value: unknown): number {
+  const numeric = Number(value ?? 0);
+  return Number.isFinite(numeric) ? Math.max(0, Math.floor(numeric)) : 0;
+}
+
+function isCheerType(value: unknown): value is GroupCheerType {
+  return value === 'fire' || value === 'clap' || value === 'together';
+}
+
+function normalizeCheerSummary(data: unknown): GroupCheerSummary {
+  const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | null | undefined;
+  return {
+    fire: normalizeCheerCount(row?.fire_count),
+    clap: normalizeCheerCount(row?.clap_count),
+    together: normalizeCheerCount(row?.together_count),
+    mySelection: isCheerType(row?.my_selection) ? row.my_selection : null,
+  };
+}
+
+export async function loadGroupDailyCheerSummary(groupId: string, receiverId: string): Promise<GroupCheerSummary> {
+  const client = requireClient();
+  const { data, error } = await client.rpc('get_group_daily_cheer_summary', {
+    p_group_id: groupId,
+    p_receiver_id: receiverId,
+  });
+  throwMapped(error);
+  return normalizeCheerSummary(data);
+}
+
+export async function sendGroupDailyCheer(
+  groupId: string,
+  receiverId: string,
+  type: GroupCheerType,
+): Promise<GroupCheerSummary> {
+  const client = requireClient();
+  const { data, error } = await client.rpc('send_group_daily_cheer', {
+    p_group_id: groupId,
+    p_receiver_id: receiverId,
+    p_cheer_type: type,
+  });
+  throwMapped(error);
+  return normalizeCheerSummary(data);
 }
 
 function localDateKey(date = new Date()) {

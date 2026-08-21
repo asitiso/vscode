@@ -53,6 +53,11 @@ export function GroupDetailScreen({ groupId, onBack }: { groupId: string; onBack
       canRemoveMembers={mine}
     />
     <button type="button" className="group-danger-btn" onClick={leave}>{mine ? '그룹 삭제/나가기' : '그룹 나가기'}</button>
-    {selected && <GroupMemberDetailModal member={selected} onClose={() => setSelected(null)} />}
+    {selected && <GroupMemberDetailModal
+      member={selected}
+      groupId={detail.id}
+      currentUserId={user?.id}
+      onClose={() => setSelected(null)}
+    />}
   </div>;
 }

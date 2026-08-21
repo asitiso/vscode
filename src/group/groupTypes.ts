@@ -29,6 +29,15 @@ export interface GroupDetail extends GroupSummary {
   members: GroupMemberSummary[];
 }
 
+export type GroupCheerType = 'fire' | 'clap' | 'together';
+
+export interface GroupCheerSummary {
+  fire: number;
+  clap: number;
+  together: number;
+  mySelection: GroupCheerType | null;
+}
+
 export type GroupApiErrorCode =
   | 'AUTH_REQUIRED'
   | 'GROUP_LIMIT_REACHED'
@@ -36,6 +45,8 @@ export type GroupApiErrorCode =
   | 'INVALID_INVITE_CODE'
   | 'INVALID_GROUP_NAME'
   | 'INVALID_NICKNAME'
+  | 'INVALID_CHEER_TYPE'
+  | 'SELF_CHEER_NOT_ALLOWED'
   | 'NOT_GROUP_MEMBER'
   | 'OWNER_REQUIRED'
   | 'OWNER_CANNOT_LEAVE'
