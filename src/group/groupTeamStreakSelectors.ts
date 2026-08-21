@@ -1,7 +1,4 @@
-export interface GroupDailyParticipation {
-  date: string;
-  participantCount: number;
-}
+import type { GroupDailyParticipation } from './groupTypes';
 
 export interface GroupTeamStreakDay {
   date: string;
