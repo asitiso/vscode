@@ -36,9 +36,9 @@ describe('GroupTeamStreakPanel', () => {
     expect(screen.getByText('2일 연속')).toBeInTheDocument();
     expect(screen.getByText('하루 3명 참여 시 성공')).toBeInTheDocument();
     expect(screen.getByText('오늘 1명 더 운동하면 스트릭 유지!')).toBeInTheDocument();
-    expect(screen.getByText('4/3')).toBeInTheDocument();
-    expect(screen.getByText('3/3')).toBeInTheDocument();
-    expect(screen.getByText('2/3')).toBeInTheDocument();
+    expect(screen.getByText('4/5')).toBeInTheDocument();
+    expect(screen.getByText('3/5')).toBeInTheDocument();
+    expect(screen.getByText('2/5')).toBeInTheDocument();
     for (const label of ['월', '화', '수', '목', '금', '토', '일']) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
