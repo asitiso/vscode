@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './GroupInviteActions.css';
 
 function inviteMessage(groupName: string, inviteCode: string): string {
   return `운동 그룹 "${groupName}"에 함께해요!\n초대코드: ${inviteCode}`;
