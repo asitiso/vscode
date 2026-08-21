@@ -11,7 +11,7 @@ Add a lightweight social interaction to workout groups so members can encourage 
 
 The feature is deliberately daily and anonymous:
 
-- a member can send one cheer per target member per Korea-local calendar day;
+- a member can send one cheer per target member per group per Korea-local calendar day;
 - changing the cheer type replaces that day's choice rather than adding another vote;
 - the receiver sees only aggregate counts by cheer type;
 - the sender may see only their own current selection for that receiver;
@@ -90,7 +90,7 @@ Server-side validation must verify:
 6. the row date is computed on the server in `Asia/Seoul`;
 7. insert-or-update uses the unique daily identity above.
 
-The function returns only the sender's resulting selected cheer type (or an equally minimal success payload). It never returns another sender's identity.
+After the upsert, the function returns the same minimal anonymous summary shape as the read RPC for that receiver: three counts plus the caller's own selected type. This makes a send a single client round trip and never returns another sender's identity.
 
 ### 5.3 Read RPC
 
@@ -137,10 +137,10 @@ interface GroupCheerSummary {
 }
 
 loadGroupDailyCheerSummary(groupId, receiverId): Promise<GroupCheerSummary>
-sendGroupDailyCheer(groupId, receiverId, type): Promise<GroupCheerSummary | GroupCheerType>
+sendGroupDailyCheer(groupId, receiverId, type): Promise<GroupCheerSummary>
 ```
 
-The exact RPC return shape should favor one round trip after a send if practical; otherwise the UI may send and then reload the summary. Either way, raw cheer rows never enter application state.
+Both RPCs map to the same normalized summary shape. A successful send returns the post-update summary directly, so the UI does not need an immediate second request. Raw cheer rows never enter application state.
 
 Errors map into the existing group error style where possible. No new global state store is required.
 
@@ -166,10 +166,9 @@ Behavior:
 
 - load today's aggregate summary when the modal opens;
 - show a small loading state without blocking the rest of the modal;
-- pressing a cheer updates the selected button state;
+- pressing a cheer sends the request and, on success, replaces local state with the returned post-update summary;
 - changing to another button replaces today's selection;
 - pressing the already-selected button keeps it selected rather than toggling it off;
-- after a successful send, refresh counts immediately so the sender sees the aggregate change;
 - on request failure, preserve the prior confirmed state and show a small inline error;
 - self modal shows aggregate counts only and hides the send controls;
 - no sender names are shown anywhere.
@@ -190,7 +189,7 @@ The group detail screen already refreshes group activity periodically, but cheer
 V1 refresh rules:
 
 - fetch summary on modal open;
-- fetch/update summary after a send;
+- use the send RPC's returned summary after a send;
 - closing/reopening the modal fetches fresh values;
 - no Realtime subscription or polling loop is added for cheers.
 
@@ -234,6 +233,7 @@ Verify at minimum:
 - changing type updates the same row instead of inserting a second row;
 - next Korea-local date produces a new daily identity;
 - summary returns correct type counts;
+- send returns the updated summary in one RPC round trip;
 - summary exposes only caller's own selection, never sender identities;
 - direct raw-table access from normal authenticated client privileges is unavailable.
 
@@ -244,6 +244,7 @@ Verify:
 - RPC payload mapping;
 - numeric count normalization;
 - nullable own selection handling;
+- send/read helpers both normalize the same response contract;
 - group error propagation.
 
 ### UI
@@ -256,7 +257,7 @@ Verify:
 - selected button uses `aria-pressed`;
 - send replaces selected type rather than accumulating a local second vote;
 - sending state prevents concurrent presses;
-- request failure restores/retains confirmed state and surfaces an inline error.
+- request failure retains confirmed state and surfaces an inline error.
 
 ### Regression
 
