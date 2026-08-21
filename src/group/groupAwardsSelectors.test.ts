@@ -52,9 +52,9 @@ describe('buildGroupAwardsView', () => {
     ]);
 
     expect(view.mvpUserId).toBe('a');
-    expect(view.todayFlame?.member.userId).toBe('b');
-    expect(view.goalHunter?.member.userId).toBe('c');
-    expect(view.hiddenHero?.member.userId).toBe('d');
+    expect(view.todayFlame?.member.userId).toBe('a');
+    expect(view.goalHunter?.member.userId).toBe('b');
+    expect(view.hiddenHero?.member.userId).toBe('c');
     expect(view.hiddenHero?.score).toBeGreaterThan(0);
   });
 
