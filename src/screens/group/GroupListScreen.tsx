@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createGroup, joinGroup, loadMyGroups } from '../../group/groupApi';
+import { extractGroupInviteCode } from '../../group/groupInviteCode';
 import type { GroupSummary } from '../../group/groupTypes';
 import { formatWorkoutSeconds } from '../../group/groupSelectors';
 
@@ -18,6 +19,7 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
   const [code, setCode] = useState('');
   const [mode, setMode] = useState<'create'|'join'|null>(null);
   const [message, setMessage] = useState('');
+  const [inviteMessage, setInviteMessage] = useState('');
   const [busy, setBusy] = useState(true);
 
   async function refresh() {
@@ -35,10 +37,32 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
     } catch (error) { setMessage(errorMessage(error)); }
   }
   async function join() {
+    setInviteMessage('');
     try {
       const id = await joinGroup(code);
       setCode(''); setMode(null); await refresh(); onSelectGroup(id);
     } catch (error) { setMessage(errorMessage(error)); }
+  }
+
+  function applyInviteText(value: string): boolean {
+    const extracted = extractGroupInviteCode(value);
+    if (!extracted) {
+      setInviteMessage('초대코드를 찾지 못했어요.');
+      return false;
+    }
+    setCode(extracted);
+    setInviteMessage('');
+    return true;
+  }
+
+  async function pasteInviteCode() {
+    try {
+      if (!navigator.clipboard?.readText) throw new Error('CLIPBOARD_UNAVAILABLE');
+      const value = await navigator.clipboard.readText();
+      applyInviteText(value);
+    } catch {
+      setInviteMessage('클립보드를 읽지 못했습니다.');
+    }
   }
 
   return <>
@@ -51,10 +75,35 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
       <input value={name} maxLength={30} onChange={(e) => setName(e.target.value)} placeholder="그룹 이름" />
       <button type="button" onClick={create} disabled={name.trim().length < 2}>만들기</button>
     </div>}
-    {mode === 'join' && <div className="group-inline-form">
-      <input value={code} maxLength={6} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} placeholder="6자리 초대코드" />
-      <button type="button" onClick={join} disabled={code.length !== 6}>참가</button>
-    </div>}
+    {mode === 'join' && <>
+      <div className="group-inline-form group-inline-form--invite">
+        <input
+          value={code}
+          maxLength={6}
+          onChange={(e) => {
+            setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+            setInviteMessage('');
+          }}
+          onPaste={(e) => {
+            const value = e.clipboardData.getData('text');
+            const extracted = extractGroupInviteCode(value);
+            if (extracted) {
+              e.preventDefault();
+              setCode(extracted);
+              setInviteMessage('');
+            } else if (value.trim().length > 6) {
+              e.preventDefault();
+              setCode('');
+              setInviteMessage('초대코드를 찾지 못했어요.');
+            }
+          }}
+          placeholder="6자리 초대코드"
+        />
+        <button type="button" className="group-paste-btn" onClick={() => void pasteInviteCode()}>붙여넣기</button>
+        <button type="button" onClick={join} disabled={code.length !== 6}>참가</button>
+      </div>
+      {inviteMessage && <p className="group-error group-invite-paste-error" role="alert">{inviteMessage}</p>}
+    </>}
 
     {message && <p className="group-error" role="alert">{message}</p>}
     <section className="group-list-section">
