@@ -216,10 +216,16 @@ export async function loadGroupDetail(groupId: string): Promise<GroupDetail> {
   const profileByUser = new Map((profiles ?? []).map((row) => [row.user_id, row]));
   const todayByUser = new Map<string, number>();
   const weekByUser = new Map<string, number>();
+  const participantIdsByDate = new Map<string, Set<string>>();
   for (const row of activity ?? []) {
     const seconds = Number(row.workout_seconds ?? 0);
     weekByUser.set(row.user_id, (weekByUser.get(row.user_id) ?? 0) + seconds);
     if (row.activity_date === today) todayByUser.set(row.user_id, (todayByUser.get(row.user_id) ?? 0) + seconds);
+    if (seconds > 0) {
+      const participants = participantIdsByDate.get(row.activity_date) ?? new Set<string>();
+      participants.add(row.user_id);
+      participantIdsByDate.set(row.activity_date, participants);
+    }
   }
   const activeByUser = new Map<string, string>();
   for (const row of sessions ?? []) if (row.last_heartbeat_at) activeByUser.set(row.user_id, row.last_heartbeat_at);
@@ -240,6 +246,10 @@ export async function loadGroupDetail(groupId: string): Promise<GroupDetail> {
     };
   });
 
+  const dailyParticipation = Array.from(participantIdsByDate.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, participants]) => ({ date, participantCount: participants.size }));
+
   return {
     id: group.id,
     name: group.name,
@@ -248,5 +258,6 @@ export async function loadGroupDetail(groupId: string): Promise<GroupDetail> {
     memberCount: members.length,
     weeklySeconds: members.reduce((sum, member) => sum + member.weeklySeconds, 0),
     members: rankGroupMembers(members),
+    dailyParticipation,
   };
 }

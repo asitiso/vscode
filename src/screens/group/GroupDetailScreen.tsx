@@ -4,6 +4,7 @@ import type { GroupDetail, GroupMemberSummary } from '../../group/groupTypes';
 import { formatWorkoutSeconds } from '../../group/groupSelectors';
 import { GroupMemberDetailModal } from './GroupMemberDetailModal';
 import { GroupCoopQuestPanel } from './GroupCoopQuestPanel';
+import { GroupTeamStreakPanel } from './GroupTeamStreakPanel';
 import { GroupWeeklyAwardsPanel } from './GroupWeeklyAwardsPanel';
 import { GroupMotivationPanel } from './GroupMotivationPanel';
 import { useGroupAuth } from '../../group/GroupAuthContext';
@@ -44,6 +45,7 @@ export function GroupDetailScreen({ groupId, onBack }: { groupId: string; onBack
     </section>
     {message && <p className="group-error">{message}</p>}
     <GroupCoopQuestPanel members={detail.members} />
+    <GroupTeamStreakPanel memberCount={detail.memberCount} dailyParticipation={detail.dailyParticipation} />
     <GroupWeeklyAwardsPanel members={detail.members} />
     <GroupMotivationPanel
       members={detail.members}

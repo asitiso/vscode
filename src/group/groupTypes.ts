@@ -25,8 +25,14 @@ export interface GroupMemberSummary {
   isOwner?: boolean;
 }
 
+export interface GroupDailyParticipation {
+  date: string;
+  participantCount: number;
+}
+
 export interface GroupDetail extends GroupSummary {
   members: GroupMemberSummary[];
+  dailyParticipation: GroupDailyParticipation[];
 }
 
 export type GroupCheerType = 'fire' | 'clap' | 'together';
