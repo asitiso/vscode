@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GroupMemberSummary } from '../../group/groupTypes';
 import { loadGroupDailyCheerSummary, sendGroupDailyCheer } from '../../group/groupApi';
 import { GroupMemberDetailModal } from './GroupMemberDetailModal';
@@ -18,6 +18,8 @@ const member: GroupMemberSummary = {
   weeklyGoalPercent: 110,
   isActive: false,
 };
+
+afterEach(cleanup);
 
 describe('GroupMemberDetailModal daily cheers', () => {
   beforeEach(() => vi.clearAllMocks());
