@@ -1,6 +1,7 @@
 import { buildGroupAwardsView } from '../../group/groupAwardsSelectors';
 import { formatWorkoutSeconds } from '../../group/groupSelectors';
 import type { GroupMemberSummary } from '../../group/groupTypes';
+import './GroupWeeklyAwardsPanel.css';
 
 interface AwardCardProps {
   title: string;
