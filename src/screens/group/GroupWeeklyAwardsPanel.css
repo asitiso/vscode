@@ -1,0 +1,9 @@
+.group-awards-panel{display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid #eadff5;border-radius:22px;background:rgba(255,255,255,.96);box-shadow:0 10px 24px rgba(90,60,130,.07)}
+.group-awards-panel__heading span{font-size:9px;font-weight:900;letter-spacing:.15em;color:#8b5ed7}
+.group-awards-panel__heading h3{margin:3px 0 0;font-size:17px;color:#34204f}
+.group-awards-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.group-award-card{display:flex;flex-direction:column;gap:5px;min-width:0;padding:12px 10px;border:1px solid #eee5f8;border-radius:16px;background:#fbf9ff;text-align:center}
+.group-award-card span{font-size:11px;font-weight:900;color:#7658a4;white-space:nowrap}
+.group-award-card strong{overflow:hidden;font-size:14px;color:#392653;text-overflow:ellipsis;white-space:nowrap}
+.group-award-card small{font-size:10px;font-weight:800;color:#8a7e94}
+@media(max-width:430px){.group-awards-grid{grid-template-columns:1fr}.group-award-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;text-align:left}.group-award-card strong{text-align:center}.group-award-card small{text-align:right;white-space:nowrap}}
