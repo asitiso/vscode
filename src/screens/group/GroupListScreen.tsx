@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createGroup, joinGroup, loadMyGroups } from '../../group/groupApi';
 import { extractGroupInviteCode } from '../../group/groupInviteCode';
 import type { GroupSummary } from '../../group/groupTypes';
@@ -21,6 +21,8 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
   const [message, setMessage] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
   const [busy, setBusy] = useState(true);
+  const [joining, setJoining] = useState(false);
+  const joinInFlight = useRef(false);
 
   async function refresh() {
     setBusy(true);
@@ -37,11 +39,20 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
     } catch (error) { setMessage(errorMessage(error)); }
   }
   async function join() {
+    if (joinInFlight.current || code.length !== 6) return;
+    joinInFlight.current = true;
+    setJoining(true);
     setInviteMessage('');
+    setMessage('');
+    const inviteCode = code;
     try {
-      const id = await joinGroup(code);
+      const id = await joinGroup(inviteCode);
       setCode(''); setMode(null); await refresh(); onSelectGroup(id);
     } catch (error) { setMessage(errorMessage(error)); }
+    finally {
+      joinInFlight.current = false;
+      setJoining(false);
+    }
   }
 
   function applyInviteText(value: string): boolean {
@@ -56,6 +67,7 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
   }
 
   async function pasteInviteCode() {
+    if (joining) return;
     try {
       if (!navigator.clipboard?.readText) throw new Error('CLIPBOARD_UNAVAILABLE');
       const value = await navigator.clipboard.readText();
@@ -80,11 +92,22 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
         <input
           value={code}
           maxLength={6}
+          disabled={joining}
           onChange={(e) => {
             setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''));
             setInviteMessage('');
           }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              void join();
+            }
+          }}
           onPaste={(e) => {
+            if (joining) {
+              e.preventDefault();
+              return;
+            }
             const value = e.clipboardData.getData('text');
             const extracted = extractGroupInviteCode(value);
             if (extracted) {
@@ -99,8 +122,8 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
           }}
           placeholder="6자리 초대코드"
         />
-        <button type="button" className="group-paste-btn" onClick={() => void pasteInviteCode()}>붙여넣기</button>
-        <button type="button" onClick={join} disabled={code.length !== 6}>참가</button>
+        <button type="button" className="group-paste-btn" onClick={() => void pasteInviteCode()} disabled={joining}>붙여넣기</button>
+        <button type="button" onClick={() => void join()} disabled={joining || code.length !== 6}>{joining ? '참가 중…' : '참가'}</button>
       </div>
       {inviteMessage && <p className="group-error group-invite-paste-error" role="alert">{inviteMessage}</p>}
     </>}
