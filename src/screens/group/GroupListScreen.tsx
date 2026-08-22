@@ -18,7 +18,8 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [mode, setMode] = useState<'create'|'join'|null>(null);
-  const [message, setMessage] = useState('');
+  const [loadMessage, setLoadMessage] = useState('');
+  const [actionMessage, setActionMessage] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
   const [busy, setBusy] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -28,22 +29,28 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
 
   async function refresh() {
     setBusy(true);
-    try { setGroups(await loadMyGroups()); setMessage(''); }
-    catch { setMessage('그룹 목록을 불러오지 못했습니다.'); }
+    try { setGroups(await loadMyGroups()); setLoadMessage(''); }
+    catch { setLoadMessage('그룹 목록을 불러오지 못했습니다.'); }
     finally { setBusy(false); }
   }
   useEffect(() => { void refresh(); }, []);
+
+  function toggleMode(next: 'create'|'join') {
+    setMode(mode === next ? null : next);
+    setActionMessage('');
+    setInviteMessage('');
+  }
 
   async function create() {
     if (createInFlight.current || name.trim().length < 2) return;
     createInFlight.current = true;
     setCreating(true);
-    setMessage('');
+    setActionMessage('');
     const groupName = name;
     try {
       const result = await createGroup(groupName);
       setName(''); setMode(null); await refresh(); onSelectGroup(result.groupId);
-    } catch (error) { setMessage(errorMessage(error)); }
+    } catch (error) { setActionMessage(errorMessage(error)); }
     finally {
       createInFlight.current = false;
       setCreating(false);
@@ -54,12 +61,12 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
     joinInFlight.current = true;
     setJoining(true);
     setInviteMessage('');
-    setMessage('');
+    setActionMessage('');
     const inviteCode = code;
     try {
       const id = await joinGroup(inviteCode);
       setCode(''); setMode(null); await refresh(); onSelectGroup(id);
-    } catch (error) { setMessage(errorMessage(error)); }
+    } catch (error) { setActionMessage(errorMessage(error)); }
     finally {
       joinInFlight.current = false;
       setJoining(false);
@@ -67,6 +74,7 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
   }
 
   function applyInviteText(value: string): boolean {
+    setActionMessage('');
     const extracted = extractGroupInviteCode(value);
     if (!extracted) {
       setInviteMessage('초대코드를 찾지 못했어요.');
@@ -79,6 +87,7 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
 
   async function pasteInviteCode() {
     if (joining) return;
+    setActionMessage('');
     try {
       if (!navigator.clipboard?.readText) throw new Error('CLIPBOARD_UNAVAILABLE');
       const value = await navigator.clipboard.readText();
@@ -90,8 +99,8 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
 
   return <>
     <div className="group-action-row">
-      <button type="button" onClick={() => setMode(mode === 'create' ? null : 'create')}>+ 그룹 만들기</button>
-      <button type="button" onClick={() => setMode(mode === 'join' ? null : 'join')}>코드로 참가</button>
+      <button type="button" onClick={() => toggleMode('create')}>+ 그룹 만들기</button>
+      <button type="button" onClick={() => toggleMode('join')}>코드로 참가</button>
     </div>
 
     {mode === 'create' && <div className="group-inline-form">
@@ -99,7 +108,10 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
         value={name}
         maxLength={30}
         disabled={creating}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => {
+          setName(e.target.value);
+          setActionMessage('');
+        }}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
@@ -119,6 +131,7 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
           onChange={(e) => {
             setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''));
             setInviteMessage('');
+            setActionMessage('');
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
@@ -131,6 +144,7 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
               e.preventDefault();
               return;
             }
+            setActionMessage('');
             const value = e.clipboardData.getData('text');
             const extracted = extractGroupInviteCode(value);
             if (extracted) {
@@ -151,7 +165,8 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
       {inviteMessage && <p className="group-error group-invite-paste-error" role="alert">{inviteMessage}</p>}
     </>}
 
-    {message && <p className="group-error" role="alert">{message}</p>}
+    {actionMessage && <p className="group-error" role="alert">{actionMessage}</p>}
+    {loadMessage && <p className="group-error" role="alert">{loadMessage}</p>}
     <section className="group-list-section">
       <div className="group-section-heading"><div><span>MY GROUPS</span><h2>내 그룹</h2></div><b>{groups.length} / 5</b></div>
       {busy ? <p className="group-empty">불러오는 중…</p> : groups.length ? <div className="group-list">
