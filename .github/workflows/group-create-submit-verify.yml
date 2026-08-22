@@ -1,0 +1,28 @@
+name: Group Create Submit Verify
+
+on:
+  pull_request:
+    branches:
+      - verify/group-create-submit-base
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-package-lock --no-audit --no-fund
+      - name: Test
+        run: npm test
+      - name: Typecheck
+        run: npx tsc -b
+      - name: Production build
+        run: npx vite build
+      - name: Lint
+        run: npm run lint
