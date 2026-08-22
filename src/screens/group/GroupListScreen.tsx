@@ -21,7 +21,9 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
   const [message, setMessage] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
   const [busy, setBusy] = useState(true);
+  const [creating, setCreating] = useState(false);
   const [joining, setJoining] = useState(false);
+  const createInFlight = useRef(false);
   const joinInFlight = useRef(false);
 
   async function refresh() {
@@ -33,10 +35,19 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
   useEffect(() => { void refresh(); }, []);
 
   async function create() {
+    if (createInFlight.current || name.trim().length < 2) return;
+    createInFlight.current = true;
+    setCreating(true);
+    setMessage('');
+    const groupName = name;
     try {
-      const result = await createGroup(name);
+      const result = await createGroup(groupName);
       setName(''); setMode(null); await refresh(); onSelectGroup(result.groupId);
     } catch (error) { setMessage(errorMessage(error)); }
+    finally {
+      createInFlight.current = false;
+      setCreating(false);
+    }
   }
   async function join() {
     if (joinInFlight.current || code.length !== 6) return;
@@ -84,8 +95,20 @@ export function GroupListScreen({ onSelectGroup }: { onSelectGroup: (groupId: st
     </div>
 
     {mode === 'create' && <div className="group-inline-form">
-      <input value={name} maxLength={30} onChange={(e) => setName(e.target.value)} placeholder="그룹 이름" />
-      <button type="button" onClick={create} disabled={name.trim().length < 2}>만들기</button>
+      <input
+        value={name}
+        maxLength={30}
+        disabled={creating}
+        onChange={(e) => setName(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            void create();
+          }
+        }}
+        placeholder="그룹 이름"
+      />
+      <button type="button" onClick={() => void create()} disabled={creating || name.trim().length < 2}>{creating ? '만드는 중…' : '만들기'}</button>
     </div>}
     {mode === 'join' && <>
       <div className="group-inline-form group-inline-form--invite">
